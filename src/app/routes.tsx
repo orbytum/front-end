@@ -15,11 +15,16 @@ import { Calendario } from "./pages/Calendario";
 import { Login } from "./pages/Login";
 import { Publicacoes } from "./pages/Publicacoes";
 import { Lembretes } from "./pages/Lembretes";
+import { AceitarConviteCadastro } from "./pages/AceitarConviteCadastro";
 
 export const router = createBrowserRouter([
   {
     path: "/login",
     Component: Login,
+  },
+  {
+    path: "/convite",
+    Component: AceitarConviteCadastro,
   },
   {
     path: "/",
