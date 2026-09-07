@@ -4,12 +4,8 @@ import { Shield, Hexagon, Box, FolderKanban, Calendar } from 'lucide-react';
 export function SolarSystem() {
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#0a1929]">
-      {/* Background gradient for depth */}
       <div className="absolute inset-0 bg-gradient-radial from-[#1a2942] via-[#0a1929] to-[#020911]" />
-      
       <div className="relative w-[800px] h-[800px] flex items-center justify-center">
-        
-        {/* Terceira órbita (mais externa) */}
         <motion.div
           className="absolute w-[680px] h-[680px] rounded-full border border-[#3d4f62]/30"
           animate={{ rotate: 360 }}
