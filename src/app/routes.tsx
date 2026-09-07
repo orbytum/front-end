@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router";
+import { RouterRef } from "./utils/RouterRef";
 import { Layout } from "./components/Layout";
 import { Dashboard } from "./pages/Dashboard";
 import { Grupos } from "./pages/Grupos";
@@ -57,3 +58,5 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
+
+RouterRef.setNavigate((to) => router.navigate(to));

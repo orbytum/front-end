@@ -1,20 +1,24 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { LoginService } from "../services/auth/LoginService";
 import { Eye, EyeOff, LogIn, Orbit } from "lucide-react";
 
 export function Login() {
   const navigate = useNavigate();
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const loginService = new LoginService();
   const [formulario, setFormulario] = useState({ usuario: "", senha: "" });
   const [erro, setErro] = useState("");
 
-  const enviarFormulario = (e: React.FormEvent) => {
+  const enviarFormulario = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formulario.usuario || !formulario.senha) {
-      setErro("Preencha todos os campos.");
-      return;
-    }
-    navigate("/");
+    const loginFormulario = {
+      email: formulario.usuario,
+      senha: formulario.senha,
+    };
+    const response = await loginService.login(loginFormulario)
+    console.log(response)
+    
   };
 
   
