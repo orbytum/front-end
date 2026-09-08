@@ -17,6 +17,9 @@ import {
   AlertTriangle,
   Send,
   Link as LinkIcon,
+  Search,
+  Filter,
+  ChevronDown,
 } from "lucide-react";
 import { DataTable, Column } from "../components/DataTable";
 import {
@@ -24,17 +27,33 @@ import {
   authApi,
   ApiError,
   ConviteCadastroDetalhe,
+  ConviteCadastroPaginadoResponse,
 } from "@/api";
 
 export function GestaoConvitesCadastro() {
   const navigate = useNavigate();
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [convites, setConvites] = useState<ConviteCadastroDetalhe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Modal novo convite
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [emailFilter, setEmailFilter] = useState("");
+  const [debouncedEmail, setDebouncedEmail] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"ativos" | "inativos" | "todos">("ativos");
+
+  const [paginatedData, setPaginatedData] = useState<ConviteCadastroPaginadoResponse>({
+    items: [],
+    totalElements: 0,
+    totalPages: 0,
+    currentPage: 1,
+    pageSize: 5,
+    totalAtivos: 0,
+    totalInativos: 0,
+    totalGeral: 0,
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [diasValidade, setDiasValidade] = useState(7);
@@ -42,13 +61,17 @@ export function GestaoConvitesCadastro() {
   const [modalError, setModalError] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
 
-  // Feedback de link copiado por ID
   const [copiedId, setCopiedId] = useState<number | "modal" | null>(null);
-
-  // Revogação
   const [revokingId, setRevokingId] = useState<number | null>(null);
 
-  // Validação de acesso
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedEmail(emailFilter);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [emailFilter]);
+
   useEffect(() => {
     const hasAdminAccess = authApi.isAdminOrInitialAdmin();
     setIsAdmin(hasAdminAccess);
@@ -58,8 +81,13 @@ export function GestaoConvitesCadastro() {
     setLoading(true);
     setError("");
     try {
-      const data = await conviteApi.listarCadastros();
-      setConvites(data || []);
+      const data = await conviteApi.listarCadastros({
+        page,
+        size: pageSize,
+        email: debouncedEmail,
+        status: statusFilter,
+      });
+      setPaginatedData(data);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -69,13 +97,18 @@ export function GestaoConvitesCadastro() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, pageSize, debouncedEmail, statusFilter]);
 
   useEffect(() => {
     if (isAdmin) {
       carregarConvites();
     }
   }, [isAdmin, carregarConvites]);
+
+  const handleStatusChange = (newStatus: "ativos" | "inativos" | "todos") => {
+    setStatusFilter(newStatus);
+    setPage(1);
+  };
 
   const handleCopyLink = (token: string, id: number | "modal") => {
     const fullUrl = `${window.location.origin}/convite?token=${token}`;
@@ -149,7 +182,6 @@ export function GestaoConvitesCadastro() {
     }
   };
 
-  // Se ainda estiver verificando permissão
   if (isAdmin === null) {
     return (
       <div className="h-full flex items-center justify-center p-6">
@@ -158,7 +190,6 @@ export function GestaoConvitesCadastro() {
     );
   }
 
-  // Se o usuário não for ADMIN nem INITIAL_ADMIN
   if (!isAdmin) {
     return (
       <div className="h-full flex items-center justify-center p-6">
@@ -180,10 +211,6 @@ export function GestaoConvitesCadastro() {
       </div>
     );
   }
-
-  const totalConvites = convites.length;
-  const convitesAtivos = convites.filter((c) => c.ativo).length;
-  const convitesInativos = totalConvites - convitesAtivos;
 
   const columns: Column<ConviteCadastroDetalhe>[] = [
     {
@@ -335,49 +362,140 @@ export function GestaoConvitesCadastro() {
         </div>
       </div>
 
-      {/* Cards de Métricas */}
+      {/* Cards de Métricas com filtro interativo */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4a9eff] to-[#2e7dd4] flex items-center justify-center shadow-lg">
-              <MailPlus className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-[#8b96a5] text-xs">Total de Convites</p>
-              <h3 className="text-white text-2xl font-bold">{totalConvites}</h3>
+        <div
+          className={`bg-[#0d1f30] rounded-2xl p-6 border transition-all cursor-pointer select-none ${
+            statusFilter === "todos"
+              ? "border-[#ff8c42] shadow-[0_0_16px_rgba(255,140,66,0.25)]"
+              : "border-[#3d4f62]/30 hover:border-[#3d4f62]/60 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]"
+          }`}
+          title="Clique para exibir todos os convites"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4a9eff] to-[#2e7dd4] flex items-center justify-center shadow-lg">
+                <MailPlus className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-[#8b96a5] text-xs">Total de Convites</p>
+                <h3 className="text-white text-2xl font-bold">{paginatedData.totalGeral}</h3>
+              </div>
             </div>
           </div>
           <span className="text-xs text-[#8b96a5]">Registrados no histórico</span>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#10b981] to-[#059669] flex items-center justify-center shadow-lg">
-              <CheckCircle2 className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-[#8b96a5] text-xs">Convites Ativos</p>
-              <h3 className="text-white text-2xl font-bold text-[#10b981]">
-                {convitesAtivos}
-              </h3>
+        <div
+          className={`bg-[#0d1f30] rounded-2xl p-6 border transition-all cursor-pointer select-none ${
+            statusFilter === "ativos"
+              ? "border-[#10b981] shadow-[0_0_16px_rgba(16,185,129,0.25)]"
+              : "border-[#3d4f62]/30 hover:border-[#3d4f62]/60 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]"
+          }`}
+          title="Clique para filtrar apenas convites ativos e válidos"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#10b981] to-[#059669] flex items-center justify-center shadow-lg">
+                <CheckCircle2 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-[#8b96a5] text-xs">Convites Ativos</p>
+                <h3 className="text-white text-2xl font-bold text-[#10b981]">
+                  {paginatedData.totalAtivos}
+                </h3>
+              </div>
             </div>
           </div>
           <span className="text-xs text-[#10b981]">Disponíveis para uso</span>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ef4444] to-[#dc2626] flex items-center justify-center shadow-lg">
-              <Ban className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-[#8b96a5] text-xs">Expirados ou Inativos</p>
-              <h3 className="text-white text-2xl font-bold text-[#ef4444]">
-                {convitesInativos}
-              </h3>
+        <div
+          className={`bg-[#0d1f30] rounded-2xl p-6 border transition-all cursor-pointer select-none ${
+            statusFilter === "inativos"
+              ? "border-[#ef4444] shadow-[0_0_16px_rgba(239,68,68,0.25)]"
+              : "border-[#3d4f62]/30 hover:border-[#3d4f62]/60 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]"
+          }`}
+          title="Clique para filtrar apenas convites inativos ou expirados"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ef4444] to-[#dc2626] flex items-center justify-center shadow-lg">
+                <Ban className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-[#8b96a5] text-xs">Expirados ou Inativos</p>
+                <h3 className="text-white text-2xl font-bold text-[#ef4444]">
+                  {paginatedData.totalInativos}
+                </h3>
+              </div>
             </div>
           </div>
           <span className="text-xs text-[#8b96a5]">Não utilizáveis</span>
+        </div>
+      </div>
+
+      {/* Barra de Filtros (Email e Status) */}
+      <div className="bg-[#0d1f30] rounded-2xl p-4 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        {/* Campo de Busca por Email */}
+        <div className="flex-1 relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8b96a5]" />
+          <input
+            type="text"
+            placeholder="Filtrar por e-mail do convidado..."
+            value={emailFilter}
+            onChange={(e) => setEmailFilter(e.target.value)}
+            className="w-full pl-11 pr-10 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] text-sm shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
+          />
+          {emailFilter && (
+            <button
+              type="button"
+              onClick={() => setEmailFilter("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#8b96a5] hover:text-white rounded-lg transition-colors cursor-pointer"
+              title="Limpar filtro de e-mail"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Filtro por Status (Combobox) e Limpeza */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative min-w-[230px]">
+            <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8b96a5] pointer-events-none" />
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                handleStatusChange(e.target.value as "ativos" | "inativos" | "todos")
+              }
+              className="w-full pl-10 pr-9 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white text-sm shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50 appearance-none transition-colors cursor-pointer"
+            >
+              <option value="ativos" className="bg-[#0d1f30] text-white">
+                Ativos ({paginatedData.totalAtivos})
+              </option>
+              <option value="inativos" className="bg-[#0d1f30] text-white">
+                Expirados / Inativos ({paginatedData.totalInativos})
+              </option>
+              <option value="todos" className="bg-[#0d1f30] text-white">
+                Todos os status ({paginatedData.totalGeral})
+              </option>
+            </select>
+            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8b96a5] pointer-events-none" />
+          </div>
+
+          {(emailFilter || statusFilter !== "ativos") && (
+            <button
+              type="button"
+              onClick={() => {
+                setEmailFilter("");
+                handleStatusChange("ativos");
+              }}
+              className="px-3 py-2 text-xs text-[#8b96a5] hover:text-white bg-[#0a1929] hover:bg-[#3d4f62]/30 border border-[#3d4f62]/30 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+              title="Redefinir filtros para o padrão (apenas ativos)"
+            >
+              Restaurar padrão
+            </button>
+          )}
         </div>
       </div>
 
@@ -399,12 +517,47 @@ export function GestaoConvitesCadastro() {
 
       {/* Tabela de Convites */}
       <DataTable
-        title="Histórico de Convites de Cadastro"
-        data={convites}
+        title={
+          <div className="flex items-center gap-3">
+            <h2 className="text-white font-semibold text-lg">
+              Histórico de Convites de Cadastro
+            </h2>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#3d4f62]/40 text-[#8b96a5] font-normal">
+              {paginatedData.totalElements}{" "}
+              {paginatedData.totalElements === 1 ? "registro" : "registros"}
+            </span>
+          </div>
+        }
+        data={paginatedData.items}
         columns={columns}
-        pageSize={5}
+        page={page}
+        pageSize={pageSize}
+        totalElements={paginatedData.totalElements}
         pageSizeOptions={[5, 10, 20]}
-        emptyMessage="Nenhum convite de cadastro gerado até o momento."
+        onPageChange={(newPage) => setPage(newPage)}
+        onPageSizeChange={(newSize) => {
+          setPageSize(newSize);
+          setPage(1);
+        }}
+        emptyMessage={
+          debouncedEmail || statusFilter !== "todos" ? (
+            <div className="space-y-2 py-2 text-center">
+              <p className="text-sm">Nenhum convite encontrado para os filtros aplicados.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmailFilter("");
+                  handleStatusChange("todos");
+                }}
+                className="text-xs text-[#ff8c42] hover:underline cursor-pointer font-medium"
+              >
+                Limpar filtros e exibir todos os convites
+              </button>
+            </div>
+          ) : (
+            "Nenhum convite de cadastro gerado até o momento."
+          )
+        }
       />
 
       {/* Modal / Diálogo para Gerar Novo Convite */}

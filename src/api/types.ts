@@ -36,3 +36,21 @@ export interface ConviteCadastroCriadoResponse {
   urlConvite: string;
   dthExpiracao: string;
 }
+
+export interface ConviteCadastroPaginadoResponse {
+  items: ConviteCadastroDetalhe[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+  totalAtivos: number;
+  totalInativos: number;
+  totalGeral: number;
+}
+
+export interface ListarCadastrosParams {
+  page?: number;
+  size?: number;
+  email?: string;
+  status?: "ativos" | "inativos" | "todos";
+}

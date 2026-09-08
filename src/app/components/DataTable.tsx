@@ -32,6 +32,9 @@ export interface DataTableProps<T> {
   // Controlled pagination (optional)
   page?: number;
   onPageChange?: (page: number) => void;
+  // Server-side pagination support (optional)
+  totalElements?: number;
+  onPageSizeChange?: (size: number) => void;
 }
 
 function getPageNumbers(current: number, total: number): (number | "...")[] {
@@ -75,20 +78,27 @@ export function DataTable<T>({
   onRowClick,
   page: propPage,
   onPageChange,
+  totalElements,
+  onPageSizeChange,
 }: DataTableProps<T>) {
   const [internalPage, setInternalPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(pageSize);
 
+  const isServerPagination = totalElements !== undefined;
   const isControlled = propPage !== undefined;
   const currentPage = isControlled ? propPage : internalPage;
 
-  const totalPages = Math.max(1, Math.ceil(data.length / currentLimit));
+  const totalRecords = isServerPagination ? totalElements : data.length;
+  const totalPages = Math.max(1, Math.ceil(totalRecords / currentLimit));
   const safePage = Math.min(Math.max(1, currentPage), totalPages);
 
   const paginatedData = useMemo(() => {
+    if (isServerPagination) {
+      return data;
+    }
     const startIndex = (safePage - 1) * currentLimit;
     return data.slice(startIndex, startIndex + currentLimit);
-  }, [data, safePage, currentLimit]);
+  }, [data, safePage, currentLimit, isServerPagination]);
 
   const handlePageChange = (newPage: number) => {
     const target = Math.min(Math.max(1, newPage), totalPages);
@@ -104,10 +114,14 @@ export function DataTable<T>({
       setInternalPage(1);
     }
     onPageChange?.(1);
+    onPageSizeChange?.(newSize);
   };
 
-  const startRecord = data.length === 0 ? 0 : (safePage - 1) * currentLimit + 1;
-  const endRecord = Math.min(safePage * currentLimit, data.length);
+  const startRecord = totalRecords === 0 ? 0 : (safePage - 1) * currentLimit + 1;
+  const endRecord = Math.min(
+    isServerPagination ? startRecord + data.length - 1 : safePage * currentLimit,
+    totalRecords
+  );
   const pageNumbers = getPageNumbers(safePage, totalPages);
 
   return (
@@ -204,7 +218,7 @@ export function DataTable<T>({
             <span>
               Mostrando <strong className="text-white">{startRecord}</strong> a{" "}
               <strong className="text-white">{endRecord}</strong> de{" "}
-              <strong className="text-white">{data.length}</strong> registros
+              <strong className="text-white">{totalRecords}</strong> registros
             </span>
 
             {pageSizeOptions && pageSizeOptions.length > 0 && (

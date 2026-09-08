@@ -71,7 +71,7 @@ export async function request<T>(
   if (!response.ok) {
     const message =
       data?.mensagem ||
-      data?.erro ||
+      data?.erro ||                     
       data?.error ||
       `Erro ${response.status}: Falha na requisição`;
     throw new ApiError(message, response.status, data);
