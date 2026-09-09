@@ -12,13 +12,21 @@ export function Login() {
 
   const enviarFormulario = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErro("");
     const loginFormulario = {
       email: formulario.usuario,
       senha: formulario.senha,
     };
-    const response = await loginService.login(loginFormulario)
-    console.log(response)
-    
+    try {
+      const response = await loginService.login(loginFormulario);
+      if (response && response.token) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("token_tipo", response.tipo || "Bearer");
+        navigate("/");
+      }
+    } catch (err: any) {
+      setErro(err?.mensagem || err?.message || "Erro ao realizar login. Verifique suas credenciais.");
+    }
   };
 
   

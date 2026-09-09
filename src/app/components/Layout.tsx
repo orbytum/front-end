@@ -12,17 +12,23 @@ import {
   CalendarDays,
   Calendar,
   Menu,
-  X
+  X,
+  MailPlus,
 } from "lucide-react";
 import { useState } from "react";
+import { authApi } from "@/api";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isAdmin = authApi.isAdminOrInitialAdmin();
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
     { path: "/grupos", label: "Grupos de Pesquisa", icon: Users },
     { path: "/participantes", label: "Participantes", icon: UserCheck },
+    ...(isAdmin
+      ? [{ path: "/gestao-convites", label: "Convites de Cadastro", icon: MailPlus }]
+      : []),
     { path: "/recursos", label: "Recursos Financeiros", icon: Hexagon },
     { path: "/solicitacoes", label: "Solicitações", icon: FileText },
     { path: "/materiais", label: "Materiais", icon: Box },
