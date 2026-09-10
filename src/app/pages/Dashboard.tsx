@@ -16,11 +16,11 @@ export function Dashboard() {
         {stats.map((stat, index) => (
           <div
             key={index}
-            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300 group"
+            className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300 group"
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[#8b96a5] text-sm mb-2">{stat.label}</p>
+                <p className="text-[#9e9e9e] text-sm mb-2">{stat.label}</p>
                 <h3 className="text-white text-2xl font-bold">{stat.value}</h3>
               </div>
               <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>

@@ -119,7 +119,7 @@ export function ParticipantesDoGrupo() {
       case "Coordenador": return "bg-[#7c3aed]/20 text-[#7c3aed]";
       case "Pesquisador": return "bg-[#4a9eff]/20 text-[#4a9eff]";
       case "Colaborador": return "bg-[#10b981]/20 text-[#10b981]";
-      default: return "bg-[#8b96a5]/20 text-[#8b96a5]";
+      default: return "bg-[#9e9e9e]/20 text-[#9e9e9e]";
     }
   };
 
@@ -129,7 +129,7 @@ export function ParticipantesDoGrupo() {
       <div className="mb-6">
         <button
           onClick={() => navigate("/grupos")}
-          className="flex items-center gap-2 text-[#8b96a5] hover:text-[#ff8c42] transition-colors mb-4"
+          className="flex items-center gap-2 text-[#9e9e9e] hover:text-[#ff8c42] transition-colors mb-4"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Voltar para Grupos</span>
@@ -140,40 +140,40 @@ export function ParticipantesDoGrupo() {
           </div>
           <div>
             <h1 className="text-white">{informacoesDoGrupo.nome}</h1>
-            <p className="text-[#8b96a5]">Gerenciar participantes e permissões</p>
+            <p className="text-[#9e9e9e]">Gerenciar participantes e permissões</p>
           </div>
         </div>
       </div>
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Total Ativos</span>
+            <span className="text-[#9e9e9e] text-sm">Total Ativos</span>
             <Users className="w-5 h-5 text-[#4a9eff]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Supervisor</span>
+            <span className="text-[#9e9e9e] text-sm">Supervisor</span>
             <Crown className="w-5 h-5 text-[#ff8c42]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.supervisores}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Coordenadores</span>
+            <span className="text-[#9e9e9e] text-sm">Coordenadores</span>
             <Shield className="w-5 h-5 text-[#7c3aed]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.coordenadores}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Pesquisadores</span>
+            <span className="text-[#9e9e9e] text-sm">Pesquisadores</span>
             <UserCheck className="w-5 h-5 text-[#4a9eff]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.pesquisadores}</div>
@@ -184,13 +184,13 @@ export function ParticipantesDoGrupo() {
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8b96a5]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
           <input
             type="text"
             placeholder="Buscar participantes..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -198,7 +198,7 @@ export function ParticipantesDoGrupo() {
         <select
           value={filtroFuncao}
           onChange={(e) => setFiltroFuncao(e.target.value)}
-          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todas as Funções</option>
           <option value="Supervisor">Supervisor</option>
@@ -220,7 +220,7 @@ export function ParticipantesDoGrupo() {
         {participantesFiltrados.map((participante) => (
           <div
             key={participante.id}
-            className={`bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300 ${ participante.status === "Inativo" ? "opacity-60" : "" }`}
+            className={`bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300 ${ participante.status === "Inativo" ? "opacity-60" : "" }`}
           >
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               {/* Informações do Participante */}
@@ -244,19 +244,19 @@ export function ParticipantesDoGrupo() {
                         {participante.funcao}
                       </span>
                       {participante.status === "Inativo" && (
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#8b96a5]/20 text-[#8b96a5]">
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#9e9e9e]/20 text-[#9e9e9e]">
                           Inativo
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-[#8b96a5] mb-3">{participante.email}</p>
+                    <p className="text-sm text-[#9e9e9e] mb-3">{participante.email}</p>
 
                     {/* Permissões */}
                     <div className="flex flex-wrap gap-2">
                       {participante.permissoes.map((permissao, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-1 bg-[#0a1929] rounded-lg text-xs text-[#8b96a5] border border-[#3d4f62]/30"
+                          className="px-2 py-1 bg-[#121212] rounded-lg text-xs text-[#9e9e9e] border border-[#2e2e2e]/30"
                         >
                           {permissao}
                         </span>
@@ -268,15 +268,15 @@ export function ParticipantesDoGrupo() {
 
               {/* Ações */}
               <div className="flex items-center gap-2 lg:flex-col">
-                <div className="text-xs text-[#8b96a5] mb-2">
+                <div className="text-xs text-[#9e9e9e] mb-2">
                   Desde {new Date(participante.dataEntrada).toLocaleDateString('pt-BR')}
                 </div>
                 <div className="flex gap-2">
-                  <button className="p-2 rounded-lg bg-[#0a1929] hover:bg-[#3d4f62]/20 transition-colors border border-[#3d4f62]/30">
+                  <button className="p-2 rounded-lg bg-[#121212] hover:bg-[#2e2e2e]/20 transition-colors border border-[#2e2e2e]/30">
                     <Edit className="w-4 h-4 text-[#4a9eff]" />
                   </button>
                   {participante.funcao !== "Supervisor" && (
-                    <button className="p-2 rounded-lg bg-[#0a1929] hover:bg-[#3d4f62]/20 transition-colors border border-[#3d4f62]/30">
+                    <button className="p-2 rounded-lg bg-[#121212] hover:bg-[#2e2e2e]/20 transition-colors border border-[#2e2e2e]/30">
                       <Trash2 className="w-4 h-4 text-[#ef4444]" />
                     </button>
                   )}
@@ -289,14 +289,14 @@ export function ParticipantesDoGrupo() {
 
       {/* Estado Vazio */}
       {participantesFiltrados.length === 0 && (
-        <div className="text-center py-12 bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30">
-          <UserCheck className="w-16 h-16 text-[#3d4f62] mx-auto mb-4" />
-          <p className="text-[#8b96a5]">Nenhum participante encontrado</p>
+        <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
+          <UserCheck className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
+          <p className="text-[#9e9e9e]">Nenhum participante encontrado</p>
         </div>
       )}
 
       {/* Legenda de Funções */}
-      <div className="mt-8 bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30">
+      <div className="mt-8 bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
         <h3 className="text-white mb-4">Funções e Permissões</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
@@ -304,28 +304,28 @@ export function ParticipantesDoGrupo() {
               <Crown className="w-4 h-4 text-[#ff8c42]" />
               <span className="text-white text-sm font-medium">Supervisor</span>
             </div>
-            <p className="text-xs text-[#8b96a5]">Controle total do grupo, orçamento e membros</p>
+            <p className="text-xs text-[#9e9e9e]">Controle total do grupo, orçamento e membros</p>
           </div>
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Shield className="w-4 h-4 text-[#7c3aed]" />
               <span className="text-white text-sm font-medium">Coordenador</span>
             </div>
-            <p className="text-xs text-[#8b96a5]">Gerencia projetos e materiais, visualiza orçamento</p>
+            <p className="text-xs text-[#9e9e9e]">Gerencia projetos e materiais, visualiza orçamento</p>
           </div>
           <div>
             <div className="flex items-center gap-2 mb-2">
               <UserCheck className="w-4 h-4 text-[#4a9eff]" />
               <span className="text-white text-sm font-medium">Pesquisador</span>
             </div>
-            <p className="text-xs text-[#8b96a5]">Cria projetos e edita materiais</p>
+            <p className="text-xs text-[#9e9e9e]">Cria projetos e edita materiais</p>
           </div>
           <div>
             <div className="flex items-center gap-2 mb-2">
               <User className="w-4 h-4 text-[#10b981]" />
               <span className="text-white text-sm font-medium">Colaborador/Aluno</span>
             </div>
-            <p className="text-xs text-[#8b96a5]">Visualiza e comenta em projetos</p>
+            <p className="text-xs text-[#9e9e9e]">Visualiza e comenta em projetos</p>
           </div>
         </div>
       </div>

@@ -126,7 +126,7 @@ export function Editais() {
   const obterIconeStatus = (status: string) => {
     switch (status) {
       case "Aberto": return <CheckCircle className="w-5 h-5 text-[#10b981]" />;
-      case "Encerrado": return <XCircle className="w-5 h-5 text-[#8b96a5]" />;
+      case "Encerrado": return <XCircle className="w-5 h-5 text-[#9e9e9e]" />;
       default: return <Clock className="w-5 h-5 text-[#ff8c42]" />;
     }
   };
@@ -134,7 +134,7 @@ export function Editais() {
   const obterCorStatus = (status: string) => {
     switch (status) {
       case "Aberto": return "bg-[#10b981]/20 text-[#10b981]";
-      case "Encerrado": return "bg-[#8b96a5]/20 text-[#8b96a5]";
+      case "Encerrado": return "bg-[#9e9e9e]/20 text-[#9e9e9e]";
       default: return "bg-[#ff8c42]/20 text-[#ff8c42]";
     }
   };
@@ -153,39 +153,39 @@ export function Editais() {
       {/* Cabeçalho */}
       <div className="mb-6">
         <h1 className="text-white mb-2">Editais</h1>
-        <p className="text-[#8b96a5]">Acompanhe editais de fomento e oportunidades de financiamento</p>
+        <p className="text-[#9e9e9e]">Acompanhe editais de fomento e oportunidades de financiamento</p>
       </div>
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Total</span>
+            <span className="text-[#9e9e9e] text-sm">Total</span>
             <Megaphone className="w-5 h-5 text-[#4a9eff]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Abertos</span>
+            <span className="text-[#9e9e9e] text-sm">Abertos</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.abertos}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Em Breve</span>
+            <span className="text-[#9e9e9e] text-sm">Em Breve</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.emBreve}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Encerrados</span>
-            <XCircle className="w-5 h-5 text-[#8b96a5]" />
+            <span className="text-[#9e9e9e] text-sm">Encerrados</span>
+            <XCircle className="w-5 h-5 text-[#9e9e9e]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.encerrados}</div>
         </div>
@@ -195,13 +195,13 @@ export function Editais() {
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8b96a5]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
           <input
             type="text"
             placeholder="Buscar editais..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -209,7 +209,7 @@ export function Editais() {
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Aberto">Abertos</option>
@@ -232,7 +232,7 @@ export function Editais() {
           return (
             <div
               key={edital.id}
-              className={`bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300 ${ edital.status === "Encerrado" ? "opacity-70" : "" }`}
+              className={`bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300 ${ edital.status === "Encerrado" ? "opacity-70" : "" }`}
             >
               <div className="flex flex-col lg:flex-row gap-4">
                 {/* Informações do Edital */}
@@ -248,18 +248,18 @@ export function Editais() {
                           <Tag className="w-4 h-4 text-[#4a9eff]" />
                           <span className="text-sm text-[#4a9eff]">{edital.tema}</span>
                         </div>
-                        <span className="text-[#3d4f62]">•</span>
+                        <span className="text-[#2e2e2e]">•</span>
                         <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-[#8b96a5]" />
-                          <span className="text-sm text-[#8b96a5]">{edital.organizacao}</span>
+                          <Building2 className="w-4 h-4 text-[#9e9e9e]" />
+                          <span className="text-sm text-[#9e9e9e]">{edital.organizacao}</span>
                         </div>
                       </div>
-                      <p className="text-sm text-[#8b96a5] mb-3">{edital.descricao}</p>
+                      <p className="text-sm text-[#9e9e9e] mb-3">{edital.descricao}</p>
 
                       {/* Informações Adicionais */}
                       <div className="flex flex-wrap gap-4">
-                        <div className="px-3 py-2 bg-[#0a1929] rounded-lg border border-[#3d4f62]/30">
-                          <span className="text-xs text-[#8b96a5]">Valor Total</span>
+                        <div className="px-3 py-2 bg-[#121212] rounded-lg border border-[#2e2e2e]/30">
+                          <span className="text-xs text-[#9e9e9e]">Valor Total</span>
                           <p className="text-sm text-[#10b981] font-semibold">{edital.valor}</p>
                         </div>
                       </div>
@@ -275,9 +275,9 @@ export function Editais() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-[#8b96a5]" />
+                    <Calendar className="w-4 h-4 text-[#9e9e9e]" />
                     <div className="text-xs">
-                      <span className="text-[#8b96a5]">Prazo: </span>
+                      <span className="text-[#9e9e9e]">Prazo: </span>
                       <span className="text-white font-medium">
                         {new Date(edital.data).toLocaleDateString('pt-BR')}
                       </span>
@@ -311,9 +311,9 @@ export function Editais() {
 
       {/* Estado Vazio */}
       {editaisFiltrados.length === 0 && (
-        <div className="text-center py-12 bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30">
-          <Megaphone className="w-16 h-16 text-[#3d4f62] mx-auto mb-4" />
-          <p className="text-[#8b96a5]">Nenhum edital encontrado</p>
+        <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
+          <Megaphone className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
+          <p className="text-[#9e9e9e]">Nenhum edital encontrado</p>
         </div>
       )}
     </div>

@@ -85,38 +85,38 @@ export function Materiais() {
       {/* Cabeçalho */}
       <div className="mb-6">
         <h1 className="text-white mb-2">Materiais e Equipamentos</h1>
-        <p className="text-[#8b96a5]">Gerencie o inventário de materiais dos grupos</p>
+        <p className="text-[#9e9e9e]">Gerencie o inventário de materiais dos grupos</p>
       </div>
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Total</span>
+            <span className="text-[#9e9e9e] text-sm">Total</span>
             <Package className="w-5 h-5 text-[#4a9eff]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Disponível</span>
+            <span className="text-[#9e9e9e] text-sm">Disponível</span>
             <Box className="w-5 h-5 text-[#10b981]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.disponiveis}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Em Uso</span>
+            <span className="text-[#9e9e9e] text-sm">Em Uso</span>
             <Box className="w-5 h-5 text-[#ff8c42]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.emUso}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Manutenção</span>
+            <span className="text-[#9e9e9e] text-sm">Manutenção</span>
             <AlertCircle className="w-5 h-5 text-[#f59e0b]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.manutencao}</div>
@@ -127,13 +127,13 @@ export function Materiais() {
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8b96a5]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
           <input
             type="text"
             placeholder="Buscar materiais, grupos ou categorias..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -149,7 +149,7 @@ export function Materiais() {
         {materiaisFiltrados.map((material) => (
           <div
             key={material.id}
-            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300"
+            className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300"
           >
             {/* Cabeçalho */}
             <div className="flex items-start gap-3 mb-4">
@@ -158,29 +158,29 @@ export function Materiais() {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-white font-semibold mb-1 truncate">{material.nome}</h3>
-                <p className="text-sm text-[#8b96a5] truncate">{material.grupo}</p>
+                <p className="text-sm text-[#9e9e9e] truncate">{material.grupo}</p>
               </div>
             </div>
 
             {/* Detalhes */}
             <div className="space-y-3 mb-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#8b96a5]">Categoria</span>
+                <span className="text-sm text-[#9e9e9e]">Categoria</span>
                 <span className="text-sm text-white">{material.categoria}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#8b96a5]">Quantidade</span>
+                <span className="text-sm text-[#9e9e9e]">Quantidade</span>
                 <span className="text-sm font-semibold text-[#ff8c42]">{material.quantidade} un.</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#8b96a5]">Localização</span>
+                <span className="text-sm text-[#9e9e9e]">Localização</span>
                 <span className="text-sm text-white truncate ml-2">{material.local}</span>
               </div>
             </div>
 
             {/* Rodapé */}
-            <div className="flex items-center justify-between pt-4 border-t border-[#3d4f62]/30">
-              <span className="text-xs text-[#8b96a5]">
+            <div className="flex items-center justify-between pt-4 border-t border-[#2e2e2e]/30">
+              <span className="text-xs text-[#9e9e9e]">
                 Adq: {new Date(material.dataAquisicao).toLocaleDateString('pt-BR')}
               </span>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${ material.status === "Disponível" ? "bg-[#10b981]/20 text-[#10b981]" : material.status === "Em Uso" ? "bg-[#ff8c42]/20 text-[#ff8c42]" : "bg-[#f59e0b]/20 text-[#f59e0b]" }`}>
@@ -193,9 +193,9 @@ export function Materiais() {
 
       {/* Estado Vazio */}
       {materiaisFiltrados.length === 0 && (
-        <div className="text-center py-12 bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30">
-          <Box className="w-16 h-16 text-[#3d4f62] mx-auto mb-4" />
-          <p className="text-[#8b96a5]">Nenhum material encontrado</p>
+        <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
+          <Box className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
+          <p className="text-[#9e9e9e]">Nenhum material encontrado</p>
         </div>
       )}
     </div>

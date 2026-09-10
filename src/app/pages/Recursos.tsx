@@ -148,13 +148,13 @@ export function Recursos() {
 
         return (
           <div className="flex flex-col items-center gap-2">
-            <div className="w-full max-w-[120px] h-2 bg-[#0a1929] rounded-full overflow-hidden">
+            <div className="w-full max-w-[120px] h-2 bg-[#121212] rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-300 ${ percentualUtilizacao > 80 ? "bg-[#ff8c42]" : "bg-[#10b981]" }`}
                 style={{ width: `${Math.min(percentualUtilizacao, 100)}%` }}
               />
             </div>
-            <span className="text-xs text-[#8b96a5]">
+            <span className="text-xs text-[#9e9e9e]">
               {percentualUtilizacao.toFixed(1)}%
             </span>
           </div>
@@ -168,35 +168,35 @@ export function Recursos() {
       {/* Cabeçalho */}
       <div className="mb-6">
         <h1 className="text-white text-2xl font-bold mb-2">Recursos Financeiros</h1>
-        <p className="text-[#8b96a5]">Acompanhe a alocação e utilização de recursos</p>
+        <p className="text-[#9e9e9e]">Acompanhe a alocação e utilização de recursos</p>
       </div>
 
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-xl bg-[#4a9eff] flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-[#8b96a5] text-sm">Total Alocado</p>
+              <p className="text-[#9e9e9e] text-sm">Total Alocado</p>
               <h3 className="text-white text-xl font-bold">
                 R$ {(totalAlocado / 1000).toFixed(0)}k
               </h3>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-xs text-[#8b96a5]">
+          <div className="flex items-center gap-1 text-xs text-[#9e9e9e]">
             <span>{recursos.length} grupos ativos</span>
           </div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-xl bg-[#ff8c42] flex items-center justify-center">
               <TrendingDown className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-[#8b96a5] text-sm">Total Utilizado</p>
+              <p className="text-[#9e9e9e] text-sm">Total Utilizado</p>
               <h3 className="text-white text-xl font-bold">
                 R$ {(totalUtilizado / 1000).toFixed(0)}k
               </h3>
@@ -212,13 +212,13 @@ export function Recursos() {
           </div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30">
+        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-xl bg-[#10b981] flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-[#8b96a5] text-sm">Saldo Disponível</p>
+              <p className="text-[#9e9e9e] text-sm">Saldo Disponível</p>
               <h3 className="text-white text-xl font-bold">
                 R$ {(saldoDisponivel / 1000).toFixed(0)}k
               </h3>

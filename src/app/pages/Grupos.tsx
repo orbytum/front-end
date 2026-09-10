@@ -59,20 +59,20 @@ export function Grupos() {
       {/* Cabeçalho */}
       <div className="mb-6">
         <h1 className="text-white mb-2">Grupos de Pesquisa</h1>
-        <p className="text-[#8b96a5]">Gerencie os grupos de pesquisa e suas configurações</p>
+        <p className="text-[#9e9e9e]">Gerencie os grupos de pesquisa e suas configurações</p>
       </div>
 
       {/* Barra de Ações */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8b96a5]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
           <input
             type="text"
             placeholder="Buscar grupos ou supervisores..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -88,7 +88,7 @@ export function Grupos() {
         {gruposFiltrados.map((grupo) => (
           <div
             key={grupo.id}
-            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300 group"
+            className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300 group"
           >
             {/* Cabeçalho */}
             <div className="flex items-start justify-between mb-4">
@@ -98,14 +98,14 @@ export function Grupos() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-white font-semibold mb-1">{grupo.nome}</h3>
-                  <div className="flex items-center gap-2 text-sm text-[#8b96a5]">
+                  <div className="flex items-center gap-2 text-sm text-[#9e9e9e]">
                     <Shield className="w-4 h-4" />
                     <span>{grupo.supervisor}</span>
                   </div>
                 </div>
               </div>
-              <button className="p-2 hover:bg-[#3d4f62]/20 rounded-lg transition-colors">
-                <MoreVertical className="w-5 h-5 text-[#8b96a5]" />
+              <button className="p-2 hover:bg-[#2e2e2e]/20 rounded-lg transition-colors">
+                <MoreVertical className="w-5 h-5 text-[#9e9e9e]" />
               </button>
             </div>
 
@@ -113,22 +113,22 @@ export function Grupos() {
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div className="text-center">
                 <div className="text-[#ff8c42] font-semibold">{grupo.participantes}</div>
-                <div className="text-xs text-[#8b96a5]">Participantes</div>
+                <div className="text-xs text-[#9e9e9e]">Participantes</div>
               </div>
               <div className="text-center">
                 <div className="text-[#ff8c42] font-semibold">{grupo.projetos}</div>
-                <div className="text-xs text-[#8b96a5]">Projetos</div>
+                <div className="text-xs text-[#9e9e9e]">Projetos</div>
               </div>
               <div className="text-center">
                 <div className="text-[#ff8c42] font-semibold">{grupo.orcamento}</div>
-                <div className="text-xs text-[#8b96a5]">Orçamento</div>
+                <div className="text-xs text-[#9e9e9e]">Orçamento</div>
               </div>
             </div>
 
             {/* Rodapé */}
-            <div className="flex items-center justify-between pt-4 border-t border-[#3d4f62]/30">
+            <div className="flex items-center justify-between pt-4 border-t border-[#2e2e2e]/30">
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-xs text-[#8b96a5]">
+                <div className="flex items-center gap-2 text-xs text-[#9e9e9e]">
                   <Calendar className="w-4 h-4" />
                   <span>Início: {new Date(grupo.dataInicio).toLocaleDateString('pt-BR')}</span>
                 </div>

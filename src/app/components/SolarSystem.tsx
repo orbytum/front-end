@@ -3,11 +3,11 @@ import { Shield, Hexagon, Box, FolderKanban, Calendar } from 'lucide-react';
 
 export function SolarSystem() {
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#0a1929]">
-      <div className="absolute inset-0 bg-gradient-radial from-[#1a2942] via-[#0a1929] to-[#020911]" />
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#121212]">
+      <div className="absolute inset-0 bg-gradient-radial from-[#1a1a1a] via-[#121212] to-[#0d0d0d]" />
       <div className="relative w-[800px] h-[800px] flex items-center justify-center">
         <motion.div
-          className="absolute w-[680px] h-[680px] rounded-full border border-[#3d4f62]/30"
+          className="absolute w-[680px] h-[680px] rounded-full border border-[#2e2e2e]/30"
           animate={{ rotate: 360 }}
           transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
         >
@@ -17,10 +17,10 @@ export function SolarSystem() {
             whileHover={{ scale: 1.2 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-12 h-12 bg-[#0a1929] rounded-lg flex items-center justify-center group transition-duration-300">
+            <div className="w-12 h-12 bg-[#121212] rounded-lg flex items-center justify-center group transition-duration-300">
               <Hexagon className="w-6 h-6 text-[#ff8c42]" />
             </div>
-            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#8b96a5] whitespace-nowrap">Recursos</span>
+            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#9e9e9e] whitespace-nowrap">Recursos</span>
           </motion.div>
           
           {/* Materiais - Cubo */}
@@ -29,10 +29,10 @@ export function SolarSystem() {
             whileHover={{ scale: 1.2 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-12 h-12 bg-[#0a1929] rounded-lg flex items-center justify-center group transition-duration-300">
+            <div className="w-12 h-12 bg-[#121212] rounded-lg flex items-center justify-center group transition-duration-300">
               <Box className="w-6 h-6 text-[#ff8c42]" />
             </div>
-            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#8b96a5] whitespace-nowrap">Materiais</span>
+            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#9e9e9e] whitespace-nowrap">Materiais</span>
           </motion.div>
           
           {/* Projetos */}
@@ -41,10 +41,10 @@ export function SolarSystem() {
             whileHover={{ scale: 1.2 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-12 h-12 bg-[#0a1929] rounded-lg flex items-center justify-center group transition-duration-300">
+            <div className="w-12 h-12 bg-[#121212] rounded-lg flex items-center justify-center group transition-duration-300">
               <FolderKanban className="w-6 h-6 text-[#ff8c42]" />
             </div>
-            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#8b96a5] whitespace-nowrap">Projetos</span>
+            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#9e9e9e] whitespace-nowrap">Projetos</span>
           </motion.div>
 
           {/* Calendário com arco pontilhado */}
@@ -53,16 +53,16 @@ export function SolarSystem() {
             whileHover={{ scale: 1.2 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-12 h-12 bg-[#0a1929] rounded-lg flex items-center justify-center group transition-duration-300">
+            <div className="w-12 h-12 bg-[#121212] rounded-lg flex items-center justify-center group transition-duration-300">
               <Calendar className="w-6 h-6 text-[#ff8c42]" />
             </div>
-            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#8b96a5] whitespace-nowrap">Calendário</span>
+            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#9e9e9e] whitespace-nowrap">Calendário</span>
 
             {/* Arco pontilhado conectando projetos ao calendário */}
             <svg className="absolute -right-[280px] -top-[140px] w-[300px] h-[300px] pointer-events-none">
               <path
                 d="M 10 150 Q 80 60, 150 10"
-                stroke="#3d4f62"
+                stroke="#2e2e2e"
                 strokeWidth="2"
                 strokeDasharray="8,8"
                 fill="none"
@@ -74,7 +74,7 @@ export function SolarSystem() {
         
         {/* Segunda órbita */}
         <motion.div
-          className="absolute w-[480px] h-[480px] rounded-full border border-[#3d4f62]/40"
+          className="absolute w-[480px] h-[480px] rounded-full border border-[#2e2e2e]/40"
           animate={{ rotate: -360 }}
           transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
         >
@@ -97,7 +97,7 @@ export function SolarSystem() {
               >
                 {/* Linha conectando ao supervisor */}
                 <div 
-                  className="absolute w-[1px] bg-[#3d4f62]/40 origin-center"
+                  className="absolute w-[1px] bg-[#2e2e2e]/40 origin-center"
                   style={{
                     height: `${Math.sqrt(x * x + y * y) - 110}px`,
                     transform: `rotate(${angle + 180}deg) translateY(-100%)`
@@ -107,12 +107,12 @@ export function SolarSystem() {
             );
           })}
           
-          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 text-xs text-[#8b96a5] whitespace-nowrap">Participantes</div>
+          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 text-xs text-[#9e9e9e] whitespace-nowrap">Participantes</div>
         </motion.div>
         
         {/* Primeira órbita */}
         <motion.div
-          className="absolute w-[280px] h-[280px] rounded-full border border-[#3d4f62]/50"
+          className="absolute w-[280px] h-[280px] rounded-full border border-[#2e2e2e]/50"
           animate={{ rotate: 360 }}
           transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
         >
@@ -122,10 +122,10 @@ export function SolarSystem() {
             whileHover={{ scale: 1.15 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-16 h-16 bg-[#0a1929] rounded-2xl flex items-center justify-center transition-duration-300">
+            <div className="w-16 h-16 bg-[#121212] rounded-2xl flex items-center justify-center transition-duration-300">
               <Shield className="w-8 h-8 text-[#ff8c42] fill-[#ff8c42]/20" />
             </div>
-            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-sm text-[#8b96a5] whitespace-nowrap font-medium">Supervisor</span>
+            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-sm text-[#9e9e9e] whitespace-nowrap font-medium">Supervisor</span>
           </motion.div>
         </motion.div>
         
@@ -152,7 +152,7 @@ export function SolarSystem() {
         {Array.from({ length: 40 }).map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-[#3d4f62] rounded-full"
+            className="absolute w-1 h-1 bg-[#2e2e2e] rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -171,9 +171,9 @@ export function SolarSystem() {
       </div>
       
       {/* Legenda informativa */}
-      <div className="absolute bottom-8 left-8 bg-[#0a1929]/80 backdrop-blur-sm p-6 rounded-2xl border border-[#3d4f62]/30">
+      <div className="absolute bottom-8 left-8 bg-[#121212]/80 backdrop-blur-sm p-6 rounded-2xl border border-[#2e2e2e]/30">
         <h3 className="text-[#ff8c42] mb-4">Sistema Solar Acadêmico</h3>
-        <div className="space-y-2 text-sm text-[#8b96a5]">
+        <div className="space-y-2 text-sm text-[#9e9e9e]">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-[#ff8c42]" />
             <span>Centro: Grupo de Pesquisa</span>
