@@ -15,7 +15,8 @@ import {
   Loader2,
   ArrowRight,
 } from "lucide-react";
-import { conviteApi, ApiError } from "@/api";
+import { ConviteService } from "../services/convites/ConviteService";
+import { HttpError } from "../utils/HttpError";
 
 const TITULOS = [
   "Aluno",
@@ -55,6 +56,7 @@ export function AceitarConviteCadastro() {
   const [step, setStep] = useState<Step>(token ? "form" : "invalid");
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const conviteService = new ConviteService();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -143,7 +145,7 @@ export function AceitarConviteCadastro() {
     };
 
     try {
-      const data = await conviteApi.aceitarCadastro(token, payload);
+      const data = await conviteService.aceitarCadastro(token, payload);
 
       if (data?.token) {
         localStorage.setItem("token", data.token);
@@ -154,8 +156,8 @@ export function AceitarConviteCadastro() {
 
       setStep("success");
     } catch (err) {
-      if (err instanceof ApiError) {
-        setSubmitError(err.message);
+      if (err instanceof HttpError) {
+        setSubmitError(err.response?.mensagem || err.message);
       } else {
         setSubmitError(
           "Não foi possível concluir seu cadastro. Verifique os dados e tente novamente."

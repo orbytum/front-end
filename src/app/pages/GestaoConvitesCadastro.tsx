@@ -22,16 +22,16 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { DataTable, Column } from "../components/DataTable";
-import {
-  conviteApi,
-  authApi,
-  ApiError,
-  ConviteCadastroDetalhe,
-  ConviteCadastroPaginadoResponse,
-} from "@/api";
+import { ConviteService } from "../services/convites/ConviteService";
+import { AuthService } from "../services/auth/AuthService";
+import { HttpError } from "../utils/HttpError";
+import { ConviteCadastroDetalhe } from "../models/dto/convites/ConviteCadastroDetalhe";
+import { ConviteCadastroPaginadoResponse } from "../models/dto/convites/ListarConvitesCadastro";
 
 export function GestaoConvitesCadastro() {
   const navigate = useNavigate();
+  const conviteService = new ConviteService();
+  const authService = new AuthService();
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +73,7 @@ export function GestaoConvitesCadastro() {
   }, [emailFilter]);
 
   useEffect(() => {
-    const hasAdminAccess = authApi.isAdminOrInitialAdmin();
+    const hasAdminAccess = authService.isAdminOrInitialAdmin();
     setIsAdmin(hasAdminAccess);
   }, []);
 
@@ -81,7 +81,7 @@ export function GestaoConvitesCadastro() {
     setLoading(true);
     setError("");
     try {
-      const data = await conviteApi.listarCadastros({
+      const data = await conviteService.listarCadastros({
         page,
         size: pageSize,
         email: debouncedEmail,
@@ -89,8 +89,8 @@ export function GestaoConvitesCadastro() {
       });
       setPaginatedData(data);
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
+      if (err instanceof HttpError) {
+        setError(err.response?.mensagem || err.message);
       } else {
         setError("Não foi possível carregar a lista de convites.");
       }
@@ -131,7 +131,7 @@ export function GestaoConvitesCadastro() {
 
     setCreating(true);
     try {
-      const res = await conviteApi.gerarCadastro({
+      const res = await conviteService.gerarCadastro({
         email: email.trim(),
         diasValidade: Number(diasValidade),
       });
@@ -141,8 +141,8 @@ export function GestaoConvitesCadastro() {
       setEmail("");
       carregarConvites();
     } catch (err) {
-      if (err instanceof ApiError) {
-        setModalError(err.message);
+      if (err instanceof HttpError) {
+        setModalError(err.response?.mensagem || err.message);
       } else {
         setModalError("Falha ao enviar convite. Verifique os dados e tente novamente.");
       }
@@ -157,10 +157,10 @@ export function GestaoConvitesCadastro() {
     }
     setRevokingId(id);
     try {
-      await conviteApi.revogarCadastro(id);
+      await conviteService.revogarCadastro(id);
       await carregarConvites();
     } catch (err) {
-      alert(err instanceof ApiError ? err.message : "Erro ao revogar convite.");
+      alert(err instanceof HttpError ? (err.response?.mensagem || err.message) : "Erro ao revogar convite.");
     } finally {
       setRevokingId(null);
     }

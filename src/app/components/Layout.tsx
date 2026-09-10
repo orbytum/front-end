@@ -16,11 +16,12 @@ import {
   MailPlus,
 } from "lucide-react";
 import { useState } from "react";
-import { authApi } from "@/api";
+import { AuthService } from "../services/auth/AuthService";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const isAdmin = authApi.isAdminOrInitialAdmin();
+  const authService = new AuthService();
+  const isAdmin = authService.isAdminOrInitialAdmin();
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
