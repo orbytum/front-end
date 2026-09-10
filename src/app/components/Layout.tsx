@@ -12,17 +12,24 @@ import {
   CalendarDays,
   Calendar,
   Menu,
-  X
+  X,
+  MailPlus,
 } from "lucide-react";
 import { useState } from "react";
+import { AuthService } from "../services/auth/AuthService";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const authService = new AuthService();
+  const isAdmin = authService.isAdminOrInitialAdmin();
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
     { path: "/grupos", label: "Grupos de Pesquisa", icon: Users },
     { path: "/participantes", label: "Participantes", icon: UserCheck },
+    ...(isAdmin
+      ? [{ path: "/gestao-convites", label: "Convites de Cadastro", icon: MailPlus }]
+      : []),
     { path: "/recursos", label: "Recursos Financeiros", icon: Hexagon },
     { path: "/solicitacoes", label: "Solicitações", icon: FileText },
     { path: "/materiais", label: "Materiais", icon: Box },
@@ -34,29 +41,27 @@ export function Layout() {
   ];
 
   return (
-    <div className="flex h-full bg-[#0a1929]">
+    <div className="flex h-full bg-[#121212]">
       {/* Sidebar */}
       <aside
-        className={`${
-          sidebarOpen ? "w-64" : "w-20"
-        } bg-[#0d1f30] border-r border-[#3d4f62]/30 transition-all duration-300 flex flex-col shadow-[8px_0_24px_rgba(0,0,0,0.3)]`}
+        className={`${ sidebarOpen ? "w-64" : "w-20" } bg-[#1e1e1e] border-r border-[#2e2e2e]/30 transition-all duration-300 flex flex-col`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-[#3d4f62]/30">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-[#2e2e2e]/30">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff8c42] to-[#f94c10] shadow-[0_0_16px_rgba(255,140,66,0.4)]" />
+              <div className="w-8 h-8 rounded-full bg-[#ff8c42]" />
               <span className="text-white font-semibold">SGA</span>
             </div>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-[#3d4f62]/20 transition-colors"
+            className="p-2 rounded-lg hover:bg-[#2e2e2e]/20 transition-colors"
           >
             {sidebarOpen ? (
-              <X className="w-5 h-5 text-[#8b96a5]" />
+              <X className="w-5 h-5 text-[#9e9e9e]" />
             ) : (
-              <Menu className="w-5 h-5 text-[#8b96a5]" />
+              <Menu className="w-5 h-5 text-[#9e9e9e]" />
             )}
           </button>
         </div>
@@ -71,17 +76,15 @@ export function Layout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                   isActive
-                    ? "bg-[#0a1929] shadow-[inset_4px_4px_8px_#050c14,inset_-4px_-4px_8px_#0f2638] text-[#ff8c42]"
-                    : "hover:bg-[#0a1929]/50 text-[#8b96a5] hover:text-white"
+                    ? "bg-[#121212] text-[#ff8c42]"
+                    : "hover:bg-[#121212]/50 text-[#9e9e9e] hover:text-white"
                 }`
               }
             >
               {({ isActive }) => (
                 <>
                   <item.icon
-                    className={`w-5 h-5 ${
-                      isActive ? "text-[#ff8c42]" : "text-[#8b96a5] group-hover:text-white"
-                    }`}
+                    className={`w-5 h-5 ${ isActive ? "text-[#ff8c42]" : "text-[#9e9e9e] group-hover:text-white" }`}
                   />
                   {sidebarOpen && (
                     <span className="text-sm font-medium">{item.label}</span>
@@ -93,11 +96,11 @@ export function Layout() {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-[#3d4f62]/30">
+        <div className="p-4 border-t border-[#2e2e2e]/30">
           {sidebarOpen ? (
-            <div className="text-xs text-[#8b96a5] text-center">
+            <div className="text-xs text-[#9e9e9e] text-center">
               ORBYTUM
-              <div className="text-[#3d4f62] mt-1">v1.0.0</div>
+              <div className="text-[#2e2e2e] mt-1">v1.0.0</div>
             </div>
           ) : (
             <div className="w-2 h-2 rounded-full bg-[#ff8c42] mx-auto" />
@@ -108,17 +111,16 @@ export function Layout() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="h-16 bg-[#0d1f30]/50 backdrop-blur-sm border-b border-[#3d4f62]/30 flex items-center justify-between px-6 shadow-[0_4px_12px_rgba(0,0,0,0.2)]">
+        <header className="h-16 bg-[#1e1e1e]/50 backdrop-blur-sm border-b border-[#2e2e2e]/30 flex items-center justify-between px-6">
           <div>
             <h2 className="text-white">ORBYTUM</h2>
-            <p className="text-xs text-[#8b96a5]">Organização orbital de pesquisa</p>
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="px-4 py-2 rounded-lg bg-[#0a1929] shadow-[4px_4px_8px_#050c14,-4px_-4px_8px_#0f2638]">
-              <span className="text-sm text-[#8b96a5]">Administrador</span>
+            <div className="px-4 py-2 rounded-lg bg-[#121212]">
+              <span className="text-sm text-[#9e9e9e]">Administrador</span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff8c42] to-[#f94c10] shadow-[0_0_16px_rgba(255,140,66,0.3)] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-[#ff8c42] flex items-center justify-center">
               <span className="text-white text-sm font-semibold">A</span>
             </div>
           </div>

@@ -148,7 +148,7 @@ export function Atividades() {
       case "Concluída": return <CheckCircle className="w-5 h-5 text-[#10b981]" />;
       case "Em Andamento": return <Clock className="w-5 h-5 text-[#ff8c42]" />;
       case "Atrasada": return <AlertCircle className="w-5 h-5 text-[#ef4444]" />;
-      default: return <Circle className="w-5 h-5 text-[#8b96a5]" />;
+      default: return <Circle className="w-5 h-5 text-[#9e9e9e]" />;
     }
   };
 
@@ -157,7 +157,7 @@ export function Atividades() {
       case "Concluída": return "bg-[#10b981]/20 text-[#10b981]";
       case "Em Andamento": return "bg-[#ff8c42]/20 text-[#ff8c42]";
       case "Atrasada": return "bg-[#ef4444]/20 text-[#ef4444]";
-      default: return "bg-[#8b96a5]/20 text-[#8b96a5]";
+      default: return "bg-[#9e9e9e]/20 text-[#9e9e9e]";
     }
   };
 
@@ -171,46 +171,46 @@ export function Atividades() {
       {/* Cabeçalho */}
       <div className="mb-6">
         <h1 className="text-white mb-2">Atividades</h1>
-        <p className="text-[#8b96a5]">Gerencie as atividades dos projetos em andamento</p>
+        <p className="text-[#9e9e9e]">Gerencie as atividades dos projetos em andamento</p>
       </div>
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Total</span>
+            <span className="text-[#9e9e9e] text-sm">Total</span>
             <ListTodo className="w-5 h-5 text-[#4a9eff]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Pendentes</span>
-            <Circle className="w-5 h-5 text-[#8b96a5]" />
+            <span className="text-[#9e9e9e] text-sm">Pendentes</span>
+            <Circle className="w-5 h-5 text-[#9e9e9e]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.pendentes}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Em Andamento</span>
+            <span className="text-[#9e9e9e] text-sm">Em Andamento</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.emAndamento}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Concluídas</span>
+            <span className="text-[#9e9e9e] text-sm">Concluídas</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.concluidas}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#8b96a5] text-sm">Atrasadas</span>
+            <span className="text-[#9e9e9e] text-sm">Atrasadas</span>
             <AlertCircle className="w-5 h-5 text-[#ef4444]" />
           </div>
           <div className="text-white text-2xl font-bold">{estatisticas.atrasadas}</div>
@@ -221,13 +221,13 @@ export function Atividades() {
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8b96a5]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
           <input
             type="text"
             placeholder="Buscar atividades..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -235,7 +235,7 @@ export function Atividades() {
         <select
           value={filtroProjeto}
           onChange={(e) => setFiltroProjeto(e.target.value)}
-          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Projetos</option>
           {projetos.map(projeto => (
@@ -247,7 +247,7 @@ export function Atividades() {
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Pendente">Pendentes</option>
@@ -257,7 +257,7 @@ export function Atividades() {
         </select>
 
         {/* Botão Nova Atividade */}
-        <button className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium">
+        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
           <Plus className="w-5 h-5" />
           <span>Nova Atividade</span>
         </button>
@@ -268,7 +268,7 @@ export function Atividades() {
         {atividadesFiltradas.map((atividade) => (
           <div
             key={atividade.id}
-            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-all duration-300"
+            className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300"
           >
             <div className="flex flex-col lg:flex-row lg:items-start gap-4">
               {/* Informações da Atividade */}
@@ -277,10 +277,10 @@ export function Atividades() {
                   {obterIconeStatus(atividade.status)}
                   <div className="flex-1">
                     <h3 className="text-white font-semibold mb-1">{atividade.nome}</h3>
-                    <p className="text-sm text-[#8b96a5] mb-2">{atividade.descricao}</p>
+                    <p className="text-sm text-[#9e9e9e] mb-2">{atividade.descricao}</p>
                     <div className="flex items-center gap-2">
                       <FolderKanban className="w-4 h-4 text-[#4a9eff]" />
-                      <span className="text-xs text-[#8b96a5]">{atividade.nomeProjeto}</span>
+                      <span className="text-xs text-[#9e9e9e]">{atividade.nomeProjeto}</span>
                     </div>
                   </div>
                 </div>
@@ -293,14 +293,10 @@ export function Atividades() {
                 </span>
 
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-[#8b96a5]" />
+                  <Calendar className="w-4 h-4 text-[#9e9e9e]" />
                   <div className="text-xs">
-                    <span className="text-[#8b96a5]">Entrega: </span>
-                    <span className={`font-medium ${
-                      estaAtrasada(atividade.dataEntrega, atividade.status)
-                        ? "text-[#ef4444]"
-                        : "text-white"
-                    }`}>
+                    <span className="text-[#9e9e9e]">Entrega: </span>
+                    <span className={`font-medium ${ estaAtrasada(atividade.dataEntrega, atividade.status) ? "text-[#ef4444]" : "text-white" }`}>
                       {new Date(atividade.dataEntrega).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
@@ -310,7 +306,7 @@ export function Atividades() {
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-[#10b981]" />
                     <div className="text-xs">
-                      <span className="text-[#8b96a5]">Concluída em: </span>
+                      <span className="text-[#9e9e9e]">Concluída em: </span>
                       <span className="text-[#10b981] font-medium">
                         {new Date(atividade.dataConclusao).toLocaleDateString('pt-BR')}
                       </span>
@@ -325,9 +321,9 @@ export function Atividades() {
 
       {/* Estado Vazio */}
       {atividadesFiltradas.length === 0 && (
-        <div className="text-center py-12 bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30">
-          <ListTodo className="w-16 h-16 text-[#3d4f62] mx-auto mb-4" />
-          <p className="text-[#8b96a5]">Nenhuma atividade encontrada</p>
+        <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
+          <ListTodo className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
+          <p className="text-[#9e9e9e]">Nenhuma atividade encontrada</p>
         </div>
       )}
     </div>

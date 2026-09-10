@@ -78,55 +78,53 @@ export function Participantes() {
       {/* Cabeçalho */}
       <div className="mb-6">
         <h1 className="text-white mb-2">Participantes</h1>
-        <p className="text-[#8b96a5]">Gerencie os participantes dos grupos de pesquisa</p>
+        <p className="text-[#9e9e9e]">Gerencie os participantes dos grupos de pesquisa</p>
       </div>
 
       {/* Barra de Ações */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8b96a5]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
           <input
             type="text"
             placeholder="Buscar por nome, grupo ou função..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
         {/* Botão Novo Participante */}
-        <button className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium">
+        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
           <Plus className="w-5 h-5" />
           <span>Novo Participante</span>
         </button>
       </div>
 
       {/* Tabela de Participantes */}
-      <div className="bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] overflow-hidden">
+      <div className="bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#3d4f62]/30">
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b96a5]">Participante</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b96a5]">Função</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b96a5]">Grupo</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b96a5]">Contato</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b96a5]">Status</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b96a5]">Ações</th>
+              <tr className="border-b border-[#2e2e2e]/30">
+                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Participante</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Função</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Grupo</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Contato</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Status</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Ações</th>
               </tr>
             </thead>
             <tbody>
               {participantesFiltrados.map((participante, index) => (
                 <tr 
                   key={participante.id}
-                  className={`border-b border-[#3d4f62]/30 hover:bg-[#0a1929]/50 transition-colors ${
-                    index === participantesFiltrados.length - 1 ? 'border-b-0' : ''
-                  }`}
+                  className={`border-b border-[#2e2e2e]/30 hover:bg-[#121212]/50 transition-colors ${ index === participantesFiltrados.length - 1 ? 'border-b-0' : '' }`}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff8c42] to-[#f94c10] flex items-center justify-center shadow-lg">
+                      <div className="w-10 h-10 rounded-full bg-[#ff8c42] flex items-center justify-center">
                         <span className="text-white text-sm font-semibold">{participante.avatar}</span>
                       </div>
                       <div>
@@ -135,38 +133,34 @@ export function Participantes() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-[#8b96a5]">
+                    <div className="flex items-center gap-2 text-[#9e9e9e]">
                       <BookOpen className="w-4 h-4" />
                       <span>{participante.funcao}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[#8b96a5]">{participante.grupo}</span>
+                    <span className="text-[#9e9e9e]">{participante.grupo}</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-[#8b96a5]">
+                      <div className="flex items-center gap-2 text-sm text-[#9e9e9e]">
                         <Mail className="w-3 h-3" />
                         <span>{participante.email}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-[#8b96a5]">
+                      <div className="flex items-center gap-2 text-sm text-[#9e9e9e]">
                         <Phone className="w-3 h-3" />
                         <span>{participante.telefone}</span>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      participante.status === "Ativo" 
-                        ? "bg-[#10b981]/20 text-[#10b981]" 
-                        : "bg-[#ff8c42]/20 text-[#ff8c42]"
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${ participante.status === "Ativo" ? "bg-[#10b981]/20 text-[#10b981]" : "bg-[#ff8c42]/20 text-[#ff8c42]" }`}>
                       {participante.status}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <button className="p-2 hover:bg-[#3d4f62]/20 rounded-lg transition-colors">
-                      <MoreVertical className="w-5 h-5 text-[#8b96a5]" />
+                    <button className="p-2 hover:bg-[#2e2e2e]/20 rounded-lg transition-colors">
+                      <MoreVertical className="w-5 h-5 text-[#9e9e9e]" />
                     </button>
                   </td>
                 </tr>
@@ -179,8 +173,8 @@ export function Participantes() {
       {/* Estado Vazio */}
       {participantesFiltrados.length === 0 && (
         <div className="text-center py-12">
-          <UserCheck className="w-16 h-16 text-[#3d4f62] mx-auto mb-4" />
-          <p className="text-[#8b96a5]">Nenhum participante encontrado</p>
+          <UserCheck className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
+          <p className="text-[#9e9e9e]">Nenhum participante encontrado</p>
         </div>
       )}
     </div>

@@ -1,7 +1,18 @@
 import { Hexagon, Plus, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { DataTable, Column } from "../components/DataTable";
+
+export interface Recurso {
+  id: number;
+  grupo: string;
+  alocado: number;
+  utilizado: number;
+  saldo: number;
+  categoria: string;
+  data: string;
+}
 
 export function Recursos() {
-  const recursos = [
+  const recursos: Recurso[] = [
     {
       id: 1,
       grupo: "IA e Machine Learning",
@@ -9,7 +20,7 @@ export function Recursos() {
       utilizado: 32500,
       saldo: 12500,
       categoria: "Equipamentos",
-      data: "2024-01-15"
+      data: "2024-01-15",
     },
     {
       id: 2,
@@ -18,7 +29,7 @@ export function Recursos() {
       utilizado: 28000,
       saldo: 39000,
       categoria: "Pesquisa",
-      data: "2024-02-01"
+      data: "2024-02-01",
     },
     {
       id: 3,
@@ -27,7 +38,7 @@ export function Recursos() {
       utilizado: 35200,
       saldo: 2800,
       categoria: "Software",
-      data: "2023-11-20"
+      data: "2023-11-20",
     },
     {
       id: 4,
@@ -36,7 +47,34 @@ export function Recursos() {
       utilizado: 8500,
       saldo: 43500,
       categoria: "Infraestrutura",
-      data: "2024-03-10"
+      data: "2024-03-10",
+    },
+    {
+      id: 5,
+      grupo: "Processamento de Linguagem Natural",
+      alocado: 41000,
+      utilizado: 39000,
+      saldo: 2000,
+      categoria: "Pesquisa",
+      data: "2024-04-05",
+    },
+    {
+      id: 6,
+      grupo: "Robótica e Sistemas Autônomos",
+      alocado: 75000,
+      utilizado: 42000,
+      saldo: 33000,
+      categoria: "Equipamentos",
+      data: "2024-04-18",
+    },
+    {
+      id: 7,
+      grupo: "Bioinformática e Saúde Digital",
+      alocado: 30000,
+      utilizado: 18500,
+      saldo: 11500,
+      categoria: "Software",
+      data: "2024-05-02",
     },
   ];
 
@@ -44,147 +82,176 @@ export function Recursos() {
   const totalUtilizado = recursos.reduce((soma, r) => soma + r.utilizado, 0);
   const saldoDisponivel = recursos.reduce((soma, r) => soma + r.saldo, 0);
 
+  const columns: Column<Recurso>[] = [
+    {
+      key: "grupo",
+      header: "Grupo",
+      align: "left",
+      render: (recurso) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center shrink-0">
+            <Hexagon className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-white font-medium">{recurso.grupo}</span>
+        </div>
+      ),
+    },
+    {
+      key: "categoria",
+      header: "Categoria",
+      align: "left",
+      render: (recurso) => (
+        <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#4a9eff]/20 text-[#4a9eff]">
+          {recurso.categoria}
+        </span>
+      ),
+    },
+    {
+      key: "alocado",
+      header: "Alocado",
+      align: "right",
+      render: (recurso) => (
+        <span className="text-white">
+          R$ {recurso.alocado.toLocaleString("pt-BR")}
+        </span>
+      ),
+    },
+    {
+      key: "utilizado",
+      header: "Utilizado",
+      align: "right",
+      render: (recurso) => (
+        <span className="text-[#ff8c42]">
+          R$ {recurso.utilizado.toLocaleString("pt-BR")}
+        </span>
+      ),
+    },
+    {
+      key: "saldo",
+      header: "Saldo",
+      align: "right",
+      render: (recurso) => (
+        <span className="text-[#10b981]">
+          R$ {recurso.saldo.toLocaleString("pt-BR")}
+        </span>
+      ),
+    },
+    {
+      key: "utilizacao",
+      header: "Utilização",
+      align: "center",
+      render: (recurso) => {
+        const percentualUtilizacao =
+          recurso.alocado > 0
+            ? (recurso.utilizado / recurso.alocado) * 100
+            : 0;
+
+        return (
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-full max-w-[120px] h-2 bg-[#121212] rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${ percentualUtilizacao > 80 ? "bg-[#ff8c42]" : "bg-[#10b981]" }`}
+                style={{ width: `${Math.min(percentualUtilizacao, 100)}%` }}
+              />
+            </div>
+            <span className="text-xs text-[#9e9e9e]">
+              {percentualUtilizacao.toFixed(1)}%
+            </span>
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
       <div className="mb-6">
-        <h1 className="text-white mb-2">Recursos Financeiros</h1>
-        <p className="text-[#8b96a5]">Acompanhe a alocação e utilização de recursos</p>
+        <h1 className="text-white text-2xl font-bold mb-2">Recursos Financeiros</h1>
+        <p className="text-[#9e9e9e]">Acompanhe a alocação e utilização de recursos</p>
       </div>
 
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]">
+        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4a9eff] to-[#2e7dd4] flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-[#4a9eff] flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-[#8b96a5] text-sm">Total Alocado</p>
+              <p className="text-[#9e9e9e] text-sm">Total Alocado</p>
               <h3 className="text-white text-xl font-bold">
                 R$ {(totalAlocado / 1000).toFixed(0)}k
               </h3>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-xs text-[#8b96a5]">
-            <span>4 grupos ativos</span>
+          <div className="flex items-center gap-1 text-xs text-[#9e9e9e]">
+            <span>{recursos.length} grupos ativos</span>
           </div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]">
+        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff8c42] to-[#f94c10] flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-[#ff8c42] flex items-center justify-center">
               <TrendingDown className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-[#8b96a5] text-sm">Total Utilizado</p>
+              <p className="text-[#9e9e9e] text-sm">Total Utilizado</p>
               <h3 className="text-white text-xl font-bold">
                 R$ {(totalUtilizado / 1000).toFixed(0)}k
               </h3>
             </div>
           </div>
           <div className="flex items-center gap-1 text-xs text-[#ff8c42]">
-            <span>{((totalUtilizado / totalAlocado) * 100).toFixed(1)}% do orçamento</span>
+            <span>
+              {totalAlocado > 0
+                ? ((totalUtilizado / totalAlocado) * 100).toFixed(1)
+                : "0"}
+              % do orçamento
+            </span>
           </div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]">
+        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#10b981] to-[#059669] flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-[#10b981] flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-[#8b96a5] text-sm">Saldo Disponível</p>
+              <p className="text-[#9e9e9e] text-sm">Saldo Disponível</p>
               <h3 className="text-white text-xl font-bold">
                 R$ {(saldoDisponivel / 1000).toFixed(0)}k
               </h3>
             </div>
           </div>
           <div className="flex items-center gap-1 text-xs text-[#10b981]">
-            <span>{((saldoDisponivel / totalAlocado) * 100).toFixed(1)}% disponível</span>
+            <span>
+              {totalAlocado > 0
+                ? ((saldoDisponivel / totalAlocado) * 100).toFixed(1)
+                : "0"}
+              % disponível
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Tabela de Recursos */}
-      <div className="bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] overflow-hidden">
-        <div className="p-6 border-b border-[#3d4f62]/30 flex items-center justify-between">
-          <h2 className="text-white">Alocação por Grupo</h2>
-          <button className="px-4 py-2 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-lg shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 text-sm font-medium">
+      {/* Tabela Reutilizável de Recursos com Paginação */}
+      <DataTable
+        title="Alocação por Grupo"
+        actions={
+          <button
+            type="button"
+            className="px-4 py-2 bg-[#ff8c42] text-white rounded-lg transition-all duration-300 flex items-center gap-2 text-sm font-medium cursor-pointer"
+          >
             <Plus className="w-4 h-4" />
             <span>Nova Alocação</span>
           </button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#3d4f62]/30">
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b96a5]">Grupo</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b96a5]">Categoria</th>
-                <th className="text-right px-6 py-4 text-sm font-medium text-[#8b96a5]">Alocado</th>
-                <th className="text-right px-6 py-4 text-sm font-medium text-[#8b96a5]">Utilizado</th>
-                <th className="text-right px-6 py-4 text-sm font-medium text-[#8b96a5]">Saldo</th>
-                <th className="text-center px-6 py-4 text-sm font-medium text-[#8b96a5]">Utilização</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recursos.map((recurso, index) => {
-                const percentualUtilizacao = (recurso.utilizado / recurso.alocado) * 100;
-                
-                return (
-                  <tr 
-                    key={recurso.id}
-                    className={`border-b border-[#3d4f62]/30 hover:bg-[#0a1929]/50 transition-colors ${
-                      index === recursos.length - 1 ? 'border-b-0' : ''
-                    }`}
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff8c42] to-[#f94c10] flex items-center justify-center shadow-lg">
-                          <Hexagon className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="text-white font-medium">{recurso.grupo}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#4a9eff]/20 text-[#4a9eff]">
-                        {recurso.categoria}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right text-white">
-                      R$ {recurso.alocado.toLocaleString('pt-BR')}
-                    </td>
-                    <td className="px-6 py-4 text-right text-[#ff8c42]">
-                      R$ {recurso.utilizado.toLocaleString('pt-BR')}
-                    </td>
-                    <td className="px-6 py-4 text-right text-[#10b981]">
-                      R$ {recurso.saldo.toLocaleString('pt-BR')}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-full max-w-[120px] h-2 bg-[#0a1929] rounded-full overflow-hidden shadow-[inset_2px_2px_4px_#050c14]">
-                          <div 
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              percentualUtilizacao > 80 
-                                ? 'bg-gradient-to-r from-[#ff8c42] to-[#f94c10]' 
-                                : 'bg-gradient-to-r from-[#10b981] to-[#059669]'
-                            }`}
-                            style={{ width: `${percentualUtilizacao}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-[#8b96a5]">
-                          {percentualUtilizacao.toFixed(1)}%
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        }
+        data={recursos}
+        columns={columns}
+        pageSize={4}
+        pageSizeOptions={[4, 8, 12]}
+      />
     </div>
   );
 }

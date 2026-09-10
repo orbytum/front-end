@@ -16,11 +16,25 @@ import { Calendario } from "./pages/Calendario";
 import { Login } from "./pages/Login";
 import { Publicacoes } from "./pages/Publicacoes";
 import { Lembretes } from "./pages/Lembretes";
+import { AceitarConviteCadastro } from "./pages/AceitarConviteCadastro";
+import { GestaoConvitesCadastro } from "./pages/GestaoConvitesCadastro";
 
 export const router = createBrowserRouter([
   {
     path: "/login",
     Component: Login,
+  },
+  {
+    path: "/convite",
+    Component: AceitarConviteCadastro,
+  },
+  {
+    path: "/convite/:token",
+    Component: AceitarConviteCadastro,
+  },
+  {
+    path: "/convites/aceitar/cadastro/:token",
+    Component: AceitarConviteCadastro,
   },
   {
     path: "/",
@@ -40,6 +54,7 @@ export const router = createBrowserRouter([
       { path: "calendario", Component: Calendario },
       { path: "publicacoes", Component: Publicacoes },
       { path: "lembretes", Component: Lembretes },
+      { path: "gestao-convites", Component: GestaoConvitesCadastro },
     ],
   },
 ]);
