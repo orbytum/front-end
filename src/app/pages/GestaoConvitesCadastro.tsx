@@ -193,7 +193,7 @@ export function GestaoConvitesCadastro() {
   if (!isAdmin) {
     return (
       <div className="h-full flex items-center justify-center p-6">
-        <div className="bg-[#0d1f30] rounded-2xl p-8 max-w-md w-full border border-[#ef4444]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] text-center">
+        <div className="bg-[#0d1f30] rounded-2xl p-8 max-w-md w-full border border-[#ef4444]/30 text-center">
           <div className="w-16 h-16 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-4">
             <ShieldAlert className="w-8 h-8 text-[#ef4444]" />
           </div>
@@ -257,16 +257,10 @@ export function GestaoConvitesCadastro() {
       align: "center",
       render: (c) => (
         <span
-          className={`px-3 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1.5 ${
-            c.ativo
-              ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30"
-              : "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/30"
-          }`}
+          className={`px-3 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1.5 ${ c.ativo ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30" : "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/30" }`}
         >
           <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              c.ativo ? "bg-[#10b981]" : "bg-[#ef4444]"
-            }`}
+            className={`w-1.5 h-1.5 rounded-full ${ c.ativo ? "bg-[#10b981]" : "bg-[#ef4444]" }`}
           />
           {c.ativo ? "Ativo" : "Expirado / Inativo"}
         </span>
@@ -354,7 +348,7 @@ export function GestaoConvitesCadastro() {
               setGeneratedLink("");
               setModalError("");
             }}
-            className="px-4 py-2.5 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl font-semibold text-sm shadow-[0_4px_16px_rgba(255,140,66,0.35)] hover:shadow-[0_6px_20px_rgba(255,140,66,0.55)] transition-all flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Novo Convite</span>
@@ -365,16 +359,12 @@ export function GestaoConvitesCadastro() {
       {/* Cards de Métricas com filtro interativo */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div
-          className={`bg-[#0d1f30] rounded-2xl p-6 border transition-all cursor-pointer select-none ${
-            statusFilter === "todos"
-              ? "border-[#ff8c42] shadow-[0_0_16px_rgba(255,140,66,0.25)]"
-              : "border-[#3d4f62]/30 hover:border-[#3d4f62]/60 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]"
-          }`}
+          className={`bg-[#0d1f30] rounded-2xl p-6 border transition-all cursor-pointer select-none ${ statusFilter === "todos" ? "border-[#ff8c42] " : "border-[#3d4f62]/30 hover:border-[#3d4f62]/60 " }`}
           title="Clique para exibir todos os convites"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4a9eff] to-[#2e7dd4] flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 rounded-xl bg-[#4a9eff] flex items-center justify-center">
                 <MailPlus className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -387,16 +377,12 @@ export function GestaoConvitesCadastro() {
         </div>
 
         <div
-          className={`bg-[#0d1f30] rounded-2xl p-6 border transition-all cursor-pointer select-none ${
-            statusFilter === "ativos"
-              ? "border-[#10b981] shadow-[0_0_16px_rgba(16,185,129,0.25)]"
-              : "border-[#3d4f62]/30 hover:border-[#3d4f62]/60 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]"
-          }`}
+          className={`bg-[#0d1f30] rounded-2xl p-6 border transition-all cursor-pointer select-none ${ statusFilter === "ativos" ? "border-[#10b981] " : "border-[#3d4f62]/30 hover:border-[#3d4f62]/60 " }`}
           title="Clique para filtrar apenas convites ativos e válidos"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#10b981] to-[#059669] flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 rounded-xl bg-[#10b981] flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -411,16 +397,12 @@ export function GestaoConvitesCadastro() {
         </div>
 
         <div
-          className={`bg-[#0d1f30] rounded-2xl p-6 border transition-all cursor-pointer select-none ${
-            statusFilter === "inativos"
-              ? "border-[#ef4444] shadow-[0_0_16px_rgba(239,68,68,0.25)]"
-              : "border-[#3d4f62]/30 hover:border-[#3d4f62]/60 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]"
-          }`}
+          className={`bg-[#0d1f30] rounded-2xl p-6 border transition-all cursor-pointer select-none ${ statusFilter === "inativos" ? "border-[#ef4444] " : "border-[#3d4f62]/30 hover:border-[#3d4f62]/60 " }`}
           title="Clique para filtrar apenas convites inativos ou expirados"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ef4444] to-[#dc2626] flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 rounded-xl bg-[#ef4444] flex items-center justify-center">
                 <Ban className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -436,7 +418,7 @@ export function GestaoConvitesCadastro() {
       </div>
 
       {/* Barra de Filtros (Email e Status) */}
-      <div className="bg-[#0d1f30] rounded-2xl p-4 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-[#0d1f30] rounded-2xl p-4 border border-[#3d4f62]/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         {/* Campo de Busca por Email */}
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8b96a5]" />
@@ -445,7 +427,7 @@ export function GestaoConvitesCadastro() {
             placeholder="Filtrar por e-mail do convidado..."
             value={emailFilter}
             onChange={(e) => setEmailFilter(e.target.value)}
-            className="w-full pl-11 pr-10 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] text-sm shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
+            className="w-full pl-11 pr-10 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
           />
           {emailFilter && (
             <button
@@ -468,7 +450,7 @@ export function GestaoConvitesCadastro() {
               onChange={(e) =>
                 handleStatusChange(e.target.value as "ativos" | "inativos" | "todos")
               }
-              className="w-full pl-10 pr-9 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white text-sm shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50 appearance-none transition-colors cursor-pointer"
+              className="w-full pl-10 pr-9 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white text-sm focus:outline-none focus:border-[#ff8c42]/50 appearance-none transition-colors cursor-pointer"
             >
               <option value="ativos" className="bg-[#0d1f30] text-white">
                 Ativos ({paginatedData.totalAtivos})
@@ -563,11 +545,11 @@ export function GestaoConvitesCadastro() {
       {/* Modal / Diálogo para Gerar Novo Convite */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#0d1f30] rounded-2xl w-full max-w-lg border border-[#3d4f62]/40 shadow-[8px_8px_32px_#050c14] overflow-hidden">
+          <div className="bg-[#0d1f30] rounded-2xl w-full max-w-lg border border-[#3d4f62]/40 overflow-hidden">
             {/* Modal Header */}
             <div className="p-6 border-b border-[#3d4f62]/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff8c42] to-[#f94c10] flex items-center justify-center shadow-md">
+                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
                   <MailPlus className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -621,7 +603,7 @@ export function GestaoConvitesCadastro() {
                         setCopiedId("modal");
                         setTimeout(() => setCopiedId(null), 2000);
                       }}
-                      className="px-3 py-1.5 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0"
+                      className="px-3 py-1.5 bg-[#ff8c42] text-white rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0"
                     >
                       {copiedId === "modal" ? (
                         <>
@@ -661,7 +643,7 @@ export function GestaoConvitesCadastro() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="usuario@exemplo.com"
                         disabled={creating}
-                        className="w-full py-2.5 pl-10 pr-4 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                        className="w-full py-2.5 pl-10 pr-4 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                       />
                     </div>
                   </div>
@@ -674,7 +656,7 @@ export function GestaoConvitesCadastro() {
                       value={diasValidade}
                       onChange={(e) => setDiasValidade(Number(e.target.value))}
                       disabled={creating}
-                      className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm cursor-pointer"
                     >
                       <option value={1}>1 dia</option>
                       <option value={3}>3 dias</option>
@@ -696,7 +678,7 @@ export function GestaoConvitesCadastro() {
                     <button
                       type="submit"
                       disabled={creating}
-                      className="px-5 py-2.5 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl font-semibold text-sm shadow-[0_4px_16px_rgba(255,140,66,0.35)] hover:shadow-[0_6px_20px_rgba(255,140,66,0.55)] transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                      className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                     >
                       {creating ? (
                         <>

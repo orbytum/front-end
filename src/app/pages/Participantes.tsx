@@ -91,19 +91,19 @@ export function Participantes() {
             placeholder="Buscar por nome, grupo ou função..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
         {/* Botão Novo Participante */}
-        <button className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium">
+        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
           <Plus className="w-5 h-5" />
           <span>Novo Participante</span>
         </button>
       </div>
 
       {/* Tabela de Participantes */}
-      <div className="bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] overflow-hidden">
+      <div className="bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -120,13 +120,11 @@ export function Participantes() {
               {participantesFiltrados.map((participante, index) => (
                 <tr 
                   key={participante.id}
-                  className={`border-b border-[#3d4f62]/30 hover:bg-[#0a1929]/50 transition-colors ${
-                    index === participantesFiltrados.length - 1 ? 'border-b-0' : ''
-                  }`}
+                  className={`border-b border-[#3d4f62]/30 hover:bg-[#0a1929]/50 transition-colors ${ index === participantesFiltrados.length - 1 ? 'border-b-0' : '' }`}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff8c42] to-[#f94c10] flex items-center justify-center shadow-lg">
+                      <div className="w-10 h-10 rounded-full bg-[#ff8c42] flex items-center justify-center">
                         <span className="text-white text-sm font-semibold">{participante.avatar}</span>
                       </div>
                       <div>
@@ -156,11 +154,7 @@ export function Participantes() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      participante.status === "Ativo" 
-                        ? "bg-[#10b981]/20 text-[#10b981]" 
-                        : "bg-[#ff8c42]/20 text-[#ff8c42]"
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${ participante.status === "Ativo" ? "bg-[#10b981]/20 text-[#10b981]" : "bg-[#ff8c42]/20 text-[#ff8c42]" }`}>
                       {participante.status}
                     </span>
                   </td>

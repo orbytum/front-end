@@ -103,7 +103,7 @@ export function Calendario() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Calendário */}
         <div className="xl:col-span-2">
-          <div className="bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] overflow-hidden">
+          <div className="bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 overflow-hidden">
             {/* Cabeçalho do Calendário */}
             <div className="p-6 border-b border-[#3d4f62]/30 flex items-center justify-between">
               <h2 className="text-white">
@@ -152,13 +152,7 @@ export function Calendario() {
                   return (
                     <div
                       key={dia}
-                      className={`aspect-square p-2 rounded-xl transition-all duration-200 cursor-pointer ${
-                        ehHoje
-                          ? "bg-gradient-to-br from-[#ff8c42] to-[#f94c10] text-white shadow-lg"
-                          : diaTemEvento
-                          ? "bg-[#0a1929] border border-[#ff8c42]/30 text-white hover:border-[#ff8c42]/50"
-                          : "bg-[#0a1929] border border-[#3d4f62]/20 text-[#8b96a5] hover:border-[#3d4f62]/40"
-                      }`}
+                      className={`aspect-square p-2 rounded-xl transition-all duration-200 cursor-pointer ${ ehHoje ? "bg-[#ff8c42] text-white " : diaTemEvento ? "bg-[#0a1929] border border-[#ff8c42]/30 text-white hover:border-[#ff8c42]/50" : "bg-[#0a1929] border border-[#3d4f62]/20 text-[#8b96a5] hover:border-[#3d4f62]/40" }`}
                     >
                       <div className="flex flex-col h-full">
                         <span className={`text-sm font-medium ${ehHoje ? 'text-white' : ''}`}>
@@ -180,10 +174,10 @@ export function Calendario() {
 
         {/* Próximos Eventos */}
         <div className="xl:col-span-1">
-          <div className="bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] overflow-hidden">
+          <div className="bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 overflow-hidden">
             <div className="p-6 border-b border-[#3d4f62]/30 flex items-center justify-between">
               <h2 className="text-white">Próximos Eventos</h2>
-              <button className="p-2 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-lg shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300">
+              <button className="p-2 bg-[#ff8c42] text-white rounded-lg transition-all duration-300">
                 <Plus className="w-4 h-4" />
               </button>
             </div>
@@ -194,7 +188,7 @@ export function Calendario() {
                 .map((evento) => (
                   <div
                     key={evento.id}
-                    className={`p-4 rounded-xl border transition-all duration-200 hover:shadow-md ${obterCorDoTipo(evento.tipo)}`}
+                    className={`p-4 rounded-xl border transition-all duration-200 ${obterCorDoTipo(evento.tipo)}`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-[#0a1929] flex flex-col items-center justify-center flex-shrink-0">

@@ -183,7 +183,7 @@ export function Lembretes() {
           const config = CONFIG_TIPO[tipo];
           const Icone = config.icone;
           return (
-            <div key={tipo} className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+            <div key={tipo} className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[#8b96a5] text-sm">{tipo}s</span>
                 <Icone className={`w-5 h-5 ${config.cor}`} />
@@ -205,11 +205,11 @@ export function Lembretes() {
             placeholder="Buscar lembretes..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
-        <div className="flex items-center gap-2 px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 shadow-[inset_2px_2px_4px_#050c14]">
+        <div className="flex items-center gap-2 px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30">
           <Filter className="w-4 h-4 text-[#8b96a5]" />
           <select
             value={filtroTipo}
@@ -226,7 +226,7 @@ export function Lembretes() {
 
         <button
           onClick={() => setMostrarModal(true)}
-          className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
+          className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
         >
           <Plus className="w-5 h-5" />
           Novo Lembrete
@@ -253,9 +253,7 @@ export function Lembretes() {
                   return (
                     <div
                       key={lembrete.id}
-                      className={`bg-[#0d1f30] rounded-2xl p-6 border shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-all duration-300 ${
-                        chave === "Encerrado" ? "border-[#3d4f62]/20 opacity-70" : "border-[#3d4f62]/30"
-                      }`}
+                      className={`bg-[#0d1f30] rounded-2xl p-6 border transition-all duration-300 ${ chave === "Encerrado" ? "border-[#3d4f62]/20 opacity-70" : "border-[#3d4f62]/30" }`}
                     >
                       <div className="flex items-start gap-4">
                         {/* Ícone do tipo */}
@@ -329,11 +327,7 @@ export function Lembretes() {
                             )}
 
                             {lembrete.tipo === "Reunião" && chave !== "Encerrado" && (
-                              <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                                lembrete.presencaConfirmada
-                                  ? "bg-[#10b981]/10 text-[#10b981]"
-                                  : "bg-[#3d4f62]/20 text-[#8b96a5] hover:bg-[#3d4f62]/30"
-                              }`}>
+                              <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${ lembrete.presencaConfirmada ? "bg-[#10b981]/10 text-[#10b981]" : "bg-[#3d4f62]/20 text-[#8b96a5] hover:bg-[#3d4f62]/30" }`}>
                                 <CheckCircle className="w-3.5 h-3.5" />
                                 {lembrete.presencaConfirmada ? "Presença Confirmada" : "Confirmar Presença"}
                               </button>
@@ -379,7 +373,7 @@ export function Lembretes() {
       {/* Modal */}
       {mostrarModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 shadow-[12px_12px_32px_#050c14] p-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-white font-semibold">Novo Lembrete</h2>
               <button
@@ -398,7 +392,7 @@ export function Lembretes() {
                   value={formulario.titulo}
                   onChange={(e) => setFormulario({ ...formulario, titulo: e.target.value })}
                   placeholder="Título do lembrete"
-                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
 
@@ -409,7 +403,7 @@ export function Lembretes() {
                   onChange={(e) => setFormulario({ ...formulario, descricao: e.target.value })}
                   placeholder="Detalhes do lembrete"
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50 resize-none"
+                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] focus:outline-none focus:border-[#ff8c42]/50 resize-none"
                 />
               </div>
 
@@ -419,7 +413,7 @@ export function Lembretes() {
                   <select
                     value={formulario.tipo}
                     onChange={(e) => setFormulario({ ...formulario, tipo: e.target.value as TipoLembrete })}
-                    className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+                    className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
                   >
                     <option>Edital</option>
                     <option>Reunião</option>
@@ -432,7 +426,7 @@ export function Lembretes() {
                   <select
                     value={formulario.recorrencia}
                     onChange={(e) => setFormulario({ ...formulario, recorrencia: e.target.value as TipoRecorrencia })}
-                    className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+                    className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
                   >
                     <option>Nenhuma</option>
                     <option>Diária</option>
@@ -449,7 +443,7 @@ export function Lembretes() {
                   type="datetime-local"
                   value={formulario.dataHora}
                   onChange={(e) => setFormulario({ ...formulario, dataHora: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
 
@@ -460,7 +454,7 @@ export function Lembretes() {
                   value={formulario.local}
                   onChange={(e) => setFormulario({ ...formulario, local: e.target.value })}
                   placeholder="Sala, auditório ou online"
-                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
 
@@ -471,7 +465,7 @@ export function Lembretes() {
                   value={formulario.link}
                   onChange={(e) => setFormulario({ ...formulario, link: e.target.value })}
                   placeholder="https://meet.google.com/..."
-                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
             </div>
@@ -485,7 +479,7 @@ export function Lembretes() {
               </button>
               <button
                 onClick={adicionarLembrete}
-                className="flex-1 py-2.5 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl font-medium shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all"
+                className="flex-1 py-2.5 bg-[#ff8c42] text-white rounded-xl font-medium transition-all"
               >
                 Criar Lembrete
               </button>

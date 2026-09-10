@@ -72,12 +72,12 @@ export function Grupos() {
             placeholder="Buscar grupos ou supervisores..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
         {/* Botão Novo Grupo */}
-        <button className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium">
+        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
           <Plus className="w-5 h-5" />
           <span>Novo Grupo</span>
         </button>
@@ -88,12 +88,12 @@ export function Grupos() {
         {gruposFiltrados.map((grupo) => (
           <div
             key={grupo.id}
-            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-all duration-300 group"
+            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300 group"
           >
             {/* Cabeçalho */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff8c42] to-[#f94c10] flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 rounded-xl bg-[#ff8c42] flex items-center justify-center">
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
@@ -140,11 +140,7 @@ export function Grupos() {
                   <span>Gerenciar Participantes</span>
                 </button>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                grupo.status === "Ativo"
-                  ? "bg-[#10b981]/20 text-[#10b981]"
-                  : "bg-[#ff8c42]/20 text-[#ff8c42]"
-              }`}>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${ grupo.status === "Ativo" ? "bg-[#10b981]/20 text-[#10b981]" : "bg-[#ff8c42]/20 text-[#ff8c42]" }`}>
                 {grupo.status}
               </span>
             </div>

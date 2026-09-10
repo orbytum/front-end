@@ -142,12 +142,12 @@ export function Publicacoes() {
 
       {/* Estatísticas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="text-[#8b96a5] text-sm mb-1">Total</div>
           <div className="text-white text-2xl font-bold">{publicacoes.length}</div>
         </div>
         {(["Artigo", "Dissertação", "Conferência"] as TipoPublicacao[]).map((tipo) => (
-          <div key={tipo} className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+          <div key={tipo} className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
             <div className="text-[#8b96a5] text-sm mb-1">{tipo}s</div>
             <div className="text-white text-2xl font-bold">
               {publicacoes.filter((p) => p.tipo === tipo).length}
@@ -165,11 +165,11 @@ export function Publicacoes() {
             placeholder="Buscar por título, autor ou conteúdo..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
-        <div className="flex items-center gap-2 px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 shadow-[inset_2px_2px_4px_#050c14]">
+        <div className="flex items-center gap-2 px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30">
           <Filter className="w-4 h-4 text-[#8b96a5]" />
           <select
             value={filtroTipo}
@@ -185,7 +185,7 @@ export function Publicacoes() {
 
         <button
           onClick={() => setMostrarModal(true)}
-          className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
+          className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
         >
           <Plus className="w-5 h-5" />
           Nova Publicação
@@ -197,7 +197,7 @@ export function Publicacoes() {
         {filtradas.map((publicacao) => (
           <div
             key={publicacao.id}
-            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-all duration-300"
+            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
@@ -265,7 +265,7 @@ export function Publicacoes() {
       {/* Modal */}
       {mostrarModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 shadow-[12px_12px_32px_#050c14] p-6">
+          <div className="w-full max-w-lg bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-white font-semibold">Nova Publicação</h2>
               <button
@@ -284,7 +284,7 @@ export function Publicacoes() {
                   value={formulario.titulo}
                   onChange={(e) => setFormulario({ ...formulario, titulo: e.target.value })}
                   placeholder="Título da publicação"
-                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
 
@@ -295,7 +295,7 @@ export function Publicacoes() {
                   onChange={(e) => setFormulario({ ...formulario, descricao: e.target.value })}
                   placeholder="Resumo ou descrição"
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50 resize-none"
+                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] focus:outline-none focus:border-[#ff8c42]/50 resize-none"
                 />
               </div>
 
@@ -305,7 +305,7 @@ export function Publicacoes() {
                   <select
                     value={formulario.tipo}
                     onChange={(e) => setFormulario({ ...formulario, tipo: e.target.value as TipoPublicacao })}
-                    className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+                    className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
                   >
                     {TIPOS.map((t) => (
                       <option key={t} value={t}>{t}</option>
@@ -318,7 +318,7 @@ export function Publicacoes() {
                     type="date"
                     value={formulario.dataPublicacao}
                     onChange={(e) => setFormulario({ ...formulario, dataPublicacao: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+                    className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
                   />
                 </div>
               </div>
@@ -330,7 +330,7 @@ export function Publicacoes() {
                   value={formulario.link}
                   onChange={(e) => setFormulario({ ...formulario, link: e.target.value })}
                   placeholder="https://doi.org/..."
-                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+                  className="w-full px-4 py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
 
@@ -352,7 +352,7 @@ export function Publicacoes() {
               </button>
               <button
                 onClick={adicionarPublicacao}
-                className="flex-1 py-2.5 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl font-medium shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all"
+                className="flex-1 py-2.5 bg-[#ff8c42] text-white rounded-xl font-medium transition-all"
               >
                 Cadastrar
               </button>

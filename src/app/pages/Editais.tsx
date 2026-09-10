@@ -158,7 +158,7 @@ export function Editais() {
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Total</span>
             <Megaphone className="w-5 h-5 text-[#4a9eff]" />
@@ -166,7 +166,7 @@ export function Editais() {
           <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Abertos</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
@@ -174,7 +174,7 @@ export function Editais() {
           <div className="text-white text-2xl font-bold">{estatisticas.abertos}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Em Breve</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
@@ -182,7 +182,7 @@ export function Editais() {
           <div className="text-white text-2xl font-bold">{estatisticas.emBreve}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Encerrados</span>
             <XCircle className="w-5 h-5 text-[#8b96a5]" />
@@ -201,7 +201,7 @@ export function Editais() {
             placeholder="Buscar editais..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -209,7 +209,7 @@ export function Editais() {
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Aberto">Abertos</option>
@@ -218,7 +218,7 @@ export function Editais() {
         </select>
 
         {/* Botão Novo Edital */}
-        <button className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium">
+        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
           <Plus className="w-5 h-5" />
           <span>Novo Edital</span>
         </button>
@@ -232,15 +232,13 @@ export function Editais() {
           return (
             <div
               key={edital.id}
-              className={`bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-all duration-300 ${
-                edital.status === "Encerrado" ? "opacity-70" : ""
-              }`}
+              className={`bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300 ${ edital.status === "Encerrado" ? "opacity-70" : "" }`}
             >
               <div className="flex flex-col lg:flex-row gap-4">
                 {/* Informações do Edital */}
                 <div className="flex-1">
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-[#ff8c42] to-[#f94c10] shadow-lg">
+                    <div className="p-3 rounded-xl bg-[#ff8c42]">
                       <Megaphone className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1">
@@ -287,28 +285,10 @@ export function Editais() {
                   </div>
 
                   {diasRestantes !== null && (
-                    <div className={`px-3 py-2 rounded-lg ${
-                      diasRestantes <= 7
-                        ? "bg-[#ef4444]/20 border border-[#ef4444]/30"
-                        : diasRestantes <= 30
-                        ? "bg-[#ff8c42]/20 border border-[#ff8c42]/30"
-                        : "bg-[#10b981]/20 border border-[#10b981]/30"
-                    }`}>
+                    <div className={`px-3 py-2 rounded-lg ${ diasRestantes <= 7 ? "bg-[#ef4444]/20 border border-[#ef4444]/30" : diasRestantes <= 30 ? "bg-[#ff8c42]/20 border border-[#ff8c42]/30" : "bg-[#10b981]/20 border border-[#10b981]/30" }`}>
                       <div className="flex items-center gap-2">
-                        <Clock className={`w-4 h-4 ${
-                          diasRestantes <= 7
-                            ? "text-[#ef4444]"
-                            : diasRestantes <= 30
-                            ? "text-[#ff8c42]"
-                            : "text-[#10b981]"
-                        }`} />
-                        <span className={`text-sm font-semibold ${
-                          diasRestantes <= 7
-                            ? "text-[#ef4444]"
-                            : diasRestantes <= 30
-                            ? "text-[#ff8c42]"
-                            : "text-[#10b981]"
-                        }`}>
+                        <Clock className={`w-4 h-4 ${ diasRestantes <= 7 ? "text-[#ef4444]" : diasRestantes <= 30 ? "text-[#ff8c42]" : "text-[#10b981]" }`} />
+                        <span className={`text-sm font-semibold ${ diasRestantes <= 7 ? "text-[#ef4444]" : diasRestantes <= 30 ? "text-[#ff8c42]" : "text-[#10b981]" }`}>
                           {diasRestantes > 0
                             ? `${diasRestantes} ${diasRestantes === 1 ? 'dia' : 'dias'}`
                             : 'Último dia'}

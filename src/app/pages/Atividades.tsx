@@ -176,7 +176,7 @@ export function Atividades() {
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Total</span>
             <ListTodo className="w-5 h-5 text-[#4a9eff]" />
@@ -184,7 +184,7 @@ export function Atividades() {
           <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Pendentes</span>
             <Circle className="w-5 h-5 text-[#8b96a5]" />
@@ -192,7 +192,7 @@ export function Atividades() {
           <div className="text-white text-2xl font-bold">{estatisticas.pendentes}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Em Andamento</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
@@ -200,7 +200,7 @@ export function Atividades() {
           <div className="text-white text-2xl font-bold">{estatisticas.emAndamento}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Concluídas</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
@@ -208,7 +208,7 @@ export function Atividades() {
           <div className="text-white text-2xl font-bold">{estatisticas.concluidas}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Atrasadas</span>
             <AlertCircle className="w-5 h-5 text-[#ef4444]" />
@@ -227,7 +227,7 @@ export function Atividades() {
             placeholder="Buscar atividades..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -235,7 +235,7 @@ export function Atividades() {
         <select
           value={filtroProjeto}
           onChange={(e) => setFiltroProjeto(e.target.value)}
-          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Projetos</option>
           {projetos.map(projeto => (
@@ -247,7 +247,7 @@ export function Atividades() {
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Pendente">Pendentes</option>
@@ -257,7 +257,7 @@ export function Atividades() {
         </select>
 
         {/* Botão Nova Atividade */}
-        <button className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium">
+        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
           <Plus className="w-5 h-5" />
           <span>Nova Atividade</span>
         </button>
@@ -268,7 +268,7 @@ export function Atividades() {
         {atividadesFiltradas.map((atividade) => (
           <div
             key={atividade.id}
-            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-all duration-300"
+            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300"
           >
             <div className="flex flex-col lg:flex-row lg:items-start gap-4">
               {/* Informações da Atividade */}
@@ -296,11 +296,7 @@ export function Atividades() {
                   <Calendar className="w-4 h-4 text-[#8b96a5]" />
                   <div className="text-xs">
                     <span className="text-[#8b96a5]">Entrega: </span>
-                    <span className={`font-medium ${
-                      estaAtrasada(atividade.dataEntrega, atividade.status)
-                        ? "text-[#ef4444]"
-                        : "text-white"
-                    }`}>
+                    <span className={`font-medium ${ estaAtrasada(atividade.dataEntrega, atividade.status) ? "text-[#ef4444]" : "text-white" }`}>
                       {new Date(atividade.dataEntrega).toLocaleDateString('pt-BR')}
                     </span>
                   </div>

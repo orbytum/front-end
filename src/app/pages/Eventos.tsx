@@ -179,7 +179,7 @@ export function Eventos() {
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Total</span>
             <CalendarIcon className="w-5 h-5 text-[#4a9eff]" />
@@ -187,7 +187,7 @@ export function Eventos() {
           <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Próximos</span>
             <Clock className="w-5 h-5 text-[#4a9eff]" />
@@ -195,7 +195,7 @@ export function Eventos() {
           <div className="text-white text-2xl font-bold">{estatisticas.proximos}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Em Andamento</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
@@ -203,7 +203,7 @@ export function Eventos() {
           <div className="text-white text-2xl font-bold">{estatisticas.emAndamento}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Encerrados</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
@@ -222,7 +222,7 @@ export function Eventos() {
             placeholder="Buscar eventos..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -230,7 +230,7 @@ export function Eventos() {
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Próximo">Próximos</option>
@@ -239,7 +239,7 @@ export function Eventos() {
         </select>
 
         {/* Botão Novo Evento */}
-        <button className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium">
+        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
           <Plus className="w-5 h-5" />
           <span>Novo Evento</span>
         </button>
@@ -253,15 +253,13 @@ export function Eventos() {
           return (
             <div
               key={evento.id}
-              className={`bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-all duration-300 ${
-                evento.status === "Encerrado" ? "opacity-70" : ""
-              }`}
+              className={`bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300 ${ evento.status === "Encerrado" ? "opacity-70" : "" }`}
             >
               <div className="flex flex-col lg:flex-row gap-4">
                 {/* Informações do Evento */}
                 <div className="flex-1">
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-[#ff8c42] to-[#f94c10] shadow-lg flex-shrink-0">
+                    <div className="p-3 rounded-xl bg-[#ff8c42] flex-shrink-0">
                       <CalendarIcon className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1">
@@ -330,28 +328,10 @@ export function Eventos() {
                   </div>
 
                   {diasAte !== null && diasAte >= 0 && (
-                    <div className={`px-3 py-2 rounded-lg ${
-                      diasAte === 0
-                        ? "bg-[#ff8c42]/20 border border-[#ff8c42]/30"
-                        : diasAte <= 7
-                        ? "bg-[#4a9eff]/20 border border-[#4a9eff]/30"
-                        : "bg-[#10b981]/20 border border-[#10b981]/30"
-                    }`}>
+                    <div className={`px-3 py-2 rounded-lg ${ diasAte === 0 ? "bg-[#ff8c42]/20 border border-[#ff8c42]/30" : diasAte <= 7 ? "bg-[#4a9eff]/20 border border-[#4a9eff]/30" : "bg-[#10b981]/20 border border-[#10b981]/30" }`}>
                       <div className="flex items-center gap-2">
-                        <Clock className={`w-4 h-4 ${
-                          diasAte === 0
-                            ? "text-[#ff8c42]"
-                            : diasAte <= 7
-                            ? "text-[#4a9eff]"
-                            : "text-[#10b981]"
-                        }`} />
-                        <span className={`text-sm font-semibold ${
-                          diasAte === 0
-                            ? "text-[#ff8c42]"
-                            : diasAte <= 7
-                            ? "text-[#4a9eff]"
-                            : "text-[#10b981]"
-                        }`}>
+                        <Clock className={`w-4 h-4 ${ diasAte === 0 ? "text-[#ff8c42]" : diasAte <= 7 ? "text-[#4a9eff]" : "text-[#10b981]" }`} />
+                        <span className={`text-sm font-semibold ${ diasAte === 0 ? "text-[#ff8c42]" : diasAte <= 7 ? "text-[#4a9eff]" : "text-[#10b981]" }`}>
                           {diasAte === 0
                             ? 'Hoje!'
                             : `em ${diasAte} ${diasAte === 1 ? 'dia' : 'dias'}`}

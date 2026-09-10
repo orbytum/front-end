@@ -56,7 +56,7 @@ export function Login() {
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="relative">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#ff8c42] to-[#f94c10] shadow-[0_0_32px_rgba(255,140,66,0.5)] flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-[#ff8c42] flex items-center justify-center">
                 <Orbit className="w-7 h-7 text-white" />
               </div>
             </div>
@@ -66,7 +66,7 @@ export function Login() {
         </div>
 
         {/* Card */}
-        <div className="bg-[#0d1f30] rounded-2xl p-8 shadow-[8px_8px_24px_#050c14,-8px_-8px_24px_#0f2638] border border-[#3d4f62]/30">
+        <div className="bg-[#0d1f30] rounded-2xl p-8 border border-[#3d4f62]/30">
           <h2 className="text-white text-xl font-semibold mb-2">Entrar no sistema</h2>
           <p className="text-[#8b96a5] text-sm mb-6">Use suas credenciais institucionais</p>
 
@@ -79,7 +79,7 @@ export function Login() {
                 value={formulario.usuario}
                 onChange={(e) => setFormulario({ ...formulario, usuario: e.target.value })}
                 placeholder="email@example.com"
-                className="w-full px-4 py-3 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_6px_#050c14] focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                className="w-full px-4 py-3 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
             </div>
 
@@ -92,7 +92,7 @@ export function Login() {
                   value={formulario.senha}
                   onChange={(e) => setFormulario({ ...formulario, senha: e.target.value })}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 pr-12 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_6px_#050c14] focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                  className="w-full px-4 py-3 pr-12 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#3d4f62] focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
                 />
                 <button
                   type="button"
@@ -111,7 +111,7 @@ export function Login() {
             {/* Enviar */}
             <button
               type="submit"
-              className="w-full py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl font-semibold shadow-[0_4px_16px_rgba(255,140,66,0.35)] hover:shadow-[0_6px_20px_rgba(255,140,66,0.55)] transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#ff8c42] text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"
             >
               <LogIn className="w-5 h-5" />
               Entrar

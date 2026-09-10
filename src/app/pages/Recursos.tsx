@@ -89,7 +89,7 @@ export function Recursos() {
       align: "left",
       render: (recurso) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff8c42] to-[#f94c10] flex items-center justify-center shadow-lg shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center shrink-0">
             <Hexagon className="w-5 h-5 text-white" />
           </div>
           <span className="text-white font-medium">{recurso.grupo}</span>
@@ -148,13 +148,9 @@ export function Recursos() {
 
         return (
           <div className="flex flex-col items-center gap-2">
-            <div className="w-full max-w-[120px] h-2 bg-[#0a1929] rounded-full overflow-hidden shadow-[inset_2px_2px_4px_#050c14]">
+            <div className="w-full max-w-[120px] h-2 bg-[#0a1929] rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-300 ${
-                  percentualUtilizacao > 80
-                    ? "bg-gradient-to-r from-[#ff8c42] to-[#f94c10]"
-                    : "bg-gradient-to-r from-[#10b981] to-[#059669]"
-                }`}
+                className={`h-full rounded-full transition-all duration-300 ${ percentualUtilizacao > 80 ? "bg-[#ff8c42]" : "bg-[#10b981]" }`}
                 style={{ width: `${Math.min(percentualUtilizacao, 100)}%` }}
               />
             </div>
@@ -177,9 +173,9 @@ export function Recursos() {
 
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4a9eff] to-[#2e7dd4] flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-[#4a9eff] flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -194,9 +190,9 @@ export function Recursos() {
           </div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff8c42] to-[#f94c10] flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-[#ff8c42] flex items-center justify-center">
               <TrendingDown className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -216,9 +212,9 @@ export function Recursos() {
           </div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#10b981] to-[#059669] flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-[#10b981] flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -245,7 +241,7 @@ export function Recursos() {
         actions={
           <button
             type="button"
-            className="px-4 py-2 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-lg shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 text-sm font-medium cursor-pointer"
+            className="px-4 py-2 bg-[#ff8c42] text-white rounded-lg transition-all duration-300 flex items-center gap-2 text-sm font-medium cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Nova Alocação</span>

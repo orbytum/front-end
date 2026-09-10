@@ -126,7 +126,7 @@ export function DataTable<T>({
 
   return (
     <div
-      className={`bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] overflow-hidden ${className}`}
+      className={`bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 overflow-hidden ${className}`}
     >
       {/* Table Header / Action Bar */}
       {(title || actions) && (
@@ -150,9 +150,7 @@ export function DataTable<T>({
                 return (
                   <th
                     key={col.key}
-                    className={`px-6 py-4 text-sm font-medium text-[#8b96a5] ${
-                      thAlignClassMap[align]
-                    } ${col.headerClassName || ""}`}
+                    className={`px-6 py-4 text-sm font-medium text-[#8b96a5] ${ thAlignClassMap[align] } ${col.headerClassName || ""}`}
                   >
                     {col.header}
                   </th>
@@ -182,9 +180,7 @@ export function DataTable<T>({
                   <tr
                     key={key}
                     onClick={() => onRowClick?.(item)}
-                    className={`border-b border-[#3d4f62]/30 hover:bg-[#0a1929]/50 transition-colors ${
-                      isLastRow ? "border-b-0" : ""
-                    } ${onRowClick ? "cursor-pointer" : ""}`}
+                    className={`border-b border-[#3d4f62]/30 hover:bg-[#0a1929]/50 transition-colors ${ isLastRow ? "border-b-0" : "" } ${onRowClick ? "cursor-pointer" : ""}`}
                   >
                     {columns.map((col) => {
                       const align = col.align || "left";
@@ -195,9 +191,7 @@ export function DataTable<T>({
                       return (
                         <td
                           key={col.key}
-                          className={`px-6 py-4 ${tdAlignClassMap[align]} ${
-                            col.className || ""
-                          }`}
+                          className={`px-6 py-4 ${tdAlignClassMap[align]} ${ col.className || "" }`}
                         >
                           {content}
                         </td>
@@ -274,11 +268,7 @@ export function DataTable<T>({
                       key={p}
                       type="button"
                       onClick={() => handlePageChange(p as number)}
-                      className={`min-w-[30px] h-7 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                        safePage === p
-                          ? "bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white shadow-[0_2px_8px_rgba(255,140,66,0.35)]"
-                          : "border border-[#3d4f62]/30 text-[#8b96a5] hover:text-white hover:bg-[#3d4f62]/20"
-                      }`}
+                      className={`min-w-[30px] h-7 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${ safePage === p ? "bg-[#ff8c42] text-white" : "border border-[#3d4f62]/30 text-[#8b96a5] hover:text-white hover:bg-[#3d4f62]/20" }`}
                     >
                       {p}
                     </button>

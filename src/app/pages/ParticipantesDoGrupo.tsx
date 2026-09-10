@@ -115,7 +115,7 @@ export function ParticipantesDoGrupo() {
 
   const obterCorFuncao = (funcao: string) => {
     switch (funcao) {
-      case "Supervisor": return "bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white";
+      case "Supervisor": return "bg-[#ff8c42] text-white";
       case "Coordenador": return "bg-[#7c3aed]/20 text-[#7c3aed]";
       case "Pesquisador": return "bg-[#4a9eff]/20 text-[#4a9eff]";
       case "Colaborador": return "bg-[#10b981]/20 text-[#10b981]";
@@ -135,7 +135,7 @@ export function ParticipantesDoGrupo() {
           <span>Voltar para Grupos</span>
         </button>
         <div className="flex items-center gap-4 mb-2">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff8c42] to-[#f94c10] flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 rounded-xl bg-[#ff8c42] flex items-center justify-center">
             <Users className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -147,7 +147,7 @@ export function ParticipantesDoGrupo() {
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Total Ativos</span>
             <Users className="w-5 h-5 text-[#4a9eff]" />
@@ -155,7 +155,7 @@ export function ParticipantesDoGrupo() {
           <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Supervisor</span>
             <Crown className="w-5 h-5 text-[#ff8c42]" />
@@ -163,7 +163,7 @@ export function ParticipantesDoGrupo() {
           <div className="text-white text-2xl font-bold">{estatisticas.supervisores}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Coordenadores</span>
             <Shield className="w-5 h-5 text-[#7c3aed]" />
@@ -171,7 +171,7 @@ export function ParticipantesDoGrupo() {
           <div className="text-white text-2xl font-bold">{estatisticas.coordenadores}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Pesquisadores</span>
             <UserCheck className="w-5 h-5 text-[#4a9eff]" />
@@ -190,7 +190,7 @@ export function ParticipantesDoGrupo() {
             placeholder="Buscar participantes..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -198,7 +198,7 @@ export function ParticipantesDoGrupo() {
         <select
           value={filtroFuncao}
           onChange={(e) => setFiltroFuncao(e.target.value)}
-          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todas as Funções</option>
           <option value="Supervisor">Supervisor</option>
@@ -209,7 +209,7 @@ export function ParticipantesDoGrupo() {
         </select>
 
         {/* Botão Adicionar Participante */}
-        <button className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium">
+        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
           <Plus className="w-5 h-5" />
           <span>Adicionar Participante</span>
         </button>
@@ -220,16 +220,14 @@ export function ParticipantesDoGrupo() {
         {participantesFiltrados.map((participante) => (
           <div
             key={participante.id}
-            className={`bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-all duration-300 ${
-              participante.status === "Inativo" ? "opacity-60" : ""
-            }`}
+            className={`bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300 ${ participante.status === "Inativo" ? "opacity-60" : "" }`}
           >
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               {/* Informações do Participante */}
               <div className="flex-1">
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
-                  <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${obterCorFuncao(participante.funcao)} flex items-center justify-center font-bold text-lg shadow-lg`}>
+                  <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${obterCorFuncao(participante.funcao)} flex items-center justify-center font-bold text-lg`}>
                     {participante.funcao === "Supervisor" ? (
                       obterIconeFuncao(participante.funcao)
                     ) : (
@@ -298,7 +296,7 @@ export function ParticipantesDoGrupo() {
       )}
 
       {/* Legenda de Funções */}
-      <div className="mt-8 bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638]">
+      <div className="mt-8 bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30">
         <h3 className="text-white mb-4">Funções e Permissões</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>

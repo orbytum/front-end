@@ -186,7 +186,7 @@ export function AceitarConviteCadastro() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#ff8c42] to-[#f94c10] shadow-[0_0_28px_rgba(255,140,66,0.45)] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-[#ff8c42] flex items-center justify-center">
               <Orbit className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -196,7 +196,7 @@ export function AceitarConviteCadastro() {
 
         {/* ── INVALID TOKEN ── */}
         {step === "invalid" && (
-          <div className="bg-[#0d1f30] rounded-2xl p-8 shadow-[8px_8px_24px_#050c14,-8px_-8px_24px_#0f2638] border border-[#ef4444]/20 text-center">
+          <div className="bg-[#0d1f30] rounded-2xl p-8 border border-[#ef4444]/20 text-center">
             <div className="w-16 h-16 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-8 h-8 text-[#ef4444]" />
             </div>
@@ -207,7 +207,7 @@ export function AceitarConviteCadastro() {
             <button
               type="button"
               onClick={() => navigate("/login")}
-              className="w-full py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-[#8b96a5] hover:text-white transition-colors text-sm shadow-[inset_2px_2px_4px_#050c14]"
+              className="w-full py-2.5 bg-[#0a1929] rounded-xl border border-[#3d4f62]/30 text-[#8b96a5] hover:text-white transition-colors text-sm"
             >
               Ir para o login
             </button>
@@ -216,7 +216,7 @@ export function AceitarConviteCadastro() {
 
         {/* ── SUCCESS ── */}
         {step === "success" && (
-          <div className="bg-[#0d1f30] rounded-2xl p-8 shadow-[8px_8px_24px_#050c14,-8px_-8px_24px_#0f2638] border border-[#10b981]/20 text-center">
+          <div className="bg-[#0d1f30] rounded-2xl p-8 border border-[#10b981]/20 text-center">
             <div className="w-16 h-16 rounded-full bg-[#10b981]/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8 text-[#10b981]" />
             </div>
@@ -227,7 +227,7 @@ export function AceitarConviteCadastro() {
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="w-full py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl font-semibold shadow-[0_4px_16px_rgba(255,140,66,0.35)] hover:shadow-[0_6px_20px_rgba(255,140,66,0.55)] transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#ff8c42] text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
             >
               <span>Acessar o sistema</span>
               <ArrowRight className="w-4 h-4" />
@@ -237,11 +237,11 @@ export function AceitarConviteCadastro() {
 
         {/* ── FORM ── */}
         {step === "form" && (
-          <div className="bg-[#0d1f30] rounded-2xl shadow-[8px_8px_24px_#050c14,-8px_-8px_24px_#0f2638] border border-[#3d4f62]/30 overflow-hidden">
+          <div className="bg-[#0d1f30] rounded-2xl border border-[#3d4f62]/30 overflow-hidden">
             {/* Header */}
             <div className="px-6 pt-6 pb-4 border-b border-[#3d4f62]/20">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff8c42] to-[#f94c10] flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(255,140,66,0.3)]">
+                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center shrink-0">
                   <UserPlus className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -369,7 +369,7 @@ export function AceitarConviteCadastro() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 mt-2 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl font-semibold shadow-[0_4px_16px_rgba(255,140,66,0.35)] hover:shadow-[0_6px_20px_rgba(255,140,66,0.55)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full py-3 mt-2 bg-[#ff8c42] text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? (
                   <>
@@ -431,7 +431,7 @@ function Field({
 }
 
 function inputCls(hasError: boolean) {
-  return `w-full py-2.5 bg-[#0a1929] rounded-xl border text-white placeholder-[#3d4f62] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none transition-colors ${
+  return `w-full py-2.5 bg-[#0a1929] rounded-xl border text-white placeholder-[#3d4f62] focus:outline-none transition-colors ${
     hasError
       ? "border-[#ef4444]/50 focus:border-[#ef4444]/80"
       : "border-[#3d4f62]/30 focus:border-[#ff8c42]/50"
@@ -439,7 +439,7 @@ function inputCls(hasError: boolean) {
 }
 
 function selectCls(hasError: boolean) {
-  return `w-full pl-10 pr-9 py-2.5 bg-[#0a1929] rounded-xl border text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none appearance-none transition-colors ${
+  return `w-full pl-10 pr-9 py-2.5 bg-[#0a1929] rounded-xl border text-white focus:outline-none appearance-none transition-colors ${
     hasError
       ? "border-[#ef4444]/50 focus:border-[#ef4444]/80"
       : "border-[#3d4f62]/30 focus:border-[#ff8c42]/50"
@@ -469,9 +469,7 @@ function PasswordStrength({ password }: { password: string }) {
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className={`flex-1 h-1 rounded-full transition-all ${
-              i < score ? colors[score] : "bg-[#3d4f62]/40"
-            }`}
+            className={`flex-1 h-1 rounded-full transition-all ${ i < score ? colors[score] : "bg-[#3d4f62]/40" }`}
           />
         ))}
       </div>

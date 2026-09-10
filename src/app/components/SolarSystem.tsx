@@ -17,7 +17,7 @@ export function SolarSystem() {
             whileHover={{ scale: 1.2 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-12 h-12 bg-[#0a1929] rounded-lg shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638] flex items-center justify-center group hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-shadow duration-300">
+            <div className="w-12 h-12 bg-[#0a1929] rounded-lg flex items-center justify-center group transition-duration-300">
               <Hexagon className="w-6 h-6 text-[#ff8c42]" />
             </div>
             <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#8b96a5] whitespace-nowrap">Recursos</span>
@@ -29,7 +29,7 @@ export function SolarSystem() {
             whileHover={{ scale: 1.2 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-12 h-12 bg-[#0a1929] rounded-lg shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638] flex items-center justify-center group hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-shadow duration-300">
+            <div className="w-12 h-12 bg-[#0a1929] rounded-lg flex items-center justify-center group transition-duration-300">
               <Box className="w-6 h-6 text-[#ff8c42]" />
             </div>
             <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#8b96a5] whitespace-nowrap">Materiais</span>
@@ -41,7 +41,7 @@ export function SolarSystem() {
             whileHover={{ scale: 1.2 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-12 h-12 bg-[#0a1929] rounded-lg shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638] flex items-center justify-center group hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-shadow duration-300">
+            <div className="w-12 h-12 bg-[#0a1929] rounded-lg flex items-center justify-center group transition-duration-300">
               <FolderKanban className="w-6 h-6 text-[#ff8c42]" />
             </div>
             <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#8b96a5] whitespace-nowrap">Projetos</span>
@@ -53,7 +53,7 @@ export function SolarSystem() {
             whileHover={{ scale: 1.2 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-12 h-12 bg-[#0a1929] rounded-lg shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638] flex items-center justify-center group hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-shadow duration-300">
+            <div className="w-12 h-12 bg-[#0a1929] rounded-lg flex items-center justify-center group transition-duration-300">
               <Calendar className="w-6 h-6 text-[#ff8c42]" />
             </div>
             <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-[#8b96a5] whitespace-nowrap">Calendário</span>
@@ -87,7 +87,7 @@ export function SolarSystem() {
             return (
               <motion.div
                 key={i}
-                className="absolute w-3 h-3 bg-[#ff8c42] rounded-full shadow-[0_0_12px_rgba(255,140,66,0.5)]"
+                className="absolute w-3 h-3 bg-[#ff8c42] rounded-full"
                 style={{
                   left: '50%',
                   top: '50%',
@@ -122,7 +122,7 @@ export function SolarSystem() {
             whileHover={{ scale: 1.15 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-16 h-16 bg-[#0a1929] rounded-2xl shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] flex items-center justify-center hover:shadow-[inset_3px_3px_8px_#050c14,inset_-3px_-3px_8px_#0f2638] transition-shadow duration-300">
+            <div className="w-16 h-16 bg-[#0a1929] rounded-2xl flex items-center justify-center transition-duration-300">
               <Shield className="w-8 h-8 text-[#ff8c42] fill-[#ff8c42]/20" />
             </div>
             <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-sm text-[#8b96a5] whitespace-nowrap font-medium">Supervisor</span>
@@ -137,19 +137,8 @@ export function SolarSystem() {
           transition={{ type: "spring", stiffness: 200, damping: 15 }}
         >
           <motion.div
-            className="w-32 h-32 rounded-full bg-gradient-to-br from-[#ff8c42] via-[#ff6b35] to-[#f94c10] shadow-[0_0_60px_rgba(255,140,66,0.4)] flex items-center justify-center relative"
-            animate={{
-              boxShadow: [
-                "0 0 60px rgba(255,140,66,0.4)",
-                "0 0 80px rgba(255,140,66,0.6)",
-                "0 0 60px rgba(255,140,66,0.4)"
-              ]
-            }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="w-32 h-32 rounded-full bg-[#ff8c42] flex items-center justify-center relative"
           >
-            {/* Inner glow */}
-            <div className="absolute inset-2 rounded-full bg-gradient-to-br from-[#ffb366] to-transparent opacity-50" />
-            
             <div className="relative text-center z-10">
               <div className="text-white font-bold">GRUPO</div>
               <div className="text-white/90 text-sm">Pesquisa</div>
@@ -182,7 +171,7 @@ export function SolarSystem() {
       </div>
       
       {/* Legenda informativa */}
-      <div className="absolute bottom-8 left-8 bg-[#0a1929]/80 backdrop-blur-sm p-6 rounded-2xl shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] border border-[#3d4f62]/30">
+      <div className="absolute bottom-8 left-8 bg-[#0a1929]/80 backdrop-blur-sm p-6 rounded-2xl border border-[#3d4f62]/30">
         <h3 className="text-[#ff8c42] mb-4">Sistema Solar Acadêmico</h3>
         <div className="space-y-2 text-sm text-[#8b96a5]">
           <div className="flex items-center gap-2">
@@ -214,14 +203,6 @@ export function SolarSystem() {
         >
           Sistema de Gestão Acadêmica
         </motion.h1>
-        <motion.p 
-          className="text-[#8b96a5]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.3 }}
-        >
-          Organização orbital de pesquisa
-        </motion.p>
       </div>
     </div>
   );

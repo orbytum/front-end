@@ -125,7 +125,7 @@ export function Projetos() {
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Total</span>
             <FolderKanban className="w-5 h-5 text-[#4a9eff]" />
@@ -133,7 +133,7 @@ export function Projetos() {
           <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Em Andamento</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
@@ -141,7 +141,7 @@ export function Projetos() {
           <div className="text-white text-2xl font-bold">{estatisticas.emAndamento}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Concluídas</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
@@ -149,7 +149,7 @@ export function Projetos() {
           <div className="text-white text-2xl font-bold">{estatisticas.concluidos}</div>
         </div>
 
-        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30 shadow-[4px_4px_12px_#050c14,-4px_-4px_12px_#0f2638]">
+        <div className="bg-[#0d1f30] rounded-xl p-4 border border-[#3d4f62]/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8b96a5] text-sm">Atrasadas</span>
             <AlertCircle className="w-5 h-5 text-[#ef4444]" />
@@ -168,7 +168,7 @@ export function Projetos() {
             placeholder="Buscar projetos..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white placeholder-[#8b96a5] focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -176,7 +176,7 @@ export function Projetos() {
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white shadow-[inset_2px_2px_4px_#050c14] focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-[#0d1f30] rounded-xl border border-[#3d4f62]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Em Andamento">Em Andamento</option>
@@ -186,7 +186,7 @@ export function Projetos() {
         </select>
 
         {/* Botão Novo Projeto */}
-        <button className="px-6 py-3 bg-gradient-to-r from-[#ff8c42] to-[#f94c10] text-white rounded-xl shadow-[0_4px_12px_rgba(255,140,66,0.3)] hover:shadow-[0_6px_16px_rgba(255,140,66,0.5)] transition-all duration-300 flex items-center gap-2 font-medium">
+        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
           <Plus className="w-5 h-5" />
           <span>Novo Projeto</span>
         </button>
@@ -197,7 +197,7 @@ export function Projetos() {
         {projetosFiltrados.map((projeto) => (
           <div
             key={projeto.id}
-            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 shadow-[6px_6px_16px_#050c14,-6px_-6px_16px_#0f2638] hover:shadow-[inset_2px_2px_6px_#050c14,inset_-2px_-2px_6px_#0f2638] transition-all duration-300"
+            className="bg-[#0d1f30] rounded-2xl p-6 border border-[#3d4f62]/30 transition-all duration-300"
           >
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               {/* Informações do Projeto */}
@@ -220,9 +220,9 @@ export function Projetos() {
                     <span className="text-xs text-[#8b96a5]">Progresso</span>
                     <span className="text-xs text-[#ff8c42] font-semibold">{projeto.progresso}%</span>
                   </div>
-                  <div className="w-full h-2 bg-[#0a1929] rounded-full overflow-hidden shadow-[inset_2px_2px_4px_#050c14]">
+                  <div className="w-full h-2 bg-[#0a1929] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#ff8c42] to-[#f94c10] rounded-full transition-all duration-300"
+                      className="h-full bg-[#ff8c42] rounded-full transition-all duration-300"
                       style={{ width: `${projeto.progresso}%` }}
                     />
                   </div>

@@ -178,4 +178,10 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+
+  *, ::before, ::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
 }
+
