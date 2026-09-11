@@ -1,33 +1,18 @@
 import { AccessLevelType } from "../../models/dto/auth/AccessLevel";
 
 export class AuthService {
-    /**
-     * Remove tokens e encerra a sessão
-     */
+
     logout(): void {
         localStorage.removeItem("token");
         localStorage.removeItem("token_tipo");
     }
 
-    /**
-     * Retorna o token atual armazenado
-     */
     getToken(): string | null {
         return localStorage.getItem("token");
     }
 
-    /**
-     * Verifica se o usuário está autenticado
-     */
-    isAuthenticated(): boolean {
-        return !!localStorage.getItem("token");
-    }
-
-    /**
-     * Extrai o accessLevel do payload do token JWT
-     */
-    getUserAccessLevel(): AccessLevelType {
-        const token = localStorage.getItem("token");
+    getTokenPayload(): any {
+        const token = this.getToken();
         if (!token) return null;
         try {
             const parts = token.split(".");
@@ -39,22 +24,53 @@ export class AuthService {
                     .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
                     .join("")
             );
-            const payload = JSON.parse(jsonPayload);
-            const level = payload.accessLevel;
-            if (typeof level === "string") {
-                return level.toLowerCase() as AccessLevelType;
-            }
-            return null;
+            return JSON.parse(jsonPayload);
         } catch {
             return null;
         }
     }
 
-    /**
-     * Verifica se o usuário logado possui perfil de administrador inicial ou administrador
-     */
-    isAdminOrInitialAdmin(): boolean {
+    isTokenValid(): boolean {
+        const payload = this.getTokenPayload();
+        if (!payload) {
+            return false;
+        }
+
+        if (payload.exp && typeof payload.exp === "number") {
+            const nowInSeconds = Math.floor(Date.now() / 1000);
+            if (nowInSeconds >= payload.exp) {
+                this.logout();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    isAuthenticated(): boolean {
+        return this.isTokenValid();
+    }
+
+    getUserAccessLevel(): AccessLevelType {
+        const payload = this.getTokenPayload();
+        if (!payload) return null;
+        const level = payload.accessLevel;
+        if (typeof level === "string") {
+            return level.toLowerCase() as AccessLevelType;
+        }
+        return null;
+    }
+
+    isAdmin(): boolean {
         const level = this.getUserAccessLevel();
-        return level === "admin" || level === "initial_admin";
+        return level === "admin";
+    }
+
+    isInitialAdmin(): boolean {
+        const level = this.getUserAccessLevel();
+        return level === "initial_admin";
+    }
+
+    isAdminOrInitialAdmin(): boolean {
+        return this.isAdmin();
     }
 }

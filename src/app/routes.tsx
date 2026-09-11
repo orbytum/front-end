@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { RouterRef } from "./utils/RouterRef";
 import { Layout } from "./components/Layout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Dashboard } from "./pages/Dashboard";
 import { Grupos } from "./pages/Grupos";
 import { ParticipantesDoGrupo } from "./pages/ParticipantesDoGrupo";
@@ -38,7 +39,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/",
-    Component: Layout,
+    element: (
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, Component: Dashboard },
       { path: "grupos", Component: Grupos },

@@ -15,6 +15,7 @@ import {
   Search,
   User,
   Shield,
+  TriangleAlert,
   Clock,
   UserCheck,
 } from "lucide-react";
@@ -177,7 +178,7 @@ export function Grupos() {
           </div>
           <h2 className="text-white text-xl font-bold mb-2">Acesso Restrito</h2>
           <p className="text-[#9e9e9e] text-sm mb-6">
-            A gestão de grupos de pesquisa é restrita a <strong>Administradores</strong> e <strong>Administradores Iniciais</strong> da plataforma.
+            A gestão de grupos de pesquisa é restrita exclusivamente a <strong>Administradores</strong> da plataforma.
           </p>
           <button
             onClick={() => navigate("/login")}
@@ -215,9 +216,6 @@ export function Grupos() {
       align: "left",
       render: (g) => (
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#2e2e2e]/20 flex items-center justify-center text-[#4a9eff] shrink-0">
-            <Shield className="w-4 h-4" />
-          </div>
           <div>
             {g.nomeLider ? (
               <>
@@ -616,7 +614,7 @@ export function Grupos() {
 
                   <div className="p-3 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-xs text-[#9e9e9e] space-y-1">
                     <p className="text-white font-medium flex items-center gap-1.5">
-                      <Shield className="w-3.5 h-3.5 text-[#ff8c42]" />
+                      <TriangleAlert className="w-3.5 h-3.5 text-[#ff8c42]" />
                       Convite com perfil de Líder
                     </p>
                     <p>
