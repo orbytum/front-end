@@ -24,6 +24,14 @@ export class HttpRequest {
     }
 
     private async executar<T>(url: string, init: RequestInit): Promise<T> {
+        const token = localStorage.getItem("token");
+        const tokenTipo = localStorage.getItem("token_tipo") || "Bearer";
+        const headers = new Headers(init.headers as HeadersInit || {});
+        if (token && !headers.has("Authorization")) {
+            headers.set("Authorization", `${tokenTipo} ${token}`);
+        }
+        init.headers = headers;
+
         const response = await fetch(url, init);
         return this.validarResposta<T>(response);
     }
