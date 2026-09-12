@@ -28,6 +28,7 @@ export function Layout() {
   }
 
   const isAdmin = authService.isAdmin();
+  const isAdmin = authService.isAdminOrInitialAdmin();
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },

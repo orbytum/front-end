@@ -193,6 +193,7 @@ export function AceitarConviteCadastro() {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-white tracking-wider">ORBYTUM</h1>
+          <p className="text-[#9e9e9e] text-xs mt-1">Gestão acadêmica orbital</p>
         </div>
 
         {/* ── INVALID TOKEN ── */}
