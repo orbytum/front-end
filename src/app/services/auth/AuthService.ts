@@ -39,12 +39,7 @@ export class AuthService {
                     .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
                     .join("")
             );
-            const payload = JSON.parse(jsonPayload);
-            const level = payload.accessLevel;
-            if (typeof level === "string") {
-                return level.toLowerCase() as AccessLevelType;
-            }
-            return null;
+            return JSON.parse(jsonPayload);
         } catch {
             return null;
         }

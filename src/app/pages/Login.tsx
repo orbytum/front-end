@@ -62,13 +62,12 @@ export function Login() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-white tracking-wider">ORBYTUM</h1>
-          <p className="text-[#9e9e9e] mt-2 text-sm">Gestão acadêmica orbital</p>
         </div>
 
         {/* Card */}
         <div className="bg-[#1e1e1e] rounded-2xl p-8 border border-[#2e2e2e]/30">
-          <h2 className="text-white text-xl font-semibold mb-2">Entrar no sistema</h2>
-          <p className="text-[#9e9e9e] text-sm mb-6">Use suas credenciais institucionais</p>
+          <h2 className="text-white text-xl font-semibold mb-2">Login</h2>
+          <p className="text-[#9e9e9e] text-sm mb-6">Informe seu email e senha</p>
 
           <form onSubmit={enviarFormulario} className="space-y-5">
             {/* Usuário */}

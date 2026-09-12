@@ -199,7 +199,7 @@ export function GestaoConvitesCadastro() {
           </div>
           <h2 className="text-white text-xl font-bold mb-2">Acesso Restrito</h2>
           <p className="text-[#9e9e9e] text-sm mb-6">
-            Esta página é restrita exclusivamente a <strong>Administradores</strong> e <strong>Administradores Iniciais</strong> da plataforma.
+            Esta página é restrita exclusivamente a <strong>Administradores</strong> da plataforma.
           </p>
           <button
             onClick={() => navigate("/login")}

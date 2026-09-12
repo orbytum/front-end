@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from "react-router";
+import { Outlet, NavLink, Navigate } from "react-router";
 import {
   LayoutDashboard,
   Users,
@@ -21,6 +21,13 @@ import { AuthService } from "../services/auth/AuthService";
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const authService = new AuthService();
+
+  if (!authService.isTokenValid()) {
+    authService.logout();
+    return <Navigate to="/login" replace />;
+  }
+
+  const isAdmin = authService.isAdmin();
   const isAdmin = authService.isAdminOrInitialAdmin();
 
   const navItems = [
