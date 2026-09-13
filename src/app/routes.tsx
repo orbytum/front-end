@@ -1,11 +1,10 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import { RouterRef } from "./utils/RouterRef";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Dashboard } from "./pages/Dashboard";
 import { Grupos } from "./pages/Grupos";
 import { ParticipantesDoGrupo } from "./pages/ParticipantesDoGrupo";
-import { Participantes } from "./pages/Participantes";
 import { Recursos } from "./pages/Recursos";
 import { Solicitacoes } from "./pages/Solicitacoes";
 import { Materiais } from "./pages/Materiais";
@@ -48,7 +47,7 @@ export const router = createBrowserRouter([
       { index: true, Component: Dashboard },
       { path: "grupos", Component: Grupos },
       { path: "grupos/:groupId/participantes", Component: ParticipantesDoGrupo },
-      { path: "participantes", Component: Participantes },
+      { path: "participantes", element: <Navigate to="/grupos" replace /> },
       { path: "recursos", Component: Recursos },
       { path: "solicitacoes", Component: Solicitacoes },
       { path: "materiais", Component: Materiais },

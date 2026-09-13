@@ -1,334 +1,518 @@
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
-import { ArrowLeft, Plus, Search, UserCheck, Shield, Edit, Trash2, Crown, User, Users } from "lucide-react";
-import { useState } from "react";
+import {
+  ArrowLeft,
+  Search,
+  UserCheck,
+  Edit,
+  Trash2,
+  Crown,
+  Users,
+  Loader2,
+  AlertTriangle,
+  X,
+  Phone,
+  GraduationCap,
+  Mail,
+  RefreshCw,
+} from "lucide-react";
+import { GrupoService } from "../services/grupos/GrupoService";
+import { GrupoDetalhe } from "../models/dto/grupos/GrupoDetalhe";
+import { ParticipanteResponse } from "../models/dto/grupos/Participante";
+import { HttpError } from "../utils/HttpError";
 
 export function ParticipantesDoGrupo() {
   const { groupId } = useParams();
   const navigate = useNavigate();
+  const grupoService = new GrupoService();
+
+  const [grupo, setGrupo] = useState<GrupoDetalhe | null>(null);
+  const [participantes, setParticipantes] = useState<ParticipanteResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [termoBusca, setTermoBusca] = useState("");
   const [filtroFuncao, setFiltroFuncao] = useState("all");
 
-  // Dados fictícios - seriam buscados via API usando groupId
-  const informacoesDoGrupo = {
-    id: groupId,
-    nome: "Inteligência Artificial e Machine Learning",
-    supervisor: "Dr. Carlos Silva"
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingParticipante, setEditingParticipante] = useState<ParticipanteResponse | null>(null);
+  const [editNome, setEditNome] = useState("");
+  const [editTelefone, setEditTelefone] = useState("");
+  const [editTitulo, setEditTitulo] = useState("");
+  const [updating, setUpdating] = useState(false);
+  const [editError, setEditError] = useState("");
+
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const carregarDados = useCallback(async () => {
+    if (!groupId || isNaN(Number(groupId))) {
+      navigate("/grupos");
+      return;
+    }
+
+    const id = Number(groupId);
+    setLoading(true);
+    setError("");
+    setActionError("");
+
+    try {
+      const [grupoRes, participantesRes] = await Promise.all([
+        grupoService.buscarPorId(id),
+        grupoService.listarParticipantes(id),
+      ]);
+      setGrupo(grupoRes);
+      setParticipantes(participantesRes);
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setError(err.response?.mensagem || err.message);
+      } else {
+        setError("Não foi possível carregar os dados do grupo e participantes.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [groupId, navigate]);
+
+  useEffect(() => {
+    carregarDados();
+  }, [carregarDados]);
+
+  const handleOpenEdit = (p: ParticipanteResponse) => {
+    setEditingParticipante(p);
+    setEditNome(p.nome);
+    setEditTelefone(p.telefone || "");
+    setEditTitulo(p.titulo || "");
+    setEditError("");
+    setEditModalOpen(true);
   };
 
-  const participantes = [
-    {
-      id: 1,
-      nome: "Dr. Carlos Silva",
-      email: "carlos.silva@universidade.edu.br",
-      funcao: "Supervisor",
-      dataEntrada: "2024-01-15",
-      status: "Ativo",
-      permissoes: ["Gerenciar Grupo", "Aprovar Projetos", "Gerenciar Orçamento", "Gerenciar Membros"]
-    },
-    {
-      id: 2,
-      nome: "João Pedro Oliveira",
-      email: "joao.oliveira@universidade.edu.br",
-      funcao: "Coordenador",
-      dataEntrada: "2024-01-20",
-      status: "Ativo",
-      permissoes: ["Criar Projetos", "Editar Materiais", "Visualizar Orçamento"]
-    },
-    {
-      id: 3,
-      nome: "Ana Carolina Lima",
-      email: "ana.lima@universidade.edu.br",
-      funcao: "Pesquisador",
-      dataEntrada: "2024-02-01",
-      status: "Ativo",
-      permissoes: ["Criar Projetos", "Editar Materiais"]
-    },
-    {
-      id: 4,
-      nome: "Rafael Santos Costa",
-      email: "rafael.costa@universidade.edu.br",
-      funcao: "Pesquisador",
-      dataEntrada: "2024-02-10",
-      status: "Ativo",
-      permissoes: ["Criar Projetos", "Editar Materiais"]
-    },
-    {
-      id: 5,
-      nome: "Beatriz Almeida Rocha",
-      email: "beatriz.rocha@universidade.edu.br",
-      funcao: "Colaborador",
-      dataEntrada: "2024-03-01",
-      status: "Ativo",
-      permissoes: ["Visualizar Projetos", "Comentar"]
-    },
-    {
-      id: 6,
-      nome: "Lucas Ferreira Silva",
-      email: "lucas.silva@universidade.edu.br",
-      funcao: "Colaborador",
-      dataEntrada: "2024-03-05",
-      status: "Ativo",
-      permissoes: ["Visualizar Projetos", "Comentar"]
-    },
-    {
-      id: 7,
-      nome: "Marina Souza Santos",
-      email: "marina.santos@universidade.edu.br",
-      funcao: "Aluno",
-      dataEntrada: "2024-03-15",
-      status: "Ativo",
-      permissoes: ["Visualizar Projetos"]
-    },
-    {
-      id: 8,
-      nome: "Felipe Rodrigues Lima",
-      email: "felipe.lima@universidade.edu.br",
-      funcao: "Aluno",
-      dataEntrada: "2024-03-15",
-      status: "Inativo",
-      permissoes: ["Visualizar Projetos"]
-    },
-  ];
+  const handleUpdateParticipante = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingParticipante || !groupId) return;
 
-  const participantesFiltrados = participantes.filter(p => {
-    const correspondeBusca = p.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
-                         p.email.toLowerCase().includes(termoBusca.toLowerCase());
-    const correspondeFiltro = filtroFuncao === "all" || p.funcao === filtroFuncao;
-    return correspondeBusca && correspondeFiltro;
+    if (!editNome.trim()) {
+      setEditError("O nome é obrigatório.");
+      return;
+    }
+
+    setUpdating(true);
+    setEditError("");
+    try {
+      await grupoService.atualizarParticipante(Number(groupId), editingParticipante.usuarioId, {
+        nome: editNome.trim(),
+        telefone: editTelefone.trim(),
+        titulo: editTitulo.trim(),
+      });
+      setEditModalOpen(false);
+      setEditingParticipante(null);
+      carregarDados();
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setEditError(err.response?.mensagem || err.message);
+      } else {
+        setEditError("Erro ao atualizar participante.");
+      }
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDeleteParticipante = async (p: ParticipanteResponse) => {
+    if (!groupId) return;
+    setActionError("");
+
+    if (!window.confirm(`Deseja realmente remover o participante "${p.nome}" deste grupo?`)) {
+      return;
+    }
+
+    setDeletingId(p.usuarioId);
+    try {
+      await grupoService.removerParticipante(Number(groupId), p.usuarioId);
+      carregarDados();
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setActionError(err.response?.mensagem || err.message);
+      } else {
+        setActionError("Erro ao remover participante.");
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const participantesFiltrados = participantes.filter((p) => {
+    const termo = termoBusca.toLowerCase();
+    const correspondeBusca =
+      p.nome.toLowerCase().includes(termo) ||
+      p.email.toLowerCase().includes(termo) ||
+      (p.cargo && p.cargo.toLowerCase().includes(termo)) ||
+      (p.titulo && p.titulo.toLowerCase().includes(termo));
+
+    if (filtroFuncao === "Líder") {
+      return correspondeBusca && p.isLider;
+    }
+    if (filtroFuncao === "Pesquisador") {
+      return correspondeBusca && !p.isLider;
+    }
+    return correspondeBusca;
   });
 
-  const estatisticas = {
-    total: participantes.filter(p => p.status === "Ativo").length,
-    supervisores: participantes.filter(p => p.funcao === "Supervisor").length,
-    coordenadores: participantes.filter(p => p.funcao === "Coordenador").length,
-    pesquisadores: participantes.filter(p => p.funcao === "Pesquisador").length,
-  };
+  const totalParticipantes = participantes.length;
+  const totalLideres = participantes.filter((p) => p.isLider).length;
+  const totalPesquisadores = participantes.filter((p) => !p.isLider).length;
 
-  const obterIconeFuncao = (funcao: string) => {
-    switch (funcao) {
-      case "Supervisor": return <Crown className="w-5 h-5" />;
-      case "Coordenador": return <Shield className="w-5 h-5" />;
-      case "Pesquisador": return <UserCheck className="w-5 h-5" />;
-      default: return <User className="w-5 h-5" />;
-    }
-  };
-
-  const obterCorFuncao = (funcao: string) => {
-    switch (funcao) {
-      case "Supervisor": return "bg-[#ff8c42] text-white";
-      case "Coordenador": return "bg-[#7c3aed]/20 text-[#7c3aed]";
-      case "Pesquisador": return "bg-[#4a9eff]/20 text-[#4a9eff]";
-      case "Colaborador": return "bg-[#10b981]/20 text-[#10b981]";
-      default: return "bg-[#9e9e9e]/20 text-[#9e9e9e]";
-    }
-  };
+  if (loading && !grupo) {
+    return (
+      <div className="h-full flex items-center justify-center p-6">
+        <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="h-full overflow-auto p-6">
-      {/* Cabeçalho com Botão Voltar */}
-      <div className="mb-6">
+    <div className="h-full overflow-auto p-6 space-y-6">
+      <div>
         <button
+          type="button"
           onClick={() => navigate("/grupos")}
-          className="flex items-center gap-2 text-[#9e9e9e] hover:text-[#ff8c42] transition-colors mb-4"
+          className="flex items-center gap-2 text-[#9e9e9e] hover:text-[#ff8c42] transition-colors mb-4 cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Voltar para Grupos</span>
         </button>
-        <div className="flex items-center gap-4 mb-2">
-          <div className="w-12 h-12 rounded-xl bg-[#ff8c42] flex items-center justify-center">
-            <Users className="w-6 h-6 text-white" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#ff8c42] flex items-center justify-center shrink-0">
+              <Users className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-white text-2xl font-bold">
+                {grupo ? grupo.nome : `Grupo #${groupId}`}
+              </h1>
+              <p className="text-[#9e9e9e] text-sm">
+                Gerencie os membros, líderes e pesquisadores vinculados ao grupo
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-white">{informacoesDoGrupo.nome}</h1>
-            <p className="text-[#9e9e9e]">Gerenciar participantes e permissões</p>
-          </div>
+          <button
+            type="button"
+            onClick={carregarDados}
+            disabled={loading}
+            className="p-2.5 bg-[#1e1e1e] hover:bg-[#2e2e2e]/30 border border-[#2e2e2e]/40 rounded-xl text-[#9e9e9e] hover:text-white transition-colors cursor-pointer self-start sm:self-auto"
+            title="Recarregar"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
         </div>
       </div>
 
-      {/* Cards de Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Total Ativos</span>
-            <Users className="w-5 h-5 text-[#4a9eff]" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-[#4a9eff] flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-[#9e9e9e] text-xs">Total de Membros</p>
+              <h3 className="text-white text-2xl font-bold">{totalParticipantes}</h3>
+            </div>
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
+          <span className="text-xs text-[#9e9e9e]">Integrantes ativos no grupo</span>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Supervisor</span>
-            <Crown className="w-5 h-5 text-[#ff8c42]" />
+        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+              <Crown className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-[#9e9e9e] text-xs">Líderes Responsáveis</p>
+              <h3 className="text-white text-2xl font-bold text-[#ff8c42]">{totalLideres}</h3>
+            </div>
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.supervisores}</div>
+          <span className="text-xs text-[#ff8c42]">Supervisão do grupo</span>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Coordenadores</span>
-            <Shield className="w-5 h-5 text-[#7c3aed]" />
+        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-[#10b981] flex items-center justify-center">
+              <UserCheck className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-[#9e9e9e] text-xs">Pesquisadores</p>
+              <h3 className="text-white text-2xl font-bold text-[#10b981]">{totalPesquisadores}</h3>
+            </div>
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.coordenadores}</div>
-        </div>
-
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Pesquisadores</span>
-            <UserCheck className="w-5 h-5 text-[#4a9eff]" />
-          </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.pesquisadores}</div>
+          <span className="text-xs text-[#10b981]">Equipe de pesquisa</span>
         </div>
       </div>
 
-      {/* Barra de Ações */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        {/* Busca */}
+      <div className="bg-[#1e1e1e] rounded-2xl p-4 border border-[#2e2e2e]/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e9e9e]" />
           <input
             type="text"
-            placeholder="Buscar participantes..."
+            placeholder="Buscar por nome, e-mail, título..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-11 pr-10 py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
           />
+          {termoBusca && (
+            <button
+              type="button"
+              onClick={() => setTermoBusca("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9e9e9e] hover:text-white rounded-lg transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
-        {/* Filtro */}
         <select
           value={filtroFuncao}
           onChange={(e) => setFiltroFuncao(e.target.value)}
-          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white text-sm focus:outline-none focus:border-[#ff8c42]/50 cursor-pointer"
         >
-          <option value="all">Todas as Funções</option>
-          <option value="Supervisor">Supervisor</option>
-          <option value="Coordenador">Coordenador</option>
-          <option value="Pesquisador">Pesquisador</option>
-          <option value="Colaborador">Colaborador</option>
-          <option value="Aluno">Aluno</option>
+          <option value="all">Todos os Membros</option>
+          <option value="Líder">Apenas Líderes</option>
+          <option value="Pesquisador">Apenas Pesquisadores</option>
         </select>
-
-        {/* Botão Adicionar Participante */}
-        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
-          <Plus className="w-5 h-5" />
-          <span>Adicionar Participante</span>
-        </button>
       </div>
 
-      {/* Lista de Participantes */}
+      {actionError && (
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{actionError}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActionError("")}
+            className="p-1 rounded-lg hover:bg-[#ef4444]/20 transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setError("")}
+            className="p-1 rounded-lg hover:bg-[#ef4444]/20 transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <div className="space-y-4">
         {participantesFiltrados.map((participante) => (
           <div
-            key={participante.id}
-            className={`bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300 ${ participante.status === "Inativo" ? "opacity-60" : "" }`}
+            key={participante.usuarioId}
+            className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all"
           >
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-              {/* Informações do Participante */}
               <div className="flex-1">
                 <div className="flex items-start gap-4">
-                  {/* Avatar */}
-                  <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${obterCorFuncao(participante.funcao)} flex items-center justify-center font-bold text-lg`}>
-                    {participante.funcao === "Supervisor" ? (
-                      obterIconeFuncao(participante.funcao)
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-base shrink-0 ${participante.isLider
+                        ? "bg-[#ff8c42] text-white"
+                        : "bg-[#4a9eff]/20 text-[#4a9eff]"
+                      }`}
+                  >
+                    {participante.isLider ? (
+                      <Crown className="w-5 h-5" />
                     ) : (
-                      participante.nome.charAt(0)
+                      participante.nome.charAt(0).toUpperCase()
                     )}
                   </div>
 
-                  {/* Detalhes */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-white font-semibold">{participante.nome}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${obterCorFuncao(participante.funcao)}`}>
-                        {obterIconeFuncao(participante.funcao)}
-                        {participante.funcao}
-                      </span>
-                      {participante.status === "Inativo" && (
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#9e9e9e]/20 text-[#9e9e9e]">
-                          Inativo
+                  <div className="flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <h3 className="text-white font-semibold text-base">{participante.nome}</h3>
+                      {participante.isLider ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 bg-[#ff8c42]/15 text-[#ff8c42] border border-[#ff8c42]/30">
+                          <Crown className="w-3.5 h-3.5" />
+                          Líder
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 bg-[#4a9eff]/15 text-[#4a9eff] border border-[#4a9eff]/30">
+                          <UserCheck className="w-3.5 h-3.5" />
+                          {participante.cargo || "Pesquisador"}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-[#9e9e9e] mb-3">{participante.email}</p>
 
-                    {/* Permissões */}
-                    <div className="flex flex-wrap gap-2">
-                      {participante.permissoes.map((permissao, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 bg-[#121212] rounded-lg text-xs text-[#9e9e9e] border border-[#2e2e2e]/30"
-                        >
-                          {permissao}
-                        </span>
-                      ))}
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-[#9e9e9e]">
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>{participante.email}</span>
+                      </div>
+                      {participante.telefone && (
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5" />
+                          <span>{participante.telefone}</span>
+                        </div>
+                      )}
+                      {participante.titulo && (
+                        <div className="flex items-center gap-1.5">
+                          <GraduationCap className="w-3.5 h-3.5" />
+                          <span>{participante.titulo}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Ações */}
-              <div className="flex items-center gap-2 lg:flex-col">
-                <div className="text-xs text-[#9e9e9e] mb-2">
-                  Desde {new Date(participante.dataEntrada).toLocaleDateString('pt-BR')}
-                </div>
-                <div className="flex gap-2">
-                  <button className="p-2 rounded-lg bg-[#121212] hover:bg-[#2e2e2e]/20 transition-colors border border-[#2e2e2e]/30">
-                    <Edit className="w-4 h-4 text-[#4a9eff]" />
-                  </button>
-                  {participante.funcao !== "Supervisor" && (
-                    <button className="p-2 rounded-lg bg-[#121212] hover:bg-[#2e2e2e]/20 transition-colors border border-[#2e2e2e]/30">
-                      <Trash2 className="w-4 h-4 text-[#ef4444]" />
-                    </button>
+              <div className="flex items-center gap-2 self-end lg:self-center">
+                <button
+                  type="button"
+                  onClick={() => handleOpenEdit(participante)}
+                  className="p-2 rounded-lg bg-[#121212] hover:bg-[#ff8c42]/10 transition-colors border border-[#2e2e2e]/30 text-[#ff8c42] cursor-pointer"
+                  title="Editar participante"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteParticipante(participante)}
+                  disabled={deletingId === participante.usuarioId}
+                  className="p-2 rounded-lg bg-[#121212] hover:bg-[#ef4444]/10 transition-colors border border-[#2e2e2e]/30 text-[#ef4444] cursor-pointer disabled:opacity-40"
+                  title="Remover do grupo"
+                >
+                  {deletingId === participante.usuarioId ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
                   )}
-                </div>
+                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Estado Vazio */}
-      {participantesFiltrados.length === 0 && (
+      {participantesFiltrados.length === 0 && !loading && (
         <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
-          <UserCheck className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
-          <p className="text-[#9e9e9e]">Nenhum participante encontrado</p>
+          <UserCheck className="w-12 h-12 text-[#2e2e2e] mx-auto mb-3" />
+          <p className="text-[#9e9e9e] text-sm">
+            {termoBusca || filtroFuncao !== "all"
+              ? "Nenhum participante encontrado para os filtros aplicados."
+              : "Nenhum participante vinculado a este grupo até o momento."}
+          </p>
         </div>
       )}
 
-      {/* Legenda de Funções */}
-      <div className="mt-8 bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
-        <h3 className="text-white mb-4">Funções e Permissões</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Crown className="w-4 h-4 text-[#ff8c42]" />
-              <span className="text-white text-sm font-medium">Supervisor</span>
+      {editModalOpen && editingParticipante && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
+            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                  <Edit className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold text-lg">Editar Participante</h3>
+                  <p className="text-[#9e9e9e] text-xs">Atualize os dados cadastrais do membro</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(false)}
+                className="p-1.5 rounded-lg text-[#9e9e9e] hover:text-white hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <p className="text-xs text-[#9e9e9e]">Controle total do grupo, orçamento e membros</p>
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Shield className="w-4 h-4 text-[#7c3aed]" />
-              <span className="text-white text-sm font-medium">Coordenador</span>
+
+            <div className="p-6 space-y-4">
+              {editError && (
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleUpdateParticipante} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    Nome Completo <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editNome}
+                    onChange={(e) => setEditNome(e.target.value)}
+                    disabled={updating}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    Telefone <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editTelefone}
+                    onChange={(e) => setEditTelefone(e.target.value)}
+                    disabled={updating}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    Titulação <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editTitulo}
+                    onChange={(e) => setEditTitulo(e.target.value)}
+                    placeholder="Ex: Doutor, Mestre, Pesquisador"
+                    disabled={updating}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditModalOpen(false)}
+                    disabled={updating}
+                    className="px-4 py-2.5 bg-[#121212] hover:bg-[#2e2e2e]/20 border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white rounded-xl text-sm transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={updating}
+                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {updating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Salvando...</span>
+                      </>
+                    ) : (
+                      <span>Salvar Alterações</span>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
-            <p className="text-xs text-[#9e9e9e]">Gerencia projetos e materiais, visualiza orçamento</p>
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <UserCheck className="w-4 h-4 text-[#4a9eff]" />
-              <span className="text-white text-sm font-medium">Pesquisador</span>
-            </div>
-            <p className="text-xs text-[#9e9e9e]">Cria projetos e edita materiais</p>
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <User className="w-4 h-4 text-[#10b981]" />
-              <span className="text-white text-sm font-medium">Colaborador/Aluno</span>
-            </div>
-            <p className="text-xs text-[#9e9e9e]">Visualiza e comenta em projetos</p>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

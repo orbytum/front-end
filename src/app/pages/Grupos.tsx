@@ -321,7 +321,10 @@ export function Grupos() {
                 <span className="text-xs text-[#9e9e9e]">Nenhum líder vinculado</span>
                 <button
                   type="button"
-                  onClick={() => handleOpenCadastrarLider(g)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenCadastrarLider(g);
+                  }}
                   disabled={!g.isAtivo}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#ff8c42]/10 hover:bg-[#ff8c42]/20 border border-[#ff8c42]/30 text-[#ff8c42] text-xs font-medium transition-colors cursor-pointer disabled:opacity-40"
                 >
@@ -339,11 +342,19 @@ export function Grupos() {
       header: "Participantes",
       align: "center",
       render: (g) => (
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#121212] border border-[#2e2e2e]/30 text-xs text-white">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/grupos/${g.id}/participantes`);
+          }}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#121212] hover:bg-[#ff8c42]/10 border border-[#2e2e2e]/30 hover:border-[#ff8c42]/40 text-xs text-white transition-all cursor-pointer"
+          title="Ver participantes"
+        >
           <UserCheck className="w-3.5 h-3.5 text-[#4a9eff]" />
           <span className="font-semibold">{g.totalParticipantes ?? 0}</span>
           <span className="text-[#9e9e9e]">membros</span>
-        </div>
+        </button>
       ),
     },
     {
@@ -373,7 +384,21 @@ export function Grupos() {
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
-            onClick={() => handleOpenEdit(g)}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/grupos/${g.id}/participantes`);
+            }}
+            className="p-1.5 rounded-lg border border-[#4a9eff]/30 text-[#4a9eff] hover:bg-[#4a9eff]/10 transition-colors cursor-pointer"
+            title="Ver participantes"
+          >
+            <Users className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenEdit(g);
+            }}
             disabled={!g.isAtivo}
             className="p-1.5 rounded-lg border border-[#ff8c42]/30 text-[#ff8c42] hover:bg-[#ff8c42]/10 transition-colors disabled:opacity-40 cursor-pointer"
             title="Editar grupo"
@@ -382,7 +407,10 @@ export function Grupos() {
           </button>
           <button
             type="button"
-            onClick={() => handleDelete(g)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(g);
+            }}
             disabled={deletingId === g.id || !g.isAtivo}
             className="p-1.5 rounded-lg border border-[#ef4444]/30 text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors disabled:opacity-40 cursor-pointer"
             title={g.isAtivo ? "Remover grupo" : "Grupo já inativo"}
@@ -593,6 +621,7 @@ export function Grupos() {
         }
         data={paginatedData.items}
         columns={columns}
+        onRowClick={(g) => navigate(`/grupos/${g.id}/participantes`)}
         page={page}
         pageSize={pageSize}
         totalElements={paginatedData.totalElements}
