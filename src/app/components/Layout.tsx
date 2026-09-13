@@ -22,12 +22,11 @@ export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const authService = new AuthService();
 
-  if (!authService.isTokenValid()) {
+  if (!authService.isAuthenticated()) {
     authService.logout();
     return <Navigate to="/login" replace />;
   }
 
-  const isAdmin = authService.isAdmin();
   const isAdmin = authService.isAdminOrInitialAdmin();
 
   const navItems = [
