@@ -18,6 +18,7 @@ import {
   TriangleAlert,
   Clock,
   UserCheck,
+  Pencil,
 } from "lucide-react";
 import { DataTable, Column } from "../components/DataTable";
 import { GrupoService } from "../services/grupos/GrupoService";
@@ -42,6 +43,13 @@ export function Grupos() {
   const [debouncedNome, setDebouncedNome] = useState("");
   const [usuarioFilter, setUsuarioFilter] = useState("");
   const [debouncedUsuario, setDebouncedUsuario] = useState("");
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingGrupo, setEditingGrupo] = useState<GrupoDetalhe | null>(null);
+  const [editNome, setEditNome] = useState("");
+  const [editIsAtivo, setEditIsAtivo] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [editError, setEditError] = useState("");
 
   const [paginatedData, setPaginatedData] = useState<GrupoPaginadoResponse>({
     items: [],
@@ -113,11 +121,6 @@ export function Grupos() {
       return;
     }
 
-    if (!emailLider.trim()) {
-      setModalError("Informe o e-mail do líder que receberá o convite.");
-      return;
-    }
-
     setCreating(true);
     try {
       const res = await grupoService.criarGrupo({
@@ -158,6 +161,44 @@ export function Grupos() {
       }
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleOpenEdit = (grupo: GrupoDetalhe) => {
+    setEditingGrupo(grupo);
+    setEditNome(grupo.nome);
+    setEditIsAtivo(grupo.isAtivo);
+    setEditError("");
+    setEditModalOpen(true);
+  };
+
+  const handleUpdateGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGrupo) return;
+
+    if (!editNome.trim()) {
+      setEditError("O nome do grupo é obrigatório.");
+      return;
+    }
+
+    setUpdating(true);
+    setEditError("");
+    try {
+      await grupoService.atualizarGrupo(editingGrupo.id, {
+        nome: editNome.trim(),
+        isAtivo: editIsAtivo,
+      });
+      setEditModalOpen(false);
+      setEditingGrupo(null);
+      carregarGrupos();
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setEditError(err.response?.mensagem || err.message);
+      } else {
+        setEditError("Erro ao atualizar o grupo.");
+      }
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -275,6 +316,15 @@ export function Grupos() {
       align: "right",
       render: (g) => (
         <div className="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => handleOpenEdit(g)}
+            disabled={!g.isAtivo}
+            className="p-1.5 rounded-lg border border-[#ff8c42]/30 text-[#ff8c42] hover:bg-[#ff8c42]/10 transition-colors disabled:opacity-40 cursor-pointer"
+            title="Editar grupo"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
           <button
             type="button"
             onClick={() => handleDelete(g)}
@@ -600,7 +650,6 @@ export function Grupos() {
                       <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e9e9e]" />
                       <input
                         type="email"
-                        required
                         value={emailLider}
                         onChange={(e) => setEmailLider(e.target.value)}
                         placeholder="lider@universidade.edu.br"
@@ -650,6 +699,95 @@ export function Grupos() {
                   </div>
                 </form>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editModalOpen && editingGrupo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
+            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                  <Pencil className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold text-lg">Editar Grupo de Pesquisa</h3>
+                  <p className="text-[#9e9e9e] text-xs">Atualize os dados e o status do grupo</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(false)}
+                className="p-1.5 rounded-lg text-[#9e9e9e] hover:text-white hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {editError && (
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleUpdateGroup} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    Nome do Grupo <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editNome}
+                    onChange={(e) => setEditNome(e.target.value)}
+                    disabled={updating}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-[#121212] rounded-xl border border-[#2e2e2e]/30">
+                  <input
+                    type="checkbox"
+                    id="editIsAtivo"
+                    checked={editIsAtivo}
+                    onChange={(e) => setEditIsAtivo(e.target.checked)}
+                    disabled={updating}
+                    className="w-4 h-4 accent-[#ff8c42] rounded cursor-pointer"
+                  />
+                  <label htmlFor="editIsAtivo" className="text-sm text-white cursor-pointer select-none">
+                    Grupo Ativo
+                  </label>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditModalOpen(false)}
+                    disabled={updating}
+                    className="px-4 py-2.5 bg-[#121212] hover:bg-[#2e2e2e]/20 border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white rounded-xl text-sm transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={updating}
+                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {updating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Salvando...</span>
+                      </>
+                    ) : (
+                      <span>Salvar Alterações</span>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

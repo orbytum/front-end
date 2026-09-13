@@ -1,4 +1,6 @@
 import { BaseService } from "../BaseService";
+import { EditGroupRequest } from "../../models/dto/grupos/EditGroup";                                                                                                                                                                                                               
+import { grupoDetalheSchema } from "../../models/dto/grupos/GrupoDetalhe";
 import {
     GrupoDetalhe,
 } from "../../models/dto/grupos/GrupoDetalhe";
@@ -32,5 +34,9 @@ export class GrupoService extends BaseService {
 
     async removerGrupo(id: number): Promise<void> {
         return this.delete(`/grupos/${id}`);
+    }
+
+    async atualizarGrupo(id: number, data: EditGroupRequest): Promise<GrupoDetalhe> {
+        return this.put(`/grupos/${id}`, data, {}, grupoDetalheSchema);
     }
 }
