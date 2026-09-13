@@ -14,6 +14,11 @@ import {
     grupoPaginadoResponseSchema,
 } from "../../models/dto/grupos/ListarGrupos";
 
+import {
+    CreateLeaderRequest,
+    LiderResponse,
+    liderResponseSchema
+} from "../../models/dto/grupos/Lider"
 export class GrupoService extends BaseService {
     async listarGrupos(params: ListarGruposParams = {}): Promise<GrupoPaginadoResponse> {
         const searchParams = new URLSearchParams();
@@ -38,5 +43,9 @@ export class GrupoService extends BaseService {
 
     async atualizarGrupo(id: number, data: EditGroupRequest): Promise<GrupoDetalhe> {
         return this.put(`/grupos/${id}`, data, {}, grupoDetalheSchema);
+    }
+
+    async cadastrarLider(grupoId: number, data: CreateLeaderRequest): Promise<LiderResponse> {
+        return this.post(`/grupos/${grupoId}/lideres`, data, {}, liderResponseSchema);
     }
 }

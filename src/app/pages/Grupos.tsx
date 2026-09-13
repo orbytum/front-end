@@ -19,6 +19,7 @@ import {
   Clock,
   UserCheck,
   Pencil,
+  UserPlus,
 } from "lucide-react";
 import { DataTable, Column } from "../components/DataTable";
 import { GrupoService } from "../services/grupos/GrupoService";
@@ -50,6 +51,16 @@ export function Grupos() {
   const [editIsAtivo, setEditIsAtivo] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [editError, setEditError] = useState("");
+
+  const [liderModalOpen, setLiderModalOpen] = useState(false);
+  const [selectedGrupoLider, setSelectedGrupoLider] = useState<GrupoDetalhe | null>(null);
+  const [liderNome, setLiderNome] = useState("");
+  const [liderEmail, setLiderEmail] = useState("");
+  const [liderTelefone, setLiderTelefone] = useState("");
+  const [liderTitulo, setLiderTitulo] = useState("");
+  const [liderSenha, setLiderSenha] = useState("");
+  const [cadastrandoLider, setCadastrandoLider] = useState(false);
+  const [liderError, setLiderError] = useState("");
 
   const [paginatedData, setPaginatedData] = useState<GrupoPaginadoResponse>({
     items: [],
@@ -202,6 +213,45 @@ export function Grupos() {
     }
   };
 
+  const handleOpenCadastrarLider = (grupo: GrupoDetalhe) => {
+    setSelectedGrupoLider(grupo);
+    setLiderNome("");
+    setLiderEmail("");
+    setLiderTelefone("");
+    setLiderTitulo("");
+    setLiderSenha("");
+    setLiderError("");
+    setLiderModalOpen(true);
+  };
+
+  const handleCadastrarLider = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedGrupoLider) return;
+
+    setCadastrandoLider(true);
+    setLiderError("");
+    try {
+      await grupoService.cadastrarLider(selectedGrupoLider.id, {
+        nome: liderNome.trim(),
+        email: liderEmail.trim(),
+        telefone: liderTelefone.trim(),
+        titulo: liderTitulo.trim(),
+        senha: liderSenha,
+      });
+      setLiderModalOpen(false);
+      setSelectedGrupoLider(null);
+      carregarGrupos();
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setLiderError(err.response?.mensagem || err.message);
+      } else {
+        setLiderError("Erro ao cadastrar o líder. Tente novamente.");
+      }
+    } finally {
+      setCadastrandoLider(false);
+    }
+  };
+
   if (isAdmin === null) {
     return (
       <div className="h-full flex items-center justify-center p-6">
@@ -267,13 +317,18 @@ export function Grupos() {
                 </span>
               </>
             ) : (
-              <>
-                <span className="text-[#ff8c42] text-sm font-medium block flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" />
-                  Convite Enviado
-                </span>
-                <span className="text-xs text-[#9e9e9e]">Aguardando aceite</span>
-              </>
+              <div className="flex flex-col items-start gap-1">
+                <span className="text-xs text-[#9e9e9e]">Nenhum líder vinculado</span>
+                <button
+                  type="button"
+                  onClick={() => handleOpenCadastrarLider(g)}
+                  disabled={!g.isAtivo}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#ff8c42]/10 hover:bg-[#ff8c42]/20 border border-[#ff8c42]/30 text-[#ff8c42] text-xs font-medium transition-colors cursor-pointer disabled:opacity-40"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Cadastrar Líder</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -784,6 +839,148 @@ export function Grupos() {
                       </>
                     ) : (
                       <span>Salvar Alterações</span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {liderModalOpen && selectedGrupoLider && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
+            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                  <UserPlus className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold text-lg">Cadastrar Líder</h3>
+                  <p className="text-[#9e9e9e] text-xs">Vincular líder ao grupo: {selectedGrupoLider.nome}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLiderModalOpen(false)}
+                className="p-1.5 rounded-lg text-[#9e9e9e] hover:text-white hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {liderError && (
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{liderError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleCadastrarLider} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    Nome Completo <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={liderNome}
+                    onChange={(e) => setLiderNome(e.target.value)}
+                    placeholder="Ex: Dr. Carlos Silva"
+                    disabled={cadastrandoLider}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    E-mail <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={liderEmail}
+                    onChange={(e) => setLiderEmail(e.target.value)}
+                    placeholder="carlos.silva@universidade.edu.br"
+                    disabled={cadastrandoLider}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                      Telefone <span className="text-[#ff8c42]">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={liderTelefone}
+                      onChange={(e) => setLiderTelefone(e.target.value)}
+                      placeholder="(11) 98765-4321"
+                      disabled={cadastrandoLider}
+                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                      Titulação <span className="text-[#ff8c42]">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={liderTitulo}
+                      onChange={(e) => setLiderTitulo(e.target.value)}
+                      placeholder="Ex: Doutor, Mestre"
+                      disabled={cadastrandoLider}
+                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    Senha Provisória <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={liderSenha}
+                    onChange={(e) => setLiderSenha(e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    disabled={cadastrandoLider}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setLiderModalOpen(false)}
+                    disabled={cadastrandoLider}
+                    className="px-4 py-2.5 bg-[#121212] hover:bg-[#2e2e2e]/20 border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white rounded-xl text-sm transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={cadastrandoLider}
+                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {cadastrandoLider ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Cadastrando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4" />
+                        <span>Cadastrar Líder</span>
+                      </>
                     )}
                   </button>
                 </div>
