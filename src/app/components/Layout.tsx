@@ -14,9 +14,13 @@ import {
   Menu,
   X,
   MailPlus,
+  Loader2,
 } from "lucide-react";
 import { useState } from "react";
 import { AuthService } from "../services/auth/AuthService";
+import { useGrupo } from "../contexts/GrupoContext";
+import { GrupoCombobox } from "./GrupoCombobox";
+import { SemGrupoView } from "./SemGrupoView";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -27,8 +31,25 @@ export function Layout() {
     return <Navigate to="/login" replace />;
   }
 
-  const isAdmin = authService.isAdmin();
   const isAdmin = authService.isAdminOrInitialAdmin();
+  const { grupoAtual, semGrupos, carregandoGrupos } = useGrupo();
+
+  // Se for usuário comum e não pertencer a nenhum grupo, renderiza tela explicativa
+  if (!isAdmin && semGrupos) {
+    return <SemGrupoView />;
+  }
+
+  // Se estiver buscando os grupos do usuário comum, exibe tela de carregamento
+  if (!isAdmin && carregandoGrupos) {
+    return (
+      <div className="min-h-screen bg-[#121212] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
+          <span className="text-[#9e9e9e] text-sm font-medium">Carregando grupos de pesquisa...</span>
+        </div>
+      </div>
+    );
+  }
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -63,7 +84,7 @@ export function Layout() {
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-[#2e2e2e]/20 transition-colors"
+            className="p-2 rounded-lg hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
           >
             {sidebarOpen ? (
               <X className="w-5 h-5 text-[#9e9e9e]" />
@@ -119,16 +140,22 @@ export function Layout() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="h-16 bg-[#1e1e1e]/50 backdrop-blur-sm border-b border-[#2e2e2e]/30 flex items-center justify-between px-6">
-          <div>
-            <h2 className="text-white">ORBYTUM</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-white font-bold tracking-wide">ORBYTUM</h2>
+            <span className="text-[#9e9e9e]/50 font-light select-none">/</span>
+            <GrupoCombobox />
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="px-4 py-2 rounded-lg bg-[#121212]">
-              <span className="text-sm text-[#9e9e9e]">Administrador</span>
+            <div className="px-4 py-2 rounded-lg bg-[#121212] border border-[#2e2e2e]/40">
+              <span className="text-sm text-[#9e9e9e]">
+                {isAdmin ? "Administrador" : (grupoAtual?.role || "Pesquisador")}
+              </span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-[#ff8c42] flex items-center justify-center">
-              <span className="text-white text-sm font-semibold">A</span>
+            <div className="w-10 h-10 rounded-full bg-[#ff8c42] flex items-center justify-center shadow-md shadow-[#ff8c42]/10">
+              <span className="text-white text-sm font-semibold">
+                {isAdmin ? "A" : (grupoAtual?.isLider ? "L" : "U")}
+              </span>
             </div>
           </div>
         </header>
