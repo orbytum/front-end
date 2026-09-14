@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { LoginService } from "../services/auth/LoginService";
 import { Eye, EyeOff, LogIn, Orbit } from "lucide-react";
 
 export function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/";
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const loginService = new LoginService();
   const [formulario, setFormulario] = useState({ usuario: "", senha: "" });
@@ -22,7 +24,7 @@ export function Login() {
       if (response && response.token) {
         localStorage.setItem("token", response.token);
         localStorage.setItem("token_tipo", response.tipo || "Bearer");
-        navigate("/");
+        navigate(redirect);
       }
     } catch (err: any) {
       setErro(err?.mensagem || err?.message || "Erro ao realizar login. Verifique suas credenciais.");

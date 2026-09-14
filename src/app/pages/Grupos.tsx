@@ -15,7 +15,6 @@ import {
   Search,
   User,
   Shield,
-  TriangleAlert,
   Clock,
   UserCheck,
   Pencil,
@@ -269,7 +268,7 @@ export function Grupos() {
           </div>
           <h2 className="text-white text-xl font-bold mb-2">Acesso Restrito</h2>
           <p className="text-[#9e9e9e] text-sm mb-6">
-            A gestão de grupos de pesquisa é restrita exclusivamente a <strong>Administradores</strong> da plataforma.
+            A gestão de grupos de pesquisa é restrita a <strong>Administradores</strong> e <strong>Administradores Iniciais</strong> da plataforma.
           </p>
           <button
             onClick={() => navigate("/login")}
@@ -307,6 +306,9 @@ export function Grupos() {
       align: "left",
       render: (g) => (
         <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#2e2e2e]/20 flex items-center justify-center text-[#4a9eff] shrink-0">
+            <Shield className="w-4 h-4" />
+          </div>
           <div>
             {g.nomeLider ? (
               <>
@@ -574,7 +576,7 @@ export function Grupos() {
         )}
       </div>
 
-      {/* Alerta de erro de ação (ex: falha ao remover) */}
+      {/* Alerta de erro de ação (ex: remoção com usuários vinculados) */}
       {actionError && (
         <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
           <div className="flex items-center gap-2">
@@ -600,10 +602,10 @@ export function Grupos() {
           </div>
           <button
             type="button"
-            onClick={() => setError("")}
-            className="p-1 rounded-lg hover:bg-[#ef4444]/20 transition-colors cursor-pointer"
+            onClick={carregarGrupos}
+            className="underline font-semibold hover:text-white"
           >
-            <X className="w-4 h-4" />
+            Tentar novamente
           </button>
         </div>
       )}
@@ -611,10 +613,12 @@ export function Grupos() {
       {/* Tabela de Grupos */}
       <DataTable
         title={
-          <div className="flex items-center gap-2">
-            <h2 className="text-white text-base font-semibold">Grupos Cadastrados</h2>
-            <span className="text-xs text-[#9e9e9e]">
-              • {paginatedData.totalElements}{" "}
+          <div className="flex items-center gap-3">
+            <h2 className="text-white font-semibold text-lg">
+              Lista de Grupos de Pesquisa
+            </h2>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#2e2e2e]/40 text-[#9e9e9e] font-normal">
+              {paginatedData.totalElements}{" "}
               {paginatedData.totalElements === 1 ? "registro" : "registros"}
             </span>
           </div>
@@ -652,7 +656,7 @@ export function Grupos() {
         }
       />
 
-      {/* Modal para Cadastrar Novo Grupo */}
+      {/* Modal / Diálogo para Cadastrar Novo Grupo */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
@@ -721,8 +725,7 @@ export function Grupos() {
                       onChange={(e) => setNome(e.target.value)}
                       placeholder="Ex: Laboratório de Inteligência Artificial"
                       disabled={creating}
-                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text- 
-  sm"
+                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                     />
                   </div>
 
@@ -734,19 +737,19 @@ export function Grupos() {
                       <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e9e9e]" />
                       <input
                         type="email"
+                        required
                         value={emailLider}
                         onChange={(e) => setEmailLider(e.target.value)}
                         placeholder="lider@universidade.edu.br"
                         disabled={creating}
-                        className="w-full py-2.5 pl-10 pr-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-     
-  colors text-sm"
+                        className="w-full py-2.5 pl-10 pr-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                       />
                     </div>
                   </div>
 
                   <div className="p-3 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-xs text-[#9e9e9e] space-y-1">
                     <p className="text-white font-medium flex items-center gap-1.5">
-                      <TriangleAlert className="w-3.5 h-3.5 text-[#ff8c42]" />
+                      <AlertTriangle className="w-3.5 h-3.5 text-[#ff8c42]" />
                       Convite com perfil de Líder
                     </p>
                     <p>

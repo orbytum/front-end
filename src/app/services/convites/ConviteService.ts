@@ -14,6 +14,12 @@ import {
     ListarConvitesCadastroParams,
     conviteCadastroPaginadoResponseSchema,
 } from "../../models/dto/convites/ListarConvitesCadastro";
+import {
+    ConviteGrupoDetalhe,
+    conviteGrupoDetalheSchema,
+    AceitarConviteGrupoResponse,
+    aceitarConviteGrupoResponseSchema,
+} from "../../models/dto/convites/ConviteGrupoDetalhe";
 
 export class ConviteService extends BaseService {
     async aceitarCadastro(token: string, data: AceitarConviteCadastroRequest): Promise<AceitarConviteCadastroResponse> {
@@ -42,5 +48,22 @@ export class ConviteService extends BaseService {
 
     async revogarCadastro(id: number): Promise<void> {
         return this.delete(`/convites/cadastro/${id}`);
+    }
+
+    async buscarConviteGrupo(token: string): Promise<ConviteGrupoDetalhe> {
+        return this.get(
+            `/convites/aceitar/grupo/${encodeURIComponent(token)}`,
+            {},
+            conviteGrupoDetalheSchema
+        );
+    }
+
+    async aceitarConviteGrupo(token: string): Promise<AceitarConviteGrupoResponse> {
+        return this.post(
+            `/convites/aceitar/grupo/${encodeURIComponent(token)}`,
+            {},
+            {},
+            aceitarConviteGrupoResponseSchema
+        );
     }
 }

@@ -14,6 +14,10 @@ import {
     ListarGruposParams,
     grupoPaginadoResponseSchema,
 } from "../../models/dto/grupos/ListarGrupos";
+import {
+    MeuGrupoResponse,
+    meuGrupoResponseSchema,
+} from "../../models/dto/grupos/MeuGrupo";
 
 import {
     CreateLeaderRequest,
@@ -38,6 +42,10 @@ export class GrupoService extends BaseService {
             searchParams.append("usuario", params.usuario.trim());
         }
         return this.get(`/grupos?${searchParams.toString()}`, {}, grupoPaginadoResponseSchema);
+    }
+
+    async listarMeusGrupos(): Promise<MeuGrupoResponse[]> {
+        return this.get("/grupos/meus-grupos", {}, z.array(meuGrupoResponseSchema));
     }
 
     async criarGrupo(data: CreateGroupRequest): Promise<GrupoDetalhe> {
