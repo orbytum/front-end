@@ -1,4 +1,4 @@
-import { Outlet, NavLink, Navigate } from "react-router";
+import { Outlet, NavLink, Navigate, useLocation } from "react-router";
 import {
   LayoutDashboard,
   Users,
@@ -24,6 +24,7 @@ import { SemGrupoView } from "./SemGrupoView";
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const authService = new AuthService();
+  const location = useLocation();
 
   if (!authService.isAuthenticated()) {
     authService.logout();
@@ -31,6 +32,12 @@ export function Layout() {
   }
 
   const isAdmin = authService.isAdminOrInitialAdmin();
+
+  // Se for ADMIN e estiver na raiz "/", redireciona para "/grupos"
+  if (isAdmin && location.pathname === "/") {
+    return <Navigate to="/grupos" replace />;
+  }
+
   const { grupoAtual, semGrupos, carregandoGrupos } = useGrupo();
 
   // Se for usuário comum e não pertencer a nenhum grupo, renderiza tela explicativa
@@ -50,21 +57,25 @@ export function Layout() {
     );
   }
 
-  const navItems = [
-    { path: "/", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/grupos", label: "Grupos de Pesquisa", icon: Users },
-    ...(isAdmin
-      ? [{ path: "/gestao-convites", label: "Convites de Cadastro", icon: MailPlus }]
-      : []),
-    { path: "/recursos", label: "Recursos Financeiros", icon: Hexagon },
-    { path: "/solicitacoes", label: "Solicitações", icon: FileText },
-    { path: "/materiais", label: "Materiais", icon: Box },
-    { path: "/projetos", label: "Projetos", icon: FolderKanban },
-    { path: "/atividades", label: "Atividades", icon: ListTodo },
-    { path: "/editais", label: "Editais", icon: Megaphone },
-    { path: "/eventos", label: "Eventos", icon: CalendarDays },
-    { path: "/calendario", label: "Calendário", icon: Calendar },
-  ];
+  const navItems = isAdmin
+    ? [
+        { path: "/grupos", label: "Grupos de Pesquisa", icon: Users },
+        { path: "/gestao-convites", label: "Convites de Cadastro", icon: MailPlus },
+        { path: "/recursos", label: "Recursos Financeiros", icon: Hexagon },
+        { path: "/solicitacoes", label: "Solicitações", icon: FileText },
+      ]
+    : [
+        { path: "/", label: "Dashboard", icon: LayoutDashboard },
+        { path: "/participantes", label: "Participantes", icon: UserCheck },
+        { path: "/recursos", label: "Recursos Financeiros", icon: Hexagon },
+        { path: "/solicitacoes", label: "Solicitações", icon: FileText },
+        { path: "/materiais", label: "Materiais", icon: Box },
+        { path: "/projetos", label: "Projetos", icon: FolderKanban },
+        { path: "/atividades", label: "Atividades", icon: ListTodo },
+        { path: "/editais", label: "Editais", icon: Megaphone },
+        { path: "/eventos", label: "Eventos", icon: CalendarDays },
+        { path: "/calendario", label: "Calendário", icon: Calendar },
+      ];
 
   return (
     <div className="flex h-full bg-[#121212]">

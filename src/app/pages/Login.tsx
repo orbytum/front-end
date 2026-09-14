@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { LoginService } from "../services/auth/LoginService";
+import { AuthService } from "../services/auth/AuthService";
 import { Eye, EyeOff, LogIn, Orbit } from "lucide-react";
 
 export function Login() {
@@ -9,6 +10,7 @@ export function Login() {
   const redirect = searchParams.get("redirect") || "/";
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const loginService = new LoginService();
+  const authService = new AuthService();
   const [formulario, setFormulario] = useState({ usuario: "", senha: "" });
   const [erro, setErro] = useState("");
 
@@ -24,12 +26,19 @@ export function Login() {
       if (response && response.token) {
         localStorage.setItem("token", response.token);
         localStorage.setItem("token_tipo", response.tipo || "Bearer");
-        navigate(redirect);
+
+        const accessLevel = authService.getUserAccessLevel();
+        if (accessLevel === "initial_admin") {
+          navigate("/cadastrar-admin-inicial");
+        } else {
+          navigate(redirect);
+        }
       }
     } catch (err: any) {
       setErro(err?.mensagem || err?.message || "Erro ao realizar login. Verifique suas credenciais.");
     }
   };
+
 
   
 

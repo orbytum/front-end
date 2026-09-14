@@ -193,7 +193,7 @@ export function Solicitacoes() {
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
       <div className="mb-6">
-        <h1 className="text-white mb-2">Solicitações de Recursos</h1>
+        <h1 className="text-white font-bold mb-2">Solicitações de Recursos</h1>
         <p className="text-[#9e9e9e]">Gerencie solicitações de verbas, equipamentos e materiais</p>
       </div>
 

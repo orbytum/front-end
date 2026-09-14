@@ -20,12 +20,18 @@ import { Lembretes } from "./pages/Lembretes";
 import { AceitarConviteCadastro } from "./pages/AceitarConviteCadastro";
 import { AceitarConviteGrupo } from "./pages/AceitarConviteGrupo";
 import { GestaoConvitesCadastro } from "./pages/GestaoConvitesCadastro";
+import { CadastrarAdminInicial } from "./pages/CadastrarAdminInicial";
 
 export const router = createBrowserRouter([
   {
     path: "/login",
     Component: Login,
   },
+  {
+    path: "/cadastrar-admin-inicial",
+    Component: CadastrarAdminInicial,
+  },
+
   {
     path: "/convite",
     Component: AceitarConviteCadastro,
