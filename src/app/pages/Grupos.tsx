@@ -17,6 +17,8 @@ import {
   Shield,
   Clock,
   UserCheck,
+  Pencil,
+  UserPlus,
 } from "lucide-react";
 import { DataTable, Column } from "../components/DataTable";
 import { GrupoService } from "../services/grupos/GrupoService";
@@ -41,6 +43,23 @@ export function Grupos() {
   const [debouncedNome, setDebouncedNome] = useState("");
   const [usuarioFilter, setUsuarioFilter] = useState("");
   const [debouncedUsuario, setDebouncedUsuario] = useState("");
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingGrupo, setEditingGrupo] = useState<GrupoDetalhe | null>(null);
+  const [editNome, setEditNome] = useState("");
+  const [editIsAtivo, setEditIsAtivo] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [editError, setEditError] = useState("");
+
+  const [liderModalOpen, setLiderModalOpen] = useState(false);
+  const [selectedGrupoLider, setSelectedGrupoLider] = useState<GrupoDetalhe | null>(null);
+  const [liderNome, setLiderNome] = useState("");
+  const [liderEmail, setLiderEmail] = useState("");
+  const [liderTelefone, setLiderTelefone] = useState("");
+  const [liderTitulo, setLiderTitulo] = useState("");
+  const [liderSenha, setLiderSenha] = useState("");
+  const [cadastrandoLider, setCadastrandoLider] = useState(false);
+  const [liderError, setLiderError] = useState("");
 
   const [paginatedData, setPaginatedData] = useState<GrupoPaginadoResponse>({
     items: [],
@@ -112,11 +131,6 @@ export function Grupos() {
       return;
     }
 
-    if (!emailLider.trim()) {
-      setModalError("Informe o e-mail do líder que receberá o convite.");
-      return;
-    }
-
     setCreating(true);
     try {
       const res = await grupoService.criarGrupo({
@@ -157,6 +171,83 @@ export function Grupos() {
       }
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleOpenEdit = (grupo: GrupoDetalhe) => {
+    setEditingGrupo(grupo);
+    setEditNome(grupo.nome);
+    setEditIsAtivo(grupo.isAtivo);
+    setEditError("");
+    setEditModalOpen(true);
+  };
+
+  const handleUpdateGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGrupo) return;
+
+    if (!editNome.trim()) {
+      setEditError("O nome do grupo é obrigatório.");
+      return;
+    }
+
+    setUpdating(true);
+    setEditError("");
+    try {
+      await grupoService.atualizarGrupo(editingGrupo.id, {
+        nome: editNome.trim(),
+        isAtivo: editIsAtivo,
+      });
+      setEditModalOpen(false);
+      setEditingGrupo(null);
+      carregarGrupos();
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setEditError(err.response?.mensagem || err.message);
+      } else {
+        setEditError("Erro ao atualizar o grupo.");
+      }
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleOpenCadastrarLider = (grupo: GrupoDetalhe) => {
+    setSelectedGrupoLider(grupo);
+    setLiderNome("");
+    setLiderEmail("");
+    setLiderTelefone("");
+    setLiderTitulo("");
+    setLiderSenha("");
+    setLiderError("");
+    setLiderModalOpen(true);
+  };
+
+  const handleCadastrarLider = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedGrupoLider) return;
+
+    setCadastrandoLider(true);
+    setLiderError("");
+    try {
+      await grupoService.cadastrarLider(selectedGrupoLider.id, {
+        nome: liderNome.trim(),
+        email: liderEmail.trim(),
+        telefone: liderTelefone.trim(),
+        titulo: liderTitulo.trim(),
+        senha: liderSenha,
+      });
+      setLiderModalOpen(false);
+      setSelectedGrupoLider(null);
+      carregarGrupos();
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setLiderError(err.response?.mensagem || err.message);
+      } else {
+        setLiderError("Erro ao cadastrar o líder. Tente novamente.");
+      }
+    } finally {
+      setCadastrandoLider(false);
     }
   };
 
@@ -228,13 +319,21 @@ export function Grupos() {
                 </span>
               </>
             ) : (
-              <>
-                <span className="text-[#ff8c42] text-sm font-medium block flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" />
-                  Convite Enviado
-                </span>
-                <span className="text-xs text-[#9e9e9e]">Aguardando aceite</span>
-              </>
+              <div className="flex flex-col items-start gap-1">
+                <span className="text-xs text-[#9e9e9e]">Nenhum líder vinculado</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenCadastrarLider(g);
+                  }}
+                  disabled={!g.isAtivo}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#ff8c42]/10 hover:bg-[#ff8c42]/20 border border-[#ff8c42]/30 text-[#ff8c42] text-xs font-medium transition-colors cursor-pointer disabled:opacity-40"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Cadastrar Líder</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -245,11 +344,19 @@ export function Grupos() {
       header: "Participantes",
       align: "center",
       render: (g) => (
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#121212] border border-[#2e2e2e]/30 text-xs text-white">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/grupos/${g.id}/participantes`);
+          }}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#121212] hover:bg-[#ff8c42]/10 border border-[#2e2e2e]/30 hover:border-[#ff8c42]/40 text-xs text-white transition-all cursor-pointer"
+          title="Ver participantes"
+        >
           <UserCheck className="w-3.5 h-3.5 text-[#4a9eff]" />
           <span className="font-semibold">{g.totalParticipantes ?? 0}</span>
           <span className="text-[#9e9e9e]">membros</span>
-        </div>
+        </button>
       ),
     },
     {
@@ -258,16 +365,14 @@ export function Grupos() {
       align: "center",
       render: (g) => (
         <span
-          className={`px-3 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1.5 ${
-            g.isAtivo
-              ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30"
-              : "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/30"
-          }`}
+          className={`px-3 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1.5 ${g.isAtivo
+            ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30"
+            : "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/30"
+            }`}
         >
           <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              g.isAtivo ? "bg-[#10b981]" : "bg-[#ef4444]"
-            }`}
+            className={`w-1.5 h-1.5 rounded-full ${g.isAtivo ? "bg-[#10b981]" : "bg-[#ef4444]"
+              }`}
           />
           {g.isAtivo ? "Ativo" : "Inativo"}
         </span>
@@ -281,7 +386,33 @@ export function Grupos() {
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
-            onClick={() => handleDelete(g)}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/grupos/${g.id}/participantes`);
+            }}
+            className="p-1.5 rounded-lg border border-[#4a9eff]/30 text-[#4a9eff] hover:bg-[#4a9eff]/10 transition-colors cursor-pointer"
+            title="Ver participantes"
+          >
+            <Users className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenEdit(g);
+            }}
+            disabled={!g.isAtivo}
+            className="p-1.5 rounded-lg border border-[#ff8c42]/30 text-[#ff8c42] hover:bg-[#ff8c42]/10 transition-colors disabled:opacity-40 cursor-pointer"
+            title="Editar grupo"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(g);
+            }}
             disabled={deletingId === g.id || !g.isAtivo}
             className="p-1.5 rounded-lg border border-[#ef4444]/30 text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors disabled:opacity-40 cursor-pointer"
             title={g.isAtivo ? "Remover grupo" : "Grupo já inativo"}
@@ -470,6 +601,7 @@ export function Grupos() {
             <span>{error}</span>
           </div>
           <button
+            type="button"
             onClick={carregarGrupos}
             className="underline font-semibold hover:text-white"
           >
@@ -493,6 +625,7 @@ export function Grupos() {
         }
         data={paginatedData.items}
         columns={columns}
+        onRowClick={(g) => navigate(`/grupos/${g.id}/participantes`)}
         page={page}
         pageSize={pageSize}
         totalElements={paginatedData.totalElements}
@@ -616,7 +749,7 @@ export function Grupos() {
 
                   <div className="p-3 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-xs text-[#9e9e9e] space-y-1">
                     <p className="text-white font-medium flex items-center gap-1.5">
-                      <Shield className="w-3.5 h-3.5 text-[#ff8c42]" />
+                      <AlertTriangle className="w-3.5 h-3.5 text-[#ff8c42]" />
                       Convite com perfil de Líder
                     </p>
                     <p>
@@ -653,6 +786,237 @@ export function Grupos() {
                   </div>
                 </form>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editModalOpen && editingGrupo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
+            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                  <Pencil className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold text-lg">Editar Grupo de Pesquisa</h3>
+                  <p className="text-[#9e9e9e] text-xs">Atualize os dados e o status do grupo</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(false)}
+                className="p-1.5 rounded-lg text-[#9e9e9e] hover:text-white hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {editError && (
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleUpdateGroup} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    Nome do Grupo <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editNome}
+                    onChange={(e) => setEditNome(e.target.value)}
+                    disabled={updating}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-[#121212] rounded-xl border border-[#2e2e2e]/30">
+                  <input
+                    type="checkbox"
+                    id="editIsAtivo"
+                    checked={editIsAtivo}
+                    onChange={(e) => setEditIsAtivo(e.target.checked)}
+                    disabled={updating}
+                    className="w-4 h-4 accent-[#ff8c42] rounded cursor-pointer"
+                  />
+                  <label htmlFor="editIsAtivo" className="text-sm text-white cursor-pointer select-none">
+                    Grupo Ativo
+                  </label>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditModalOpen(false)}
+                    disabled={updating}
+                    className="px-4 py-2.5 bg-[#121212] hover:bg-[#2e2e2e]/20 border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white rounded-xl text-sm transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={updating}
+                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {updating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Salvando...</span>
+                      </>
+                    ) : (
+                      <span>Salvar Alterações</span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {liderModalOpen && selectedGrupoLider && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
+            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                  <UserPlus className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold text-lg">Cadastrar Líder</h3>
+                  <p className="text-[#9e9e9e] text-xs">Vincular líder ao grupo: {selectedGrupoLider.nome}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLiderModalOpen(false)}
+                className="p-1.5 rounded-lg text-[#9e9e9e] hover:text-white hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {liderError && (
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{liderError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleCadastrarLider} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    Nome Completo <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={liderNome}
+                    onChange={(e) => setLiderNome(e.target.value)}
+                    placeholder="Ex: Dr. Carlos Silva"
+                    disabled={cadastrandoLider}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    E-mail <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={liderEmail}
+                    onChange={(e) => setLiderEmail(e.target.value)}
+                    placeholder="carlos.silva@universidade.edu.br"
+                    disabled={cadastrandoLider}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                      Telefone <span className="text-[#ff8c42]">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={liderTelefone}
+                      onChange={(e) => setLiderTelefone(e.target.value)}
+                      placeholder="(11) 98765-4321"
+                      disabled={cadastrandoLider}
+                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                      Titulação <span className="text-[#ff8c42]">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={liderTitulo}
+                      onChange={(e) => setLiderTitulo(e.target.value)}
+                      placeholder="Ex: Doutor, Mestre"
+                      disabled={cadastrandoLider}
+                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    Senha Provisória <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={liderSenha}
+                    onChange={(e) => setLiderSenha(e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    disabled={cadastrandoLider}
+                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setLiderModalOpen(false)}
+                    disabled={cadastrandoLider}
+                    className="px-4 py-2.5 bg-[#121212] hover:bg-[#2e2e2e]/20 border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white rounded-xl text-sm transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={cadastrandoLider}
+                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {cadastrandoLider ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Cadastrando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4" />
+                        <span>Cadastrar Líder</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { BaseService } from "../BaseService";
+import { EditGroupRequest } from "../../models/dto/grupos/EditGroup";
+import { grupoDetalheSchema } from "../../models/dto/grupos/GrupoDetalhe";
 import {
     GrupoDetalhe,
 } from "../../models/dto/grupos/GrupoDetalhe";
@@ -23,6 +25,17 @@ import {
     pesquisadorPaginadoResponseSchema,
 } from "../../models/dto/grupos/PesquisadorPaginado";
 
+import {
+    CreateLeaderRequest,
+    LiderResponse,
+    liderResponseSchema
+} from "../../models/dto/grupos/Lider"
+
+import {
+    ParticipanteResponse,
+    EditParticipanteRequest,
+    participanteResponseSchema
+} from "../../models/dto/grupos/Participante"
 export class GrupoService extends BaseService {
     async listarGrupos(params: ListarGruposParams = {}): Promise<GrupoPaginadoResponse> {
         const searchParams = new URLSearchParams();
@@ -57,5 +70,33 @@ export class GrupoService extends BaseService {
             searchParams.append("nome", params.nome.trim());
         }
         return this.get(`/grupos/${grupoId}/pesquisadores?${searchParams.toString()}`, {}, pesquisadorPaginadoResponseSchema);
+    }
+  
+    async atualizarGrupo(id: number, data: EditGroupRequest): Promise<GrupoDetalhe> {
+        return this.put(`/grupos/${id}`, data, {}, grupoDetalheSchema);
+    }
+
+    async cadastrarLider(grupoId: number, data: CreateLeaderRequest): Promise<LiderResponse> {
+        return this.post(`/grupos/${grupoId}/lideres`, data, {}, liderResponseSchema);
+    }
+
+    async buscarPorId(id: number): Promise<GrupoDetalhe> {
+        return this.get(`/grupos/${id}`, {}, grupoDetalheSchema);
+    }
+
+    async listarParticipantes(grupoId: number): Promise<ParticipanteResponse[]> {
+        return this.get(`/grupos/${grupoId}/pesquisadores`, {}, z.array(participanteResponseSchema));
+    }
+
+    async atualizarParticipante(
+        grupoId: number,
+        usuarioId: number,
+        data: EditParticipanteRequest
+    ): Promise<ParticipanteResponse> {
+        return this.put(`/grupos/${grupoId}/pesquisadores/${usuarioId}`, data, {}, participanteResponseSchema);
+    }
+
+    async removerParticipante(grupoId: number, usuarioId: number): Promise<void> {
+        return this.delete(`/grupos/${grupoId}/pesquisadores/${usuarioId}`);
     }
 }

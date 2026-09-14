@@ -20,10 +20,12 @@ import {
   Search,
   Filter,
   ChevronDown,
+  Shield,
 } from "lucide-react";
 import { DataTable, Column } from "../components/DataTable";
 import { ConviteService } from "../services/convites/ConviteService";
 import { AuthService } from "../services/auth/AuthService";
+import { LoginService } from "../services/auth/LoginService";
 import { HttpError } from "../utils/HttpError";
 import { ConviteCadastroDetalhe } from "../models/dto/convites/ConviteCadastroDetalhe";
 import { ConviteCadastroPaginadoResponse } from "../models/dto/convites/ListarConvitesCadastro";
@@ -32,10 +34,21 @@ export function GestaoConvitesCadastro() {
   const navigate = useNavigate();
   const conviteService = new ConviteService();
   const authService = new AuthService();
+  const loginService = new LoginService();
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [adminModalOpen, setAdminModalOpen] = useState(false);
+  const [adminNome, setAdminNome] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminTelefone, setAdminTelefone] = useState("");
+  const [adminTitulo, setAdminTitulo] = useState("");
+  const [adminSenha, setAdminSenha] = useState("");
+  const [cadastrandoAdmin, setCadastrandoAdmin] = useState(false);
+  const [adminError, setAdminError] = useState("");
+  const [adminSuccess, setAdminSuccess] = useState(false);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
@@ -117,6 +130,32 @@ export function GestaoConvitesCadastro() {
     setTimeout(() => {
       setCopiedId((prev) => (prev === id ? null : prev));
     }, 2000);
+  };
+
+  const handleRegisterAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminError("");
+    setAdminSuccess(false);
+
+    setCadastrandoAdmin(true);
+    try {
+      await loginService.registerAdmin({
+        nome: adminNome.trim(),
+        email: adminEmail.trim(),
+        telefone: adminTelefone.trim(),
+        titulo: adminTitulo.trim(),
+        senha: adminSenha,
+      });
+      setAdminSuccess(true);
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setAdminError(err.response?.mensagem || err.message);
+      } else {
+        setAdminError("Erro ao cadastrar administrador. Tente novamente.");
+      }
+    } finally {
+      setCadastrandoAdmin(false);
+    }
   };
 
   const handleCreateInvite = async (e: React.FormEvent) => {
@@ -339,6 +378,24 @@ export function GestaoConvitesCadastro() {
             title="Recarregar lista"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setAdminModalOpen(true);
+              setAdminNome("");
+              setAdminEmail("");
+              setAdminTelefone("");
+              setAdminTitulo("");
+              setAdminSenha("");
+              setAdminError("");
+              setAdminSuccess(false);
+            }}
+            className="px-4 py-2.5 bg-[#1e1e1e] hover:bg-[#2e2e2e]/40 border border-[#ff8c42]/40 text-[#ff8c42] rounded-xl font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <Shield className="w-4 h-4" />
+            <span>Novo Administrador</span>
           </button>
 
           <button
@@ -689,6 +746,168 @@ export function GestaoConvitesCadastro() {
                         <>
                           <Send className="w-4 h-4" />
                           <span>Gerar e Enviar Convite</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {adminModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
+            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold text-lg">Novo Administrador</h3>
+                  <p className="text-[#9e9e9e] text-xs">Cadastre um novo administrador da plataforma</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAdminModalOpen(false)}
+                className="p-1.5 rounded-lg text-[#9e9e9e] hover:text-white hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {adminError && (
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{adminError}</span>
+                </div>
+              )}
+
+              {adminSuccess ? (
+                <div className="p-5 bg-[#10b981]/10 border border-[#10b981]/30 rounded-xl space-y-3">
+                  <div className="flex items-center gap-2 text-[#10b981] font-semibold text-sm">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span>Administrador cadastrado com sucesso!</span>
+                  </div>
+                  <p className="text-xs text-[#9e9e9e]">
+                    A conta de administrador foi criada. O usuário já pode acessar a plataforma utilizando o e-mail e senha cadastrados.
+                  </p>
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setAdminModalOpen(false)}
+                      className="px-4 py-2 bg-[#ff8c42] text-white rounded-xl text-xs font-medium transition-colors cursor-pointer"
+                    >
+                      Concluir
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleRegisterAdmin} className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                      Nome Completo <span className="text-[#ff8c42]">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={adminNome}
+                      onChange={(e) => setAdminNome(e.target.value)}
+                      placeholder="Ex: João Silva"
+                      disabled={cadastrandoAdmin}
+                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                      E-mail <span className="text-[#ff8c42]">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={adminEmail}
+                      onChange={(e) => setAdminEmail(e.target.value)}
+                      placeholder="admin@organizacao.com"
+                      disabled={cadastrandoAdmin}
+                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                        Telefone <span className="text-[#ff8c42]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={adminTelefone}
+                        onChange={(e) => setAdminTelefone(e.target.value)}
+                        placeholder="(11) 98765-4321"
+                        disabled={cadastrandoAdmin}
+                        className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                        Titulação <span className="text-[#ff8c42]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={adminTitulo}
+                        onChange={(e) => setAdminTitulo(e.target.value)}
+                        placeholder="Ex: Doutor, Mestre"
+                        disabled={cadastrandoAdmin}
+                        className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                      Senha <span className="text-[#ff8c42]">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={adminSenha}
+                      onChange={(e) => setAdminSenha(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      disabled={cadastrandoAdmin}
+                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    />
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setAdminModalOpen(false)}
+                      disabled={cadastrandoAdmin}
+                      className="px-4 py-2.5 bg-[#121212] hover:bg-[#2e2e2e]/20 border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white rounded-xl text-sm transition-colors cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={cadastrandoAdmin}
+                      className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                    >
+                      {cadastrandoAdmin ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Cadastrando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="w-4 h-4" />
+                          <span>Cadastrar Administrador</span>
                         </>
                       )}
                     </button>

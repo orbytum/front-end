@@ -2,7 +2,6 @@ import { Outlet, NavLink, Navigate, useLocation } from "react-router";
 import {
   LayoutDashboard,
   Users,
-  UserCheck,
   Hexagon,
   FileText,
   Box,
@@ -27,7 +26,7 @@ export function Layout() {
   const authService = new AuthService();
   const location = useLocation();
 
-  if (!authService.isTokenValid()) {
+  if (!authService.isAuthenticated()) {
     authService.logout();
     return <Navigate to="/login" replace />;
   }

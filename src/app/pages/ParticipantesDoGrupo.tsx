@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
 import { ArrowLeft, Search, UserCheck, Shield, Crown, User, Users, Lock, UserPlus, Loader2, Mail, Phone } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -10,6 +11,13 @@ import { ModalConvidarMembro } from "../components/ModalConvidarMembro";
 export function ParticipantesDoGrupo() {
   const { groupId } = useParams();
   const navigate = useNavigate();
+  const grupoService = new GrupoService();
+
+  const [grupo, setGrupo] = useState<GrupoDetalhe | null>(null);
+  const [participantes, setParticipantes] = useState<ParticipanteResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [termoBusca, setTermoBusca] = useState("");
   const [modalConvidarAberto, setModalConvidarAberto] = useState(false);
 
@@ -64,11 +72,40 @@ export function ParticipantesDoGrupo() {
     return nome.substring(0, 2).toUpperCase();
   };
 
+  const participantesFiltrados = participantes.filter((p) => {
+    const termo = termoBusca.toLowerCase();
+    const correspondeBusca =
+      p.nome.toLowerCase().includes(termo) ||
+      p.email.toLowerCase().includes(termo) ||
+      (p.cargo && p.cargo.toLowerCase().includes(termo)) ||
+      (p.titulo && p.titulo.toLowerCase().includes(termo));
+
+    if (filtroFuncao === "Líder") {
+      return correspondeBusca && p.isLider;
+    }
+    if (filtroFuncao === "Pesquisador") {
+      return correspondeBusca && !p.isLider;
+    }
+    return correspondeBusca;
+  });
+
+  const totalParticipantes = participantes.length;
+  const totalLideres = participantes.filter((p) => p.isLider).length;
+  const totalPesquisadores = participantes.filter((p) => !p.isLider).length;
+
+  if (loading && !grupo) {
+    return (
+      <div className="h-full flex items-center justify-center p-6">
+        <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full overflow-auto p-6">
-      {/* Cabeçalho com Botão Voltar */}
-      <div className="mb-6">
+    <div className="h-full overflow-auto p-6 space-y-6">
+      <div>
         <button
+          type="button"
           onClick={() => navigate("/grupos")}
           className="flex items-center gap-2 text-[#9e9e9e] hover:text-[#ff8c42] transition-colors mb-4 cursor-pointer"
         >
@@ -83,6 +120,15 @@ export function ParticipantesDoGrupo() {
             <h1 className="text-white text-xl font-bold">{nomeGrupoExibicao}</h1>
             <p className="text-[#9e9e9e] text-sm">Gerenciar participantes e cargos do grupo</p>
           </div>
+          <button
+            type="button"
+            onClick={carregarDados}
+            disabled={loading}
+            className="p-2.5 bg-[#1e1e1e] hover:bg-[#2e2e2e]/30 border border-[#2e2e2e]/40 rounded-xl text-[#9e9e9e] hover:text-white transition-colors cursor-pointer self-start sm:self-auto"
+            title="Recarregar"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
         </div>
       </div>
 
@@ -113,11 +159,9 @@ export function ParticipantesDoGrupo() {
         </div>
       </div>
 
-      {/* Barra de Ações */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        {/* Busca */}
+      <div className="bg-[#1e1e1e] rounded-2xl p-4 border border-[#2e2e2e]/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e9e9e]" />
           <input
             type="text"
             placeholder="Buscar participantes por nome..."
@@ -125,6 +169,15 @@ export function ParticipantesDoGrupo() {
             onChange={(e) => setTermoBusca(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50 text-sm"
           />
+          {termoBusca && (
+            <button
+              type="button"
+              onClick={() => setTermoBusca("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9e9e9e] hover:text-white rounded-lg transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Botão Adicionar Participante (Apenas Líder/Admin) */}

@@ -10,7 +10,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
   const authService = new AuthService();
 
-  if (!authService.isTokenValid()) {
+  if (!authService.isAuthenticated()) {
     authService.logout();
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
