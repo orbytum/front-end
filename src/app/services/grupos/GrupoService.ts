@@ -17,6 +17,12 @@ import {
     meuGrupoResponseSchema,
 } from "../../models/dto/grupos/MeuGrupo";
 
+import {
+    PesquisadorPaginadoResponse,
+    ListarPesquisadoresParams,
+    pesquisadorPaginadoResponseSchema,
+} from "../../models/dto/grupos/PesquisadorPaginado";
+
 export class GrupoService extends BaseService {
     async listarGrupos(params: ListarGruposParams = {}): Promise<GrupoPaginadoResponse> {
         const searchParams = new URLSearchParams();
@@ -41,5 +47,15 @@ export class GrupoService extends BaseService {
 
     async removerGrupo(id: number): Promise<void> {
         return this.delete(`/grupos/${id}`);
+    }
+
+    async listarPesquisadores(grupoId: number, params: ListarPesquisadoresParams = {}): Promise<PesquisadorPaginadoResponse> {
+        const searchParams = new URLSearchParams();
+        searchParams.append("page", String(params.page ?? 1));
+        searchParams.append("size", String(params.size ?? 10));
+        if (params.nome && params.nome.trim()) {
+            searchParams.append("nome", params.nome.trim());
+        }
+        return this.get(`/grupos/${grupoId}/pesquisadores?${searchParams.toString()}`, {}, pesquisadorPaginadoResponseSchema);
     }
 }

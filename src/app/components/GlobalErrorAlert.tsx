@@ -15,8 +15,7 @@ export function GlobalErrorAlert() {
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<ErroAlerta>).detail;
       setErro(detail);
-
-      // Reinicia o timer para ocultar o toast automaticamente após 5 segundos
+      
       clearTimeout(timer);
       timer = setTimeout(() => {
         setErro(null);

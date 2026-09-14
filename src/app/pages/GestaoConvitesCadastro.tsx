@@ -323,7 +323,7 @@ export function GestaoConvitesCadastro() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-white text-2xl font-bold mb-1">
-            Gestão de Convites de Cadastro
+            Convites de Cadastro
           </h1>
           <p className="text-[#9e9e9e] text-sm">
             Gere e acompanhe convites para novos usuários se cadastrarem na plataforma

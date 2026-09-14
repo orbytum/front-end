@@ -303,7 +303,7 @@ export function Grupos() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-white text-2xl font-bold mb-1">
-            Gestão de Grupos de Pesquisa
+            Grupos de Pesquisa
           </h1>
           <p className="text-[#9e9e9e] text-sm">
             Cadastre novos grupos, envie convites para líderes e acompanhe a equipe
