@@ -2,7 +2,6 @@ import { Outlet, NavLink, Navigate } from "react-router";
 import {
   LayoutDashboard,
   Users,
-  UserCheck,
   Hexagon,
   FileText,
   Box,
@@ -26,7 +25,7 @@ export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const authService = new AuthService();
 
-  if (!authService.isTokenValid()) {
+  if (!authService.isAuthenticated()) {
     authService.logout();
     return <Navigate to="/login" replace />;
   }
@@ -54,7 +53,6 @@ export function Layout() {
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
     { path: "/grupos", label: "Grupos de Pesquisa", icon: Users },
-    { path: "/participantes", label: "Participantes", icon: UserCheck },
     ...(isAdmin
       ? [{ path: "/gestao-convites", label: "Convites de Cadastro", icon: MailPlus }]
       : []),
