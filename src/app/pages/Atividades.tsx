@@ -148,7 +148,7 @@ export function Atividades() {
       case "Concluída": return <CheckCircle className="w-5 h-5 text-[#10b981]" />;
       case "Em Andamento": return <Clock className="w-5 h-5 text-[#ff8c42]" />;
       case "Atrasada": return <AlertCircle className="w-5 h-5 text-[#ef4444]" />;
-      default: return <Circle className="w-5 h-5 text-[#9e9e9e]" />;
+      default: return <Circle className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
@@ -157,7 +157,7 @@ export function Atividades() {
       case "Concluída": return "bg-[#10b981]/20 text-[#10b981]";
       case "Em Andamento": return "bg-[#ff8c42]/20 text-[#ff8c42]";
       case "Atrasada": return "bg-[#ef4444]/20 text-[#ef4444]";
-      default: return "bg-[#9e9e9e]/20 text-[#9e9e9e]";
+      default: return "bg-muted-foreground/20 text-muted-foreground";
     }
   };
 
@@ -170,50 +170,50 @@ export function Atividades() {
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
       <div className="mb-6">
-        <h1 className="text-white mb-2">Atividades</h1>
-        <p className="text-[#9e9e9e]">Gerencie as atividades dos projetos em andamento</p>
+        <h1 className="text-foreground mb-2">Atividades</h1>
+        <p className="text-muted-foreground">Gerencie as atividades dos projetos em andamento</p>
       </div>
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Total</span>
+            <span className="text-muted-foreground text-sm">Total</span>
             <ListTodo className="w-5 h-5 text-[#4a9eff]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Pendentes</span>
-            <Circle className="w-5 h-5 text-[#9e9e9e]" />
+            <span className="text-muted-foreground text-sm">Pendentes</span>
+            <Circle className="w-5 h-5 text-muted-foreground" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.pendentes}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.pendentes}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Em Andamento</span>
+            <span className="text-muted-foreground text-sm">Em Andamento</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.emAndamento}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.emAndamento}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Concluídas</span>
+            <span className="text-muted-foreground text-sm">Concluídas</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.concluidas}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.concluidas}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Atrasadas</span>
+            <span className="text-muted-foreground text-sm">Atrasadas</span>
             <AlertCircle className="w-5 h-5 text-[#ef4444]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.atrasadas}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.atrasadas}</div>
         </div>
       </div>
 
@@ -221,13 +221,13 @@ export function Atividades() {
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar atividades..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -235,7 +235,7 @@ export function Atividades() {
         <select
           value={filtroProjeto}
           onChange={(e) => setFiltroProjeto(e.target.value)}
-          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Projetos</option>
           {projetos.map(projeto => (
@@ -247,7 +247,7 @@ export function Atividades() {
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Pendente">Pendentes</option>
@@ -268,7 +268,7 @@ export function Atividades() {
         {atividadesFiltradas.map((atividade) => (
           <div
             key={atividade.id}
-            className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300"
+            className="bg-card rounded-2xl p-6 border border-border/30 transition-all duration-300"
           >
             <div className="flex flex-col lg:flex-row lg:items-start gap-4">
               {/* Informações da Atividade */}
@@ -276,11 +276,11 @@ export function Atividades() {
                 <div className="flex items-start gap-3 mb-3">
                   {obterIconeStatus(atividade.status)}
                   <div className="flex-1">
-                    <h3 className="text-white font-semibold mb-1">{atividade.nome}</h3>
-                    <p className="text-sm text-[#9e9e9e] mb-2">{atividade.descricao}</p>
+                    <h3 className="text-foreground font-semibold mb-1">{atividade.nome}</h3>
+                    <p className="text-sm text-muted-foreground mb-2">{atividade.descricao}</p>
                     <div className="flex items-center gap-2">
                       <FolderKanban className="w-4 h-4 text-[#4a9eff]" />
-                      <span className="text-xs text-[#9e9e9e]">{atividade.nomeProjeto}</span>
+                      <span className="text-xs text-muted-foreground">{atividade.nomeProjeto}</span>
                     </div>
                   </div>
                 </div>
@@ -293,10 +293,10 @@ export function Atividades() {
                 </span>
 
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-[#9e9e9e]" />
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
                   <div className="text-xs">
-                    <span className="text-[#9e9e9e]">Entrega: </span>
-                    <span className={`font-medium ${ estaAtrasada(atividade.dataEntrega, atividade.status) ? "text-[#ef4444]" : "text-white" }`}>
+                    <span className="text-muted-foreground">Entrega: </span>
+                    <span className={`font-medium ${ estaAtrasada(atividade.dataEntrega, atividade.status) ? "text-[#ef4444]" : "text-foreground" }`}>
                       {new Date(atividade.dataEntrega).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
@@ -306,7 +306,7 @@ export function Atividades() {
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-[#10b981]" />
                     <div className="text-xs">
-                      <span className="text-[#9e9e9e]">Concluída em: </span>
+                      <span className="text-muted-foreground">Concluída em: </span>
                       <span className="text-[#10b981] font-medium">
                         {new Date(atividade.dataConclusao).toLocaleDateString('pt-BR')}
                       </span>
@@ -321,9 +321,9 @@ export function Atividades() {
 
       {/* Estado Vazio */}
       {atividadesFiltradas.length === 0 && (
-        <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
-          <ListTodo className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
-          <p className="text-[#9e9e9e]">Nenhuma atividade encontrada</p>
+        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+          <ListTodo className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">Nenhuma atividade encontrada</p>
         </div>
       )}
     </div>

@@ -94,7 +94,7 @@ export function Projetos() {
       case "Concluída": return <CheckCircle className="w-5 h-5 text-[#10b981]" />;
       case "Em Andamento": return <Clock className="w-5 h-5 text-[#ff8c42]" />;
       case "Atrasada": return <AlertCircle className="w-5 h-5 text-[#ef4444]" />;
-      default: return <Circle className="w-5 h-5 text-[#9e9e9e]" />;
+      default: return <Circle className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
@@ -103,7 +103,7 @@ export function Projetos() {
       case "Concluída": return "bg-[#10b981]/20 text-[#10b981]";
       case "Em Andamento": return "bg-[#ff8c42]/20 text-[#ff8c42]";
       case "Atrasada": return "bg-[#ef4444]/20 text-[#ef4444]";
-      default: return "bg-[#9e9e9e]/20 text-[#9e9e9e]";
+      default: return "bg-muted-foreground/20 text-muted-foreground";
     }
   };
 
@@ -119,42 +119,42 @@ export function Projetos() {
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
       <div className="mb-6">
-        <h1 className="text-white mb-2">Projetos</h1>
-        <p className="text-[#9e9e9e]">Acompanhe o progresso dos projetos dos grupos</p>
+        <h1 className="text-foreground mb-2">Projetos</h1>
+        <p className="text-muted-foreground">Acompanhe o progresso dos projetos dos grupos</p>
       </div>
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Total</span>
+            <span className="text-muted-foreground text-sm">Total</span>
             <FolderKanban className="w-5 h-5 text-[#4a9eff]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Em Andamento</span>
+            <span className="text-muted-foreground text-sm">Em Andamento</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.emAndamento}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.emAndamento}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Concluídas</span>
+            <span className="text-muted-foreground text-sm">Concluídas</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.concluidos}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.concluidos}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Atrasadas</span>
+            <span className="text-muted-foreground text-sm">Atrasadas</span>
             <AlertCircle className="w-5 h-5 text-[#ef4444]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.atrasados}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.atrasados}</div>
         </div>
       </div>
 
@@ -162,13 +162,13 @@ export function Projetos() {
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar projetos..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -176,7 +176,7 @@ export function Projetos() {
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Em Andamento">Em Andamento</option>
@@ -197,7 +197,7 @@ export function Projetos() {
         {projetosFiltrados.map((projeto) => (
           <div
             key={projeto.id}
-            className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300"
+            className="bg-card rounded-2xl p-6 border border-border/30 transition-all duration-300"
           >
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               {/* Informações do Projeto */}
@@ -205,8 +205,8 @@ export function Projetos() {
                 <div className="flex items-start gap-3 mb-3">
                   {obterIconeStatus(projeto.status)}
                   <div className="flex-1">
-                    <h3 className="text-white font-semibold mb-1">{projeto.titulo}</h3>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-[#9e9e9e]">
+                    <h3 className="text-foreground font-semibold mb-1">{projeto.titulo}</h3>
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                       <span>{projeto.grupo}</span>
                       <span>•</span>
                       <span>{projeto.responsavel}</span>
@@ -217,10 +217,10 @@ export function Projetos() {
                 {/* Barra de Progresso */}
                 <div className="mb-2">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-[#9e9e9e]">Progresso</span>
+                    <span className="text-xs text-muted-foreground">Progresso</span>
                     <span className="text-xs text-[#ff8c42] font-semibold">{projeto.progresso}%</span>
                   </div>
-                  <div className="w-full h-2 bg-[#121212] rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-background rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#ff8c42] rounded-full transition-all duration-300"
                       style={{ width: `${projeto.progresso}%` }}
@@ -239,7 +239,7 @@ export function Projetos() {
                     {projeto.prioridade}
                   </span>
                 </div>
-                <div className="text-xs text-[#9e9e9e]">
+                <div className="text-xs text-muted-foreground">
                   {new Date(projeto.dataInicio).toLocaleDateString('pt-BR')} - {new Date(projeto.dataFim).toLocaleDateString('pt-BR')}
                 </div>
               </div>
@@ -250,9 +250,9 @@ export function Projetos() {
 
       {/* Estado Vazio */}
       {projetosFiltrados.length === 0 && (
-        <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
-          <FolderKanban className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
-          <p className="text-[#9e9e9e]">Nenhum projeto encontrado</p>
+        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+          <FolderKanban className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">Nenhum projeto encontrado</p>
         </div>
       )}
     </div>

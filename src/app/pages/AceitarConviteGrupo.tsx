@@ -130,12 +130,12 @@ export function AceitarConviteGrupo() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 relative overflow-hidden">
       {/* Elementos orbitais de fundo */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full border border-[#2e2e2e]/15" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-[#2e2e2e]/10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[1100px] rounded-full border border-[#2e2e2e]/05" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full border border-border/15" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-border/10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[1100px] rounded-full border border-border/05" />
         {[...Array(10)].map((_, i) => (
           <div
             key={i}
@@ -153,34 +153,34 @@ export function AceitarConviteGrupo() {
               <Orbit className="w-6 h-6 text-white" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-wider">ORBYTUM</h1>
-          <p className="text-[#9e9e9e] text-xs mt-1">Gestão acadêmica orbital</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-wider">ORBYTUM</h1>
+          <p className="text-muted-foreground text-xs mt-1">Gestão acadêmica orbital</p>
         </div>
 
         {/* ── CARREGANDO ── */}
         {status === "carregando" && (
-          <div className="bg-[#1e1e1e] rounded-2xl p-8 border border-[#2e2e2e]/30 text-center">
+          <div className="bg-card rounded-2xl p-8 border border-border/30 text-center">
             <Loader2 className="w-10 h-10 text-[#ff8c42] animate-spin mx-auto mb-4" />
-            <h2 className="text-white font-semibold text-base mb-1">Localizando convite...</h2>
-            <p className="text-[#9e9e9e] text-xs">Aguarde enquanto verificamos os dados do grupo.</p>
+            <h2 className="text-foreground font-semibold text-base mb-1">Localizando convite...</h2>
+            <p className="text-muted-foreground text-xs">Aguarde enquanto verificamos os dados do grupo.</p>
           </div>
         )}
 
         {/* ── INVÁLIDO OU EXPIRADO ── */}
         {status === "invalido" && (
-          <div className="bg-[#1e1e1e] rounded-2xl p-8 border border-[#ef4444]/20 text-center">
+          <div className="bg-card rounded-2xl p-8 border border-[#ef4444]/20 text-center">
             <div className="w-16 h-16 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-8 h-8 text-[#ef4444]" />
             </div>
-            <h2 className="text-white font-semibold text-lg mb-2">Convite indisponível</h2>
-            <p className="text-[#9e9e9e] text-sm mb-6">
+            <h2 className="text-foreground font-semibold text-lg mb-2">Convite indisponível</h2>
+            <p className="text-muted-foreground text-sm mb-6">
               {mensagemErro || "Este link de convite é inválido, expirou ou já atingiu o limite máximo de utilizações."}
             </p>
             <div className="space-y-3">
               <button
                 type="button"
                 onClick={() => navigate("/login")}
-                className="w-full py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-[#9e9e9e] hover:text-white transition-colors text-sm cursor-pointer"
+                className="w-full py-2.5 bg-background rounded-xl border border-border/30 text-muted-foreground hover:text-foreground transition-colors text-sm cursor-pointer"
               >
                 Ir para o login
               </button>
@@ -190,13 +190,13 @@ export function AceitarConviteGrupo() {
 
         {/* ── JÁ É MEMBRO DO GRUPO ── */}
         {status === "ja_membro" && (
-          <div className="bg-[#1e1e1e] rounded-2xl p-8 border border-[#ff8c42]/30 text-center">
+          <div className="bg-card rounded-2xl p-8 border border-[#ff8c42]/30 text-center">
             <div className="w-16 h-16 rounded-full bg-[#ff8c42]/10 flex items-center justify-center mx-auto mb-4">
               <UserCheck className="w-8 h-8 text-[#ff8c42]" />
             </div>
-            <h2 className="text-white font-semibold text-lg mb-2">Você já pertence a este grupo</h2>
-            <p className="text-[#9e9e9e] text-sm mb-6">
-              Sua conta já possui vínculo ativo com o grupo <span className="text-white font-medium">{convite?.nomeGrupo}</span>.
+            <h2 className="text-foreground font-semibold text-lg mb-2">Você já pertence a este grupo</h2>
+            <p className="text-muted-foreground text-sm mb-6">
+              Sua conta já possui vínculo ativo com o grupo <span className="text-foreground font-medium">{convite?.nomeGrupo}</span>.
             </p>
             <button
               type="button"
@@ -211,13 +211,13 @@ export function AceitarConviteGrupo() {
 
         {/* ── SUCESSO ── */}
         {status === "sucesso" && (
-          <div className="bg-[#1e1e1e] rounded-2xl p-8 border border-[#10b981]/20 text-center">
+          <div className="bg-card rounded-2xl p-8 border border-[#10b981]/20 text-center">
             <div className="w-16 h-16 rounded-full bg-[#10b981]/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8 text-[#10b981]" />
             </div>
-            <h2 className="text-white font-semibold text-lg mb-2">Bem-vindo ao grupo!</h2>
-            <p className="text-[#9e9e9e] text-sm mb-6">
-              Você agora é membro do grupo <span className="text-white font-semibold">{convite?.nomeGrupo}</span>. Você já pode visualizar projetos, atividades e recursos associados.
+            <h2 className="text-foreground font-semibold text-lg mb-2">Bem-vindo ao grupo!</h2>
+            <p className="text-muted-foreground text-sm mb-6">
+              Você agora é membro do grupo <span className="text-foreground font-semibold">{convite?.nomeGrupo}</span>. Você já pode visualizar projetos, atividades e recursos associados.
             </p>
             <button
               type="button"
@@ -232,16 +232,16 @@ export function AceitarConviteGrupo() {
 
         {/* ── VISUALIZAÇÃO E CONFIRMAÇÃO DO CONVITE ── */}
         {status === "visualizacao" && convite && (
-          <div className="bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30 overflow-hidden shadow-2xl">
+          <div className="bg-card rounded-2xl border border-border/30 overflow-hidden shadow-2xl">
             {/* Cabeçalho do Card */}
-            <div className="px-6 pt-6 pb-4 border-b border-[#2e2e2e]/20">
+            <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center shrink-0">
                   <Users className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-white font-semibold text-base">Convite de Grupo</h2>
-                  <p className="text-[#9e9e9e] text-xs">Participe deste grupo de pesquisa</p>
+                  <h2 className="text-foreground font-semibold text-base">Convite de Grupo</h2>
+                  <p className="text-muted-foreground text-xs">Participe deste grupo de pesquisa</p>
                 </div>
               </div>
             </div>
@@ -256,11 +256,11 @@ export function AceitarConviteGrupo() {
               )}
 
               {/* Destaque do Nome do Grupo */}
-              <div className="p-5 bg-[#121212] rounded-xl border border-[#2e2e2e]/40 text-center">
+              <div className="p-5 bg-background rounded-xl border border-border/40 text-center">
                 <p className="text-xs uppercase tracking-wider text-[#ff8c42] font-semibold mb-1">
                   Grupo de Pesquisa
                 </p>
-                <h3 className="text-xl font-bold text-white tracking-wide break-words">
+                <h3 className="text-xl font-bold text-foreground tracking-wide break-words">
                   {convite.nomeGrupo}
                 </h3>
               </div>
@@ -268,8 +268,8 @@ export function AceitarConviteGrupo() {
               {/* Detalhes do Convite */}
               <div className="space-y-2.5 text-sm">
                 {convite.cargo && (
-                  <div className="flex items-center justify-between py-2 px-3 bg-[#121212]/60 rounded-lg border border-[#2e2e2e]/20">
-                    <span className="text-[#9e9e9e] flex items-center gap-2 text-xs">
+                  <div className="flex items-center justify-between py-2 px-3 bg-background/60 rounded-lg border border-border/20">
+                    <span className="text-muted-foreground flex items-center gap-2 text-xs">
                       <ShieldCheck className="w-4 h-4 text-[#ff8c42]" />
                       Função atribuída:
                     </span>
@@ -280,24 +280,24 @@ export function AceitarConviteGrupo() {
                 )}
 
                 {convite.nomeRemetente && (
-                  <div className="flex items-center justify-between py-2 px-3 bg-[#121212]/60 rounded-lg border border-[#2e2e2e]/20">
-                    <span className="text-[#9e9e9e] flex items-center gap-2 text-xs">
-                      <Users className="w-4 h-4 text-[#9e9e9e]" />
+                  <div className="flex items-center justify-between py-2 px-3 bg-background/60 rounded-lg border border-border/20">
+                    <span className="text-muted-foreground flex items-center gap-2 text-xs">
+                      <Users className="w-4 h-4 text-muted-foreground" />
                       Convidado por:
                     </span>
-                    <span className="text-white text-xs font-medium">
+                    <span className="text-foreground text-xs font-medium">
                       {convite.nomeRemetente}
                     </span>
                   </div>
                 )}
 
                 {convite.dthExpiracao && formatarData(convite.dthExpiracao) && (
-                  <div className="flex items-center justify-between py-2 px-3 bg-[#121212]/60 rounded-lg border border-[#2e2e2e]/20">
-                    <span className="text-[#9e9e9e] flex items-center gap-2 text-xs">
-                      <Calendar className="w-4 h-4 text-[#9e9e9e]" />
+                  <div className="flex items-center justify-between py-2 px-3 bg-background/60 rounded-lg border border-border/20">
+                    <span className="text-muted-foreground flex items-center gap-2 text-xs">
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
                       Válido até:
                     </span>
-                    <span className="text-[#9e9e9e] text-xs">
+                    <span className="text-muted-foreground text-xs">
                       {formatarData(convite.dthExpiracao)}
                     </span>
                   </div>
@@ -327,7 +327,7 @@ export function AceitarConviteGrupo() {
                   </button>
                 ) : (
                   <div className="space-y-3">
-                    <div className="p-3 bg-[#121212] rounded-xl border border-[#2e2e2e]/40 text-xs text-[#9e9e9e] text-center">
+                    <div className="p-3 bg-background rounded-xl border border-border/40 text-xs text-muted-foreground text-center">
                       Você precisa estar autenticado com sua conta para confirmar e entrar neste grupo.
                     </div>
                     <button

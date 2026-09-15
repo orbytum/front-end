@@ -27,7 +27,8 @@ export class HttpRequest {
         const token = localStorage.getItem("token");
         const tokenTipo = localStorage.getItem("token_tipo") || "Bearer";
         const headers = new Headers(init.headers as HeadersInit || {});
-        if (token && !headers.has("Authorization")) {
+        const isLoginEndpoint = url.includes('/auth/login');
+        if (token && !headers.has("Authorization") && !isLoginEndpoint) {
             headers.set("Authorization", `${tokenTipo} ${token}`);
         }
         init.headers = headers;

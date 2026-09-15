@@ -169,12 +169,12 @@ export function AceitarConviteCadastro() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background celestial circles */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full border border-[#2e2e2e]/15" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-[#2e2e2e]/10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[1100px] rounded-full border border-[#2e2e2e]/05" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full border border-border/15" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-border/10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[1100px] rounded-full border border-border/05" />
         {[...Array(10)].map((_, i) => (
           <div
             key={i}
@@ -192,24 +192,24 @@ export function AceitarConviteCadastro() {
               <Orbit className="w-6 h-6 text-white" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-wider">ORBYTUM</h1>
-          <p className="text-[#9e9e9e] text-xs mt-1">Gestão acadêmica orbital</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-wider">ORBYTUM</h1>
+          <p className="text-muted-foreground text-xs mt-1">Gestão acadêmica orbital</p>
         </div>
 
         {/* ── INVALID TOKEN ── */}
         {step === "invalid" && (
-          <div className="bg-[#1e1e1e] rounded-2xl p-8 border border-[#ef4444]/20 text-center">
+          <div className="bg-card rounded-2xl p-8 border border-[#ef4444]/20 text-center">
             <div className="w-16 h-16 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-8 h-8 text-[#ef4444]" />
             </div>
-            <h2 className="text-white font-semibold text-lg mb-2">Convite não identificado</h2>
-            <p className="text-[#9e9e9e] text-sm mb-6">
+            <h2 className="text-foreground font-semibold text-lg mb-2">Convite não identificado</h2>
+            <p className="text-muted-foreground text-sm mb-6">
               Nenhum token de convite foi encontrado no endereço acessado ou o convite expirou. Por favor, verifique o link recebido por e-mail ou solicite um novo convite ao coordenador.
             </p>
             <button
               type="button"
               onClick={() => navigate("/login")}
-              className="w-full py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-[#9e9e9e] hover:text-white transition-colors text-sm"
+              className="w-full py-2.5 bg-background rounded-xl border border-border/30 text-muted-foreground hover:text-foreground transition-colors text-sm"
             >
               Ir para o login
             </button>
@@ -218,12 +218,12 @@ export function AceitarConviteCadastro() {
 
         {/* ── SUCCESS ── */}
         {step === "success" && (
-          <div className="bg-[#1e1e1e] rounded-2xl p-8 border border-[#10b981]/20 text-center">
+          <div className="bg-card rounded-2xl p-8 border border-[#10b981]/20 text-center">
             <div className="w-16 h-16 rounded-full bg-[#10b981]/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8 text-[#10b981]" />
             </div>
-            <h2 className="text-white font-semibold text-lg mb-2">Cadastro concluído!</h2>
-            <p className="text-[#9e9e9e] text-sm mb-6">
+            <h2 className="text-foreground font-semibold text-lg mb-2">Cadastro concluído!</h2>
+            <p className="text-muted-foreground text-sm mb-6">
               Sua conta foi criada e ativada com sucesso. Você já pode acessar o sistema com suas credenciais.
             </p>
             <button
@@ -239,16 +239,16 @@ export function AceitarConviteCadastro() {
 
         {/* ── FORM ── */}
         {step === "form" && (
-          <div className="bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30 overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border/30 overflow-hidden">
             {/* Header */}
-            <div className="px-6 pt-6 pb-4 border-b border-[#2e2e2e]/20">
+            <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center shrink-0">
                   <UserPlus className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-white font-semibold text-base">Ativação de Conta</h2>
-                  <p className="text-[#9e9e9e] text-xs">Preencha seus dados para completar seu cadastro</p>
+                  <h2 className="text-foreground font-semibold text-base">Ativação de Conta</h2>
+                  <p className="text-muted-foreground text-xs">Preencha seus dados para completar seu cadastro</p>
                 </div>
               </div>
             </div>
@@ -265,7 +265,7 @@ export function AceitarConviteCadastro() {
               {/* Nome */}
               <Field label="Nome completo" error={errors.nome} required>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2e2e2e]" />
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
                     value={form.nome}
@@ -280,7 +280,7 @@ export function AceitarConviteCadastro() {
               {/* Título */}
               <Field label="Título" error={errors.titulo} required>
                 <div className="relative">
-                  <Award className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2e2e2e] pointer-events-none" />
+                  <Award className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   <select
                     value={form.titulo}
                     onChange={handleChange("titulo")}
@@ -292,7 +292,7 @@ export function AceitarConviteCadastro() {
                       <option key={t} value={t}>{t}</option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2e2e2e] pointer-events-none" />
+                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 </div>
                 {form.titulo === "Outro" && (
                   <input
@@ -309,7 +309,7 @@ export function AceitarConviteCadastro() {
               {/* Telefone */}
               <Field label="Telefone" error={errors.telefone} required>
                 <div className="relative">
-                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2e2e2e]" />
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="tel"
                     value={form.telefone}
@@ -324,7 +324,7 @@ export function AceitarConviteCadastro() {
               {/* Senha */}
               <Field label="Senha" error={errors.senha} required>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2e2e2e]" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type={showPassword ? "text" : "password"}
                     value={form.senha}
@@ -337,7 +337,7 @@ export function AceitarConviteCadastro() {
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
                     tabIndex={-1}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9e9e9e] hover:text-white transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -348,7 +348,7 @@ export function AceitarConviteCadastro() {
               {/* Confirmar Senha */}
               <Field label="Confirmar senha" error={errors.confirmarSenha} required>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2e2e2e]" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type={showConfirm ? "text" : "password"}
                     value={form.confirmarSenha}
@@ -361,7 +361,7 @@ export function AceitarConviteCadastro() {
                     type="button"
                     onClick={() => setShowConfirm((v) => !v)}
                     tabIndex={-1}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9e9e9e] hover:text-white transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -386,12 +386,12 @@ export function AceitarConviteCadastro() {
                 )}
               </button>
 
-              <p className="text-center text-xs text-[#2e2e2e] pt-2">
+              <p className="text-center text-xs text-muted-foreground pt-2">
                 Já possui uma conta ativa?{" "}
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
-                  className="text-[#9e9e9e] hover:text-white transition-colors font-medium cursor-pointer"
+                  className="text-muted-foreground hover:text-foreground transition-colors font-medium cursor-pointer"
                 >
                   Fazer login
                 </button>
@@ -417,7 +417,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+      <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
         {label}
         {required && <span className="text-[#ff8c42] ml-0.5">*</span>}
       </label>
@@ -433,18 +433,18 @@ function Field({
 }
 
 function inputCls(hasError: boolean) {
-  return `w-full py-2.5 bg-[#121212] rounded-xl border text-white placeholder-[#2e2e2e] focus:outline-none transition-colors ${
+  return `w-full py-2.5 bg-background rounded-xl border text-foreground placeholder-muted-foreground focus:outline-none transition-colors ${
     hasError
       ? "border-[#ef4444]/50 focus:border-[#ef4444]/80"
-      : "border-[#2e2e2e]/30 focus:border-[#ff8c42]/50"
+      : "border-border/30 focus:border-[#ff8c42]/50"
   }`;
 }
 
 function selectCls(hasError: boolean) {
-  return `w-full pl-10 pr-9 py-2.5 bg-[#121212] rounded-xl border text-white focus:outline-none appearance-none transition-colors ${
+  return `w-full pl-10 pr-9 py-2.5 bg-background rounded-xl border text-foreground focus:outline-none appearance-none transition-colors ${
     hasError
       ? "border-[#ef4444]/50 focus:border-[#ef4444]/80"
-      : "border-[#2e2e2e]/30 focus:border-[#ff8c42]/50"
+      : "border-border/30 focus:border-[#ff8c42]/50"
   }`;
 }
 
@@ -471,11 +471,11 @@ function PasswordStrength({ password }: { password: string }) {
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className={`flex-1 h-1 rounded-full transition-all ${ i < score ? colors[score] : "bg-[#2e2e2e]/40" }`}
+            className={`flex-1 h-1 rounded-full transition-all ${ i < score ? colors[score] : "bg-border/40" }`}
           />
         ))}
       </div>
-      <p className="text-xs text-[#9e9e9e]">{levels[score]}</p>
+      <p className="text-xs text-muted-foreground">{levels[score]}</p>
     </div>
   );
 }

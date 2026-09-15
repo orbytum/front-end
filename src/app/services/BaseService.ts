@@ -40,7 +40,7 @@ export class BaseService {
 // #region Metódos privados
     private setBaseUrl(baseUrl: string | null = null): HttpRequest {
         if (baseUrl === null) {
-            baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:8080';
+            baseUrl = import.meta.env.VITE_BASE_URL || '/api';
         }
         this.httpRequest = new HttpRequest(baseUrl!);
         return this.httpRequest;

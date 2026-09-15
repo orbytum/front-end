@@ -175,7 +175,7 @@ export function ParticipantesDoGrupo() {
         <button
           type="button"
           onClick={() => navigate("/grupos")}
-          className="flex items-center gap-2 text-[#9e9e9e] hover:text-[#ff8c42] transition-colors mb-4 cursor-pointer"
+          className="flex items-center gap-2 text-muted-foreground hover:text-[#ff8c42] transition-colors mb-4 cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Voltar para Grupos</span>
@@ -186,10 +186,10 @@ export function ParticipantesDoGrupo() {
               <Users className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-white text-2xl font-bold">
+              <h1 className="text-foreground text-2xl font-bold">
                 {grupo ? grupo.nome : `Grupo #${groupId}`}
               </h1>
-              <p className="text-[#9e9e9e] text-sm">
+              <p className="text-muted-foreground text-sm">
                 Gerencie os membros, líderes e pesquisadores vinculados ao grupo
               </p>
             </div>
@@ -198,7 +198,7 @@ export function ParticipantesDoGrupo() {
             type="button"
             onClick={carregarDados}
             disabled={loading}
-            className="p-2.5 bg-[#1e1e1e] hover:bg-[#2e2e2e]/30 border border-[#2e2e2e]/40 rounded-xl text-[#9e9e9e] hover:text-white transition-colors cursor-pointer self-start sm:self-auto"
+            className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer self-start sm:self-auto"
             title="Recarregar"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -207,61 +207,61 @@ export function ParticipantesDoGrupo() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-2xl p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-[#4a9eff] flex items-center justify-center">
               <Users className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-[#9e9e9e] text-xs">Total de Membros</p>
-              <h3 className="text-white text-2xl font-bold">{totalParticipantes}</h3>
+              <p className="text-muted-foreground text-xs">Total de Membros</p>
+              <h3 className="text-foreground text-2xl font-bold">{totalParticipantes}</h3>
             </div>
           </div>
-          <span className="text-xs text-[#9e9e9e]">Integrantes ativos no grupo</span>
+          <span className="text-xs text-muted-foreground">Integrantes ativos no grupo</span>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-2xl p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
               <Crown className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-[#9e9e9e] text-xs">Líderes Responsáveis</p>
-              <h3 className="text-white text-2xl font-bold text-[#ff8c42]">{totalLideres}</h3>
+              <p className="text-muted-foreground text-xs">Líderes Responsáveis</p>
+              <h3 className="text-foreground text-2xl font-bold text-[#ff8c42]">{totalLideres}</h3>
             </div>
           </div>
           <span className="text-xs text-[#ff8c42]">Supervisão do grupo</span>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-2xl p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-[#10b981] flex items-center justify-center">
               <UserCheck className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-[#9e9e9e] text-xs">Pesquisadores</p>
-              <h3 className="text-white text-2xl font-bold text-[#10b981]">{totalPesquisadores}</h3>
+              <p className="text-muted-foreground text-xs">Pesquisadores</p>
+              <h3 className="text-foreground text-2xl font-bold text-[#10b981]">{totalPesquisadores}</h3>
             </div>
           </div>
           <span className="text-xs text-[#10b981]">Equipe de pesquisa</span>
         </div>
       </div>
 
-      <div className="bg-[#1e1e1e] rounded-2xl p-4 border border-[#2e2e2e]/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-card rounded-2xl p-4 border border-border/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar por nome, e-mail, título..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-11 pr-10 py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
+            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
           />
           {termoBusca && (
             <button
               type="button"
               onClick={() => setTermoBusca("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9e9e9e] hover:text-white rounded-lg transition-colors cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -271,7 +271,7 @@ export function ParticipantesDoGrupo() {
         <select
           value={filtroFuncao}
           onChange={(e) => setFiltroFuncao(e.target.value)}
-          className="px-4 py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white text-sm focus:outline-none focus:border-[#ff8c42]/50 cursor-pointer"
+          className="px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 cursor-pointer"
         >
           <option value="all">Todos os Membros</option>
           <option value="Líder">Apenas Líderes</option>
@@ -315,7 +315,7 @@ export function ParticipantesDoGrupo() {
         {participantesFiltrados.map((participante) => (
           <div
             key={participante.usuarioId}
-            className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all"
+            className="bg-card rounded-2xl p-6 border border-border/30 transition-all"
           >
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               <div className="flex-1">
@@ -335,7 +335,7 @@ export function ParticipantesDoGrupo() {
 
                   <div className="flex-1 space-y-2">
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <h3 className="text-white font-semibold text-base">{participante.nome}</h3>
+                      <h3 className="text-foreground font-semibold text-base">{participante.nome}</h3>
                       {participante.isLider ? (
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 bg-[#ff8c42]/15 text-[#ff8c42] border border-[#ff8c42]/30">
                           <Crown className="w-3.5 h-3.5" />
@@ -349,7 +349,7 @@ export function ParticipantesDoGrupo() {
                       )}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-[#9e9e9e]">
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                       <div className="flex items-center gap-1.5">
                         <Mail className="w-3.5 h-3.5" />
                         <span>{participante.email}</span>
@@ -375,7 +375,7 @@ export function ParticipantesDoGrupo() {
                 <button
                   type="button"
                   onClick={() => handleOpenEdit(participante)}
-                  className="p-2 rounded-lg bg-[#121212] hover:bg-[#ff8c42]/10 transition-colors border border-[#2e2e2e]/30 text-[#ff8c42] cursor-pointer"
+                  className="p-2 rounded-lg bg-background hover:bg-[#ff8c42]/10 transition-colors border border-border/30 text-[#ff8c42] cursor-pointer"
                   title="Editar participante"
                 >
                   <Edit className="w-4 h-4" />
@@ -384,7 +384,7 @@ export function ParticipantesDoGrupo() {
                   type="button"
                   onClick={() => handleDeleteParticipante(participante)}
                   disabled={deletingId === participante.usuarioId}
-                  className="p-2 rounded-lg bg-[#121212] hover:bg-[#ef4444]/10 transition-colors border border-[#2e2e2e]/30 text-[#ef4444] cursor-pointer disabled:opacity-40"
+                  className="p-2 rounded-lg bg-background hover:bg-[#ef4444]/10 transition-colors border border-border/30 text-[#ef4444] cursor-pointer disabled:opacity-40"
                   title="Remover do grupo"
                 >
                   {deletingId === participante.usuarioId ? (
@@ -400,9 +400,9 @@ export function ParticipantesDoGrupo() {
       </div>
 
       {participantesFiltrados.length === 0 && !loading && (
-        <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
-          <UserCheck className="w-12 h-12 text-[#2e2e2e] mx-auto mb-3" />
-          <p className="text-[#9e9e9e] text-sm">
+        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+          <UserCheck className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">
             {termoBusca || filtroFuncao !== "all"
               ? "Nenhum participante encontrado para os filtros aplicados."
               : "Nenhum participante vinculado a este grupo até o momento."}
@@ -412,21 +412,21 @@ export function ParticipantesDoGrupo() {
 
       {editModalOpen && editingParticipante && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
-            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
+          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
+            <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
                   <Edit className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold text-lg">Editar Participante</h3>
-                  <p className="text-[#9e9e9e] text-xs">Atualize os dados cadastrais do membro</p>
+                  <h3 className="text-foreground font-semibold text-lg">Editar Participante</h3>
+                  <p className="text-muted-foreground text-xs">Atualize os dados cadastrais do membro</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setEditModalOpen(false)}
-                className="p-1.5 rounded-lg text-[#9e9e9e] hover:text-white hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-border/20 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -442,7 +442,7 @@ export function ParticipantesDoGrupo() {
 
               <form onSubmit={handleUpdateParticipante} className="space-y-4">
                 <div>
-                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                     Nome Completo <span className="text-[#ff8c42]">*</span>
                   </label>
                   <input
@@ -451,12 +451,12 @@ export function ParticipantesDoGrupo() {
                     value={editNome}
                     onChange={(e) => setEditNome(e.target.value)}
                     disabled={updating}
-                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                     Telefone <span className="text-[#ff8c42]">*</span>
                   </label>
                   <input
@@ -465,12 +465,12 @@ export function ParticipantesDoGrupo() {
                     value={editTelefone}
                     onChange={(e) => setEditTelefone(e.target.value)}
                     disabled={updating}
-                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                     Titulação <span className="text-[#ff8c42]">*</span>
                   </label>
                   <input
@@ -480,7 +480,7 @@ export function ParticipantesDoGrupo() {
                     onChange={(e) => setEditTitulo(e.target.value)}
                     placeholder="Ex: Doutor, Mestre, Pesquisador"
                     disabled={updating}
-                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                   />
                 </div>
 
@@ -489,7 +489,7 @@ export function ParticipantesDoGrupo() {
                     type="button"
                     onClick={() => setEditModalOpen(false)}
                     disabled={updating}
-                    className="px-4 py-2.5 bg-[#121212] hover:bg-[#2e2e2e]/20 border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white rounded-xl text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
                   >
                     Cancelar
                   </button>

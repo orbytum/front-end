@@ -77,21 +77,21 @@ export function Participantes() {
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
       <div className="mb-6">
-        <h1 className="text-white mb-2">Participantes</h1>
-        <p className="text-[#9e9e9e]">Gerencie os participantes dos grupos de pesquisa</p>
+        <h1 className="text-foreground mb-2">Participantes</h1>
+        <p className="text-muted-foreground">Gerencie os participantes dos grupos de pesquisa</p>
       </div>
 
       {/* Barra de Ações */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar por nome, grupo ou função..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -103,24 +103,24 @@ export function Participantes() {
       </div>
 
       {/* Tabela de Participantes */}
-      <div className="bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30 overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border/30 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#2e2e2e]/30">
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Participante</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Função</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Grupo</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Contato</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Status</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#9e9e9e]">Ações</th>
+              <tr className="border-b border-border/30">
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Participante</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Função</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Grupo</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Contato</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Status</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Ações</th>
               </tr>
             </thead>
             <tbody>
               {participantesFiltrados.map((participante, index) => (
                 <tr 
                   key={participante.id}
-                  className={`border-b border-[#2e2e2e]/30 hover:bg-[#121212]/50 transition-colors ${ index === participantesFiltrados.length - 1 ? 'border-b-0' : '' }`}
+                  className={`border-b border-border/30 hover:bg-background/50 transition-colors ${ index === participantesFiltrados.length - 1 ? 'border-b-0' : '' }`}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -128,26 +128,26 @@ export function Participantes() {
                         <span className="text-white text-sm font-semibold">{participante.avatar}</span>
                       </div>
                       <div>
-                        <div className="text-white font-medium">{participante.nome}</div>
+                        <div className="text-foreground font-medium">{participante.nome}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-[#9e9e9e]">
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <BookOpen className="w-4 h-4" />
                       <span>{participante.funcao}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[#9e9e9e]">{participante.grupo}</span>
+                    <span className="text-muted-foreground">{participante.grupo}</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-[#9e9e9e]">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Mail className="w-3 h-3" />
                         <span>{participante.email}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-[#9e9e9e]">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Phone className="w-3 h-3" />
                         <span>{participante.telefone}</span>
                       </div>
@@ -159,8 +159,8 @@ export function Participantes() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <button className="p-2 hover:bg-[#2e2e2e]/20 rounded-lg transition-colors">
-                      <MoreVertical className="w-5 h-5 text-[#9e9e9e]" />
+                    <button className="p-2 hover:bg-border/20 rounded-lg transition-colors">
+                      <MoreVertical className="w-5 h-5 text-muted-foreground" />
                     </button>
                   </td>
                 </tr>
@@ -173,8 +173,8 @@ export function Participantes() {
       {/* Estado Vazio */}
       {participantesFiltrados.length === 0 && (
         <div className="text-center py-12">
-          <UserCheck className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
-          <p className="text-[#9e9e9e]">Nenhum participante encontrado</p>
+          <UserCheck className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">Nenhum participante encontrado</p>
         </div>
       )}
     </div>
