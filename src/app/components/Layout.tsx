@@ -14,6 +14,7 @@ import {
   X,
   MailPlus,
   Loader2,
+  BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 import { AuthService } from "../services/auth/AuthService";
@@ -32,6 +33,7 @@ export function Layout() {
   }
 
   const isAdmin = authService.isAdminOrInitialAdmin();
+  const isUser = authService.isUser();
   const { grupoAtual, semGrupos, carregandoGrupos } = useGrupo();
 
   // Se for usuário comum e não pertencer a nenhum grupo, renderiza tela explicativa
@@ -56,6 +58,9 @@ export function Layout() {
     { path: "/grupos", label: "Grupos de Pesquisa", icon: Users },
     ...(isAdmin
       ? [{ path: "/gestao-convites", label: "Convites de Cadastro", icon: MailPlus }]
+      : []),
+    ...(isUser
+      ? [{ path: "/publicacoes", label: "Publicações", icon: BookOpen }]
       : []),
     { path: "/recursos", label: "Recursos Financeiros", icon: Hexagon },
     { path: "/solicitacoes", label: "Solicitações", icon: FileText },

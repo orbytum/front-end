@@ -22,6 +22,8 @@ import { AceitarConviteGrupo } from "./pages/AceitarConviteGrupo";
 import { GestaoConvitesCadastro } from "./pages/GestaoConvitesCadastro";
 import { CriarAdminInicial } from "./pages/CriarAdminInicial";
 
+import { UserOnlyRoute } from "./components/UserOnlyRoute";
+
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -74,7 +76,14 @@ export const router = createBrowserRouter([
       { path: "editais", Component: Editais },
       { path: "eventos", Component: Eventos },
       { path: "calendario", Component: Calendario },
-      { path: "publicacoes", Component: Publicacoes },
+      {
+        path: "publicacoes",
+        element: (
+          <UserOnlyRoute>
+            <Publicacoes />
+          </UserOnlyRoute>
+        ),
+      },
       { path: "lembretes", Component: Lembretes },
       { path: "gestao-convites", Component: GestaoConvitesCadastro },
     ],
