@@ -262,17 +262,17 @@ export function Grupos() {
   if (!isAdmin) {
     return (
       <div className="h-full flex items-center justify-center p-6">
-        <div className="bg-[#1e1e1e] rounded-2xl p-8 max-w-md w-full border border-[#ef4444]/30 text-center">
+        <div className="bg-card rounded-2xl p-8 max-w-md w-full border border-[#ef4444]/30 text-center">
           <div className="w-16 h-16 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-4">
             <ShieldAlert className="w-8 h-8 text-[#ef4444]" />
           </div>
-          <h2 className="text-white text-xl font-bold mb-2">Acesso Restrito</h2>
-          <p className="text-[#9e9e9e] text-sm mb-6">
+          <h2 className="text-foreground text-xl font-bold mb-2">Acesso Restrito</h2>
+          <p className="text-muted-foreground text-sm mb-6">
             A gestão de grupos de pesquisa é restrita a <strong>Administradores</strong> e <strong>Administradores Iniciais</strong> da plataforma.
           </p>
           <button
             onClick={() => navigate("/login")}
-            className="w-full py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/40 text-white hover:border-[#ff8c42]/60 transition-colors text-sm font-medium cursor-pointer"
+            className="w-full py-2.5 bg-background rounded-xl border border-border/40 text-foreground hover:border-[#ff8c42]/60 transition-colors text-sm font-medium cursor-pointer"
           >
             Fazer login com outra conta
           </button>
@@ -288,12 +288,12 @@ export function Grupos() {
       align: "left",
       render: (g) => (
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#121212] border border-[#2e2e2e]/40 flex items-center justify-center text-[#ff8c42] shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-background border border-border/40 flex items-center justify-center text-[#ff8c42] shrink-0">
             <Users className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-white font-medium block">{g.nome}</span>
-            <span className="text-xs text-[#9e9e9e]">
+            <span className="text-foreground font-medium block">{g.nome}</span>
+            <span className="text-xs text-muted-foreground">
               ID #{g.id} • {g.isAtivo ? "Ativo" : "Inativo"}
             </span>
           </div>
@@ -306,13 +306,13 @@ export function Grupos() {
       align: "left",
       render: (g) => (
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#2e2e2e]/20 flex items-center justify-center text-[#4a9eff] shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-border/20 flex items-center justify-center text-[#4a9eff] shrink-0">
             <Shield className="w-4 h-4" />
           </div>
           <div>
             {g.nomeLider ? (
               <>
-                <span className="text-white text-sm font-medium block">{g.nomeLider}</span>
+                <span className="text-foreground text-sm font-medium block">{g.nomeLider}</span>
                 <span className="text-xs text-[#10b981] flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
                   Líder Vinculado
@@ -320,7 +320,7 @@ export function Grupos() {
               </>
             ) : (
               <div className="flex flex-col items-start gap-1">
-                <span className="text-xs text-[#9e9e9e]">Nenhum líder vinculado</span>
+                <span className="text-xs text-muted-foreground">Nenhum líder vinculado</span>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -350,12 +350,12 @@ export function Grupos() {
             e.stopPropagation();
             navigate(`/grupos/${g.id}/participantes`);
           }}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#121212] hover:bg-[#ff8c42]/10 border border-[#2e2e2e]/30 hover:border-[#ff8c42]/40 text-xs text-white transition-all cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-background hover:bg-[#ff8c42]/10 border border-border/30 hover:border-[#ff8c42]/40 text-xs text-foreground transition-all cursor-pointer"
           title="Ver participantes"
         >
           <UserCheck className="w-3.5 h-3.5 text-[#4a9eff]" />
           <span className="font-semibold">{g.totalParticipantes ?? 0}</span>
-          <span className="text-[#9e9e9e]">membros</span>
+          <span className="text-muted-foreground">membros</span>
         </button>
       ),
     },
@@ -433,10 +433,10 @@ export function Grupos() {
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-white text-2xl font-bold mb-1">
-            Grupos de Pesquisa
+          <h1 className="text-foreground text-2xl font-bold mb-1">
+            Gestão de Grupos de Pesquisa
           </h1>
-          <p className="text-[#9e9e9e] text-sm">
+          <p className="text-muted-foreground text-sm">
             Cadastre novos grupos, envie convites para líderes e acompanhe a equipe
           </p>
         </div>
@@ -446,7 +446,7 @@ export function Grupos() {
             type="button"
             onClick={carregarGrupos}
             disabled={loading}
-            className="p-2.5 bg-[#1e1e1e] hover:bg-[#2e2e2e]/30 border border-[#2e2e2e]/40 rounded-xl text-[#9e9e9e] hover:text-white transition-colors cursor-pointer"
+            className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             title="Recarregar lista"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -471,27 +471,27 @@ export function Grupos() {
 
       {/* Cards de Métricas */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-2xl p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-[#4a9eff] flex items-center justify-center">
               <Users className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-[#9e9e9e] text-xs">Total de Grupos</p>
-              <h3 className="text-white text-2xl font-bold">{paginatedData.totalElements}</h3>
+              <p className="text-muted-foreground text-xs">Total de Grupos</p>
+              <h3 className="text-foreground text-2xl font-bold">{paginatedData.totalElements}</h3>
             </div>
           </div>
-          <span className="text-xs text-[#9e9e9e]">Grupos cadastrados no sistema</span>
+          <span className="text-xs text-muted-foreground">Grupos cadastrados no sistema</span>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-2xl p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-[#10b981] flex items-center justify-center">
               <CheckCircle2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-[#9e9e9e] text-xs">Grupos Ativos na Página</p>
-              <h3 className="text-white text-2xl font-bold text-[#10b981]">
+              <p className="text-muted-foreground text-xs">Grupos Ativos na Página</p>
+              <h3 className="text-foreground text-2xl font-bold text-[#10b981]">
                 {paginatedData.items.filter((g) => g.isAtivo).length}
               </h3>
             </div>
@@ -499,39 +499,39 @@ export function Grupos() {
           <span className="text-xs text-[#10b981]">Em atividade</span>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-2xl p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
               <UserCheck className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-[#9e9e9e] text-xs">Participantes na Página</p>
-              <h3 className="text-white text-2xl font-bold text-[#ff8c42]">
+              <p className="text-muted-foreground text-xs">Participantes na Página</p>
+              <h3 className="text-foreground text-2xl font-bold text-[#ff8c42]">
                 {paginatedData.items.reduce((acc, g) => acc + (g.totalParticipantes || 0), 0)}
               </h3>
             </div>
           </div>
-          <span className="text-xs text-[#9e9e9e]">Membros vinculados exibidos</span>
+          <span className="text-xs text-muted-foreground">Membros vinculados exibidos</span>
         </div>
       </div>
 
       {/* Barra de Filtros */}
-      <div className="bg-[#1e1e1e] rounded-2xl p-4 border border-[#2e2e2e]/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-card rounded-2xl p-4 border border-border/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         {/* Busca por Nome do Grupo */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Filtrar por nome do grupo..."
             value={nomeFilter}
             onChange={(e) => setNomeFilter(e.target.value)}
-            className="w-full pl-11 pr-10 py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
+            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
           />
           {nomeFilter && (
             <button
               type="button"
               onClick={() => setNomeFilter("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9e9e9e] hover:text-white rounded-lg transition-colors cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer"
               title="Limpar filtro de nome"
             >
               <X className="w-4 h-4" />
@@ -541,19 +541,19 @@ export function Grupos() {
 
         {/* Busca por Usuário/Líder */}
         <div className="flex-1 relative">
-          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e9e9e]" />
+          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Filtrar por líder, membro ou criador..."
             value={usuarioFilter}
             onChange={(e) => setUsuarioFilter(e.target.value)}
-            className="w-full pl-11 pr-10 py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
+            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
           />
           {usuarioFilter && (
             <button
               type="button"
               onClick={() => setUsuarioFilter("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9e9e9e] hover:text-white rounded-lg transition-colors cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer"
               title="Limpar filtro de usuário"
             >
               <X className="w-4 h-4" />
@@ -568,7 +568,7 @@ export function Grupos() {
               setNomeFilter("");
               setUsuarioFilter("");
             }}
-            className="px-3 py-2 text-xs text-[#9e9e9e] hover:text-white bg-[#121212] hover:bg-[#2e2e2e]/30 border border-[#2e2e2e]/30 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+            className="px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-background hover:bg-border/30 border border-border/30 rounded-xl transition-all cursor-pointer whitespace-nowrap"
             title="Redefinir filtros"
           >
             Restaurar padrão
@@ -603,7 +603,7 @@ export function Grupos() {
           <button
             type="button"
             onClick={carregarGrupos}
-            className="underline font-semibold hover:text-white"
+            className="underline font-semibold hover:text-foreground"
           >
             Tentar novamente
           </button>
@@ -614,10 +614,10 @@ export function Grupos() {
       <DataTable
         title={
           <div className="flex items-center gap-3">
-            <h2 className="text-white font-semibold text-lg">
+            <h2 className="text-foreground font-semibold text-lg">
               Lista de Grupos de Pesquisa
             </h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#2e2e2e]/40 text-[#9e9e9e] font-normal">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-border/40 text-muted-foreground font-normal">
               {paginatedData.totalElements}{" "}
               {paginatedData.totalElements === 1 ? "registro" : "registros"}
             </span>
@@ -659,18 +659,18 @@ export function Grupos() {
       {/* Modal / Diálogo para Cadastrar Novo Grupo */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
+          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
             {/* Modal Header */}
-            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
+            <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
                   <Users className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold text-lg">
+                  <h3 className="text-foreground font-semibold text-lg">
                     Novo Grupo de Pesquisa
                   </h3>
-                  <p className="text-[#9e9e9e] text-xs">
+                  <p className="text-muted-foreground text-xs">
                     Cadastre o grupo e envie um convite com perfil de Líder
                   </p>
                 </div>
@@ -678,7 +678,7 @@ export function Grupos() {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="p-1.5 rounded-lg text-[#9e9e9e] hover:text-white hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-border/20 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -699,7 +699,7 @@ export function Grupos() {
                     <CheckCircle2 className="w-5 h-5" />
                     <span>Grupo criado e convite de Líder enviado com sucesso!</span>
                   </div>
-                  <p className="text-xs text-[#9e9e9e]">
+                  <p className="text-xs text-muted-foreground">
                     O grupo <strong>{createdGrupo.nome}</strong> foi cadastrado. Um convite de Líder com validade de 7 dias foi emitido para o e-mail informado.
                   </p>
                   <div className="pt-2 flex justify-end">
@@ -715,7 +715,7 @@ export function Grupos() {
               ) : (
                 <form onSubmit={handleCreateGroup} className="space-y-4">
                   <div>
-                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                       Nome do Grupo <span className="text-[#ff8c42]">*</span>
                     </label>
                     <input
@@ -725,16 +725,16 @@ export function Grupos() {
                       onChange={(e) => setNome(e.target.value)}
                       placeholder="Ex: Laboratório de Inteligência Artificial"
                       disabled={creating}
-                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                      className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                       E-mail do Líder <span className="text-[#ff8c42]">*</span>
                     </label>
                     <div className="relative">
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e9e9e]" />
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="email"
                         required
@@ -742,13 +742,13 @@ export function Grupos() {
                         onChange={(e) => setEmailLider(e.target.value)}
                         placeholder="lider@universidade.edu.br"
                         disabled={creating}
-                        className="w-full py-2.5 pl-10 pr-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                        className="w-full py-2.5 pl-10 pr-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="p-3 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-xs text-[#9e9e9e] space-y-1">
-                    <p className="text-white font-medium flex items-center gap-1.5">
+                  <div className="p-3 bg-background rounded-xl border border-border/30 text-xs text-muted-foreground space-y-1">
+                    <p className="text-foreground font-medium flex items-center gap-1.5">
                       <AlertTriangle className="w-3.5 h-3.5 text-[#ff8c42]" />
                       Convite com perfil de Líder
                     </p>
@@ -762,7 +762,7 @@ export function Grupos() {
                       type="button"
                       onClick={() => setModalOpen(false)}
                       disabled={creating}
-                      className="px-4 py-2.5 bg-[#121212] hover:bg-[#2e2e2e]/20 border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white rounded-xl text-sm transition-colors cursor-pointer"
+                      className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -793,21 +793,21 @@ export function Grupos() {
 
       {editModalOpen && editingGrupo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
-            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
+          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
+            <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
                   <Pencil className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold text-lg">Editar Grupo de Pesquisa</h3>
-                  <p className="text-[#9e9e9e] text-xs">Atualize os dados e o status do grupo</p>
+                  <h3 className="text-foreground font-semibold text-lg">Editar Grupo de Pesquisa</h3>
+                  <p className="text-muted-foreground text-xs">Atualize os dados e o status do grupo</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setEditModalOpen(false)}
-                className="p-1.5 rounded-lg text-[#9e9e9e] hover:text-white hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-border/20 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -823,7 +823,7 @@ export function Grupos() {
 
               <form onSubmit={handleUpdateGroup} className="space-y-4">
                 <div>
-                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                     Nome do Grupo <span className="text-[#ff8c42]">*</span>
                   </label>
                   <input
@@ -832,11 +832,11 @@ export function Grupos() {
                     value={editNome}
                     onChange={(e) => setEditNome(e.target.value)}
                     disabled={updating}
-                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                   />
                 </div>
 
-                <div className="flex items-center gap-3 p-3 bg-[#121212] rounded-xl border border-[#2e2e2e]/30">
+                <div className="flex items-center gap-3 p-3 bg-background rounded-xl border border-border/30">
                   <input
                     type="checkbox"
                     id="editIsAtivo"
@@ -845,7 +845,7 @@ export function Grupos() {
                     disabled={updating}
                     className="w-4 h-4 accent-[#ff8c42] rounded cursor-pointer"
                   />
-                  <label htmlFor="editIsAtivo" className="text-sm text-white cursor-pointer select-none">
+                  <label htmlFor="editIsAtivo" className="text-sm text-foreground cursor-pointer select-none">
                     Grupo Ativo
                   </label>
                 </div>
@@ -855,7 +855,7 @@ export function Grupos() {
                     type="button"
                     onClick={() => setEditModalOpen(false)}
                     disabled={updating}
-                    className="px-4 py-2.5 bg-[#121212] hover:bg-[#2e2e2e]/20 border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white rounded-xl text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -882,21 +882,21 @@ export function Grupos() {
 
       {liderModalOpen && selectedGrupoLider && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#1e1e1e] rounded-2xl w-full max-w-lg border border-[#2e2e2e]/40 overflow-hidden">
-            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
+          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
+            <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
                   <UserPlus className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold text-lg">Cadastrar Líder</h3>
-                  <p className="text-[#9e9e9e] text-xs">Vincular líder ao grupo: {selectedGrupoLider.nome}</p>
+                  <h3 className="text-foreground font-semibold text-lg">Cadastrar Líder</h3>
+                  <p className="text-muted-foreground text-xs">Vincular líder ao grupo: {selectedGrupoLider.nome}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setLiderModalOpen(false)}
-                className="p-1.5 rounded-lg text-[#9e9e9e] hover:text-white hover:bg-[#2e2e2e]/20 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-border/20 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -912,7 +912,7 @@ export function Grupos() {
 
               <form onSubmit={handleCadastrarLider} className="space-y-4">
                 <div>
-                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                     Nome Completo <span className="text-[#ff8c42]">*</span>
                   </label>
                   <input
@@ -922,12 +922,12 @@ export function Grupos() {
                     onChange={(e) => setLiderNome(e.target.value)}
                     placeholder="Ex: Dr. Carlos Silva"
                     disabled={cadastrandoLider}
-                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                     E-mail <span className="text-[#ff8c42]">*</span>
                   </label>
                   <input
@@ -937,13 +937,13 @@ export function Grupos() {
                     onChange={(e) => setLiderEmail(e.target.value)}
                     placeholder="carlos.silva@universidade.edu.br"
                     disabled={cadastrandoLider}
-                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                       Telefone <span className="text-[#ff8c42]">*</span>
                     </label>
                     <input
@@ -953,12 +953,12 @@ export function Grupos() {
                       onChange={(e) => setLiderTelefone(e.target.value)}
                       placeholder="(11) 98765-4321"
                       disabled={cadastrandoLider}
-                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                      className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                    <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                       Titulação <span className="text-[#ff8c42]">*</span>
                     </label>
                     <input
@@ -968,13 +968,13 @@ export function Grupos() {
                       onChange={(e) => setLiderTitulo(e.target.value)}
                       placeholder="Ex: Doutor, Mestre"
                       disabled={cadastrandoLider}
-                      className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                      className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-[#9e9e9e] mb-1.5 font-normal">
+                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                     Senha Provisória <span className="text-[#ff8c42]">*</span>
                   </label>
                   <input
@@ -985,7 +985,7 @@ export function Grupos() {
                     onChange={(e) => setLiderSenha(e.target.value)}
                     placeholder="Mínimo 6 caracteres"
                     disabled={cadastrandoLider}
-                    className="w-full py-2.5 px-4 bg-[#121212] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                   />
                 </div>
 
@@ -994,7 +994,7 @@ export function Grupos() {
                     type="button"
                     onClick={() => setLiderModalOpen(false)}
                     disabled={cadastrandoLider}
-                    className="px-4 py-2.5 bg-[#121212] hover:bg-[#2e2e2e]/20 border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white rounded-xl text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
                   >
                     Cancelar
                   </button>

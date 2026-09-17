@@ -20,12 +20,17 @@ import { Lembretes } from "./pages/Lembretes";
 import { AceitarConviteCadastro } from "./pages/AceitarConviteCadastro";
 import { AceitarConviteGrupo } from "./pages/AceitarConviteGrupo";
 import { GestaoConvitesCadastro } from "./pages/GestaoConvitesCadastro";
-import { CadastrarAdminInicial } from "./pages/CadastrarAdminInicial";
+import { CriarAdminInicial } from "./pages/CriarAdminInicial";
 
 export const router = createBrowserRouter([
   {
     path: "/login",
     Component: Login,
+  },
+  // TODO: /criar-admin-inicial não segue os padrões de design da tela /convites/aceitar/cadastro/:token corrigir isso
+  {
+    path: "/criar-admin-inicial",
+    Component: CriarAdminInicial,
   },
   {
     path: "/cadastrar-admin-inicial",

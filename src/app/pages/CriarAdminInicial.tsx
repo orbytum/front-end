@@ -1,58 +1,46 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import { LoginService } from "../services/auth/LoginService";
-import { AuthService } from "../services/auth/AuthService";
-import { Eye, EyeOff, LogIn, Orbit } from "lucide-react";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { HttpError } from "../utils/HttpError";
+import { Eye, EyeOff, Orbit, UserPlus } from "lucide-react";
 
-export function Login() {
+export function CriarAdminInicial() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/";
-  const [mostrarSenha, setMostrarSenha] = useState(false);
   const loginService = new LoginService();
-  const authService = new AuthService();
-  const [formulario, setFormulario] = useState({ usuario: "", senha: "" });
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
+  const [formulario, setFormulario] = useState({
+    nome: "",
+    email: "",
+    senha: "",
+    telefone: "",
+    titulo: "",
+  });
 
   const enviarFormulario = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
-    const loginFormulario = {
-      email: formulario.usuario,
-      senha: formulario.senha,
-    };
     try {
-      const response = await loginService.login(loginFormulario);
+      const response = await loginService.registerAdmin(formulario);
       if (response && response.token) {
         localStorage.setItem("token", response.token);
         localStorage.setItem("token_tipo", response.tipo || "Bearer");
-        if (authService.getUserAccessLevel() === "initial_admin") {
-          navigate("/criar-admin-inicial");
-        } else {
-          navigate(redirect);
-        }
+        navigate("/");
       }
-    } catch (err: any) {
-      setErro(err?.mensagem || err?.message || "Erro ao realizar login. Verifique suas credenciais.");
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setErro(err.response?.mensagem || err.message);
+      } else {
+        setErro("Erro ao criar administrador. Tente novamente.");
+      }
     }
   };
 
-
-  
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Toggle de tema */}
-      <div className="absolute top-4 right-4 z-20">
-        <ThemeToggle />
-      </div>
-      {/* Anéis de órbita de fundo */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-border/15" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full border border-border/10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] rounded-full border border-border/05" />
-        {/* Partículas flutuantes */}
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
@@ -66,7 +54,6 @@ export function Login() {
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Logo */}
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="relative">
@@ -78,25 +65,59 @@ export function Login() {
           <h1 className="text-3xl font-bold text-foreground tracking-wider">ORBYTUM</h1>
         </div>
 
-        {/* Card */}
         <div className="bg-card rounded-2xl p-8 border border-border/30">
-          <h2 className="text-foreground text-xl font-semibold mb-2">Login</h2>
-          <p className="text-muted-foreground text-sm mb-6">Informe seu email e senha</p>
+          <h2 className="text-foreground text-xl font-semibold mb-2">Criar Administrador</h2>
+          <p className="text-muted-foreground text-sm mb-6">Preencha os dados para o primeiro administrador do sistema</p>
 
-          <form onSubmit={enviarFormulario} className="space-y-5">
-            {/* Usuário */}
+          <form onSubmit={enviarFormulario} className="space-y-4">
             <div>
-              <label className="block text-sm text-muted-foreground mb-2 font-normal">E-mail</label>
+              <label className="block text-sm text-muted-foreground mb-2 font-normal">Nome completo</label>
               <input
-                type="email"
-                value={formulario.usuario}
-                onChange={(e) => setFormulario({ ...formulario, usuario: e.target.value })}
-                placeholder="email@example.com"
+                type="text"
+                value={formulario.nome}
+                onChange={(e) => setFormulario({ ...formulario, nome: e.target.value })}
+                placeholder="Seu nome"
+                required
                 className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
             </div>
 
-            {/* Senha */}
+            <div>
+              <label className="block text-sm text-muted-foreground mb-2 font-normal">E-mail</label>
+              <input
+                type="email"
+                value={formulario.email}
+                onChange={(e) => setFormulario({ ...formulario, email: e.target.value })}
+                placeholder="email@example.com"
+                required
+                className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-muted-foreground mb-2 font-normal">Telefone</label>
+              <input
+                type="tel"
+                value={formulario.telefone}
+                onChange={(e) => setFormulario({ ...formulario, telefone: e.target.value })}
+                placeholder="(00) 00000-0000"
+                required
+                className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-muted-foreground mb-2 font-normal">Título acadêmico</label>
+              <input
+                type="text"
+                value={formulario.titulo}
+                onChange={(e) => setFormulario({ ...formulario, titulo: e.target.value })}
+                placeholder="Ex: Dr., Ms., Prof."
+                required
+                className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+              />
+            </div>
+
             <div>
               <label className="block text-sm text-muted-foreground mb-2 font-normal">Senha</label>
               <div className="relative">
@@ -104,7 +125,9 @@ export function Login() {
                   type={mostrarSenha ? "text" : "password"}
                   value={formulario.senha}
                   onChange={(e) => setFormulario({ ...formulario, senha: e.target.value })}
-                  placeholder="••••••••"
+                  placeholder="Mínimo 6 caracteres"
+                  required
+                  minLength={6}
                   className="w-full px-4 py-3 pr-12 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
                 />
                 <button
@@ -121,33 +144,14 @@ export function Login() {
               <p className="text-[#ef4444] text-sm">{erro}</p>
             )}
 
-            {/* Enviar */}
             <button
               type="submit"
               className="w-full py-3 bg-[#ff8c42] text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"
             >
-              <LogIn className="w-5 h-5" />
-              Entrar
+              <UserPlus className="w-5 h-5" />
+              Criar Administrador
             </button>
           </form>
-
-          <div className="mt-6 pt-6 border-t border-border/30 text-center">
-            <p className="text-xs text-muted-foreground">
-              Acesso via convite? Use o link recebido por e-mail.
-            </p>
-          </div>
-        </div>
-
-        {/* Badges de funções */}
-        <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
-          {["Administrador", "Líder", "Coordenador", "Pesquisador"].map((funcao) => (
-            <span
-              key={funcao}
-              className="px-3 py-1 rounded-full text-xs text-muted-foreground bg-card/60 border border-border/20"
-            >
-              {funcao}
-            </span>
-          ))}
         </div>
       </div>
     </div>

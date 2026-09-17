@@ -73,24 +73,21 @@ export function Participantes() {
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
       <div className="mb-6">
-        <h1 className="text-white mb-2">Participantes do Grupo</h1>
-        <p className="text-[#9e9e9e]">
-          {grupoAtual ? `Membros do grupo ${grupoAtual.nome}` : "Selecione um grupo no menu superior para visualizar os participantes"}
-        </p>
+        <h1 className="text-foreground mb-2">Participantes</h1>
+        <p className="text-muted-foreground">Gerencie os participantes dos grupos de pesquisa</p>
       </div>
 
       {/* Barra de Ações */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar participante por nome..."
             value={termoBusca}
-            onChange={handleBuscaChange}
-            disabled={!grupoAtual}
-            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50 text-sm disabled:opacity-50"
+            onChange={(e) => setTermoBusca(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -119,20 +116,79 @@ export function Participantes() {
         )}
       </div>
 
-      {erro && (
-        <div className="mb-6 p-4 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl text-[#ef4444] text-sm">
-          {erro}
+      {/* Tabela de Participantes */}
+      <div className="bg-card rounded-2xl border border-border/30 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border/30">
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Participante</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Função</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Grupo</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Contato</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Status</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {participantesFiltrados.map((participante, index) => (
+                <tr 
+                  key={participante.id}
+                  className={`border-b border-border/30 hover:bg-background/50 transition-colors ${ index === participantesFiltrados.length - 1 ? 'border-b-0' : '' }`}
+                >
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#ff8c42] flex items-center justify-center">
+                        <span className="text-white text-sm font-semibold">{participante.avatar}</span>
+                      </div>
+                      <div>
+                        <div className="text-foreground font-medium">{participante.nome}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <BookOpen className="w-4 h-4" />
+                      <span>{participante.funcao}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-muted-foreground">{participante.grupo}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Mail className="w-3 h-3" />
+                        <span>{participante.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Phone className="w-3 h-3" />
+                        <span>{participante.telefone}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${ participante.status === "Ativo" ? "bg-[#10b981]/20 text-[#10b981]" : "bg-[#ff8c42]/20 text-[#ff8c42]" }`}>
+                      {participante.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button className="p-2 hover:bg-border/20 rounded-lg transition-colors">
+                      <MoreVertical className="w-5 h-5 text-muted-foreground" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Alerta sem grupo selecionado */}
-      {!grupoAtual ? (
-        <div className="bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30 p-12 text-center">
-          <Users className="w-16 h-16 text-[#ff8c42]/40 mx-auto mb-4" />
-          <h2 className="text-white text-lg font-bold mb-2">Nenhum grupo de pesquisa selecionado</h2>
-          <p className="text-[#9e9e9e] text-sm max-w-md mx-auto">
-            Por favor, selecione um grupo de pesquisa no menu superior (header) para visualizar seus participantes.
-          </p>
+      {/* Estado Vazio */}
+      {participantesFiltrados.length === 0 && (
+        <div className="text-center py-12">
+          <UserCheck className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">Nenhum participante encontrado</p>
         </div>
       ) : (
         <>

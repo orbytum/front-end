@@ -88,7 +88,7 @@ export function Calendario() {
       case "Apresentação": return "bg-[#ff8c42]/20 text-[#ff8c42] border-[#ff8c42]/30";
       case "Workshop": return "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30";
       case "Defesa": return "bg-[#7c3aed]/20 text-[#7c3aed] border-[#7c3aed]/30";
-      default: return "bg-[#9e9e9e]/20 text-[#9e9e9e] border-[#9e9e9e]/30";
+      default: return "bg-muted-foreground/20 text-muted-foreground border-muted-foreground/30";
     }
   };
 
@@ -96,31 +96,31 @@ export function Calendario() {
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
       <div className="mb-6">
-        <h1 className="text-white mb-2">Calendário</h1>
-        <p className="text-[#9e9e9e]">Visualize e gerencie os eventos dos grupos</p>
+        <h1 className="text-foreground mb-2">Calendário</h1>
+        <p className="text-muted-foreground">Visualize e gerencie os eventos dos grupos</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Calendário */}
         <div className="xl:col-span-2">
-          <div className="bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30 overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border/30 overflow-hidden">
             {/* Cabeçalho do Calendário */}
-            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
-              <h2 className="text-white">
+            <div className="p-6 border-b border-border/30 flex items-center justify-between">
+              <h2 className="text-foreground">
                 {nomesDosMeses[dataAtual.getMonth()]} {dataAtual.getFullYear()}
               </h2>
               <div className="flex items-center gap-2">
                 <button
                   onClick={mesAnterior}
-                  className="p-2 hover:bg-[#2e2e2e]/20 rounded-lg transition-colors"
+                  className="p-2 hover:bg-border/20 rounded-lg transition-colors"
                 >
-                  <ChevronLeft className="w-5 h-5 text-[#9e9e9e]" />
+                  <ChevronLeft className="w-5 h-5 text-muted-foreground" />
                 </button>
                 <button
                   onClick={proximoMes}
-                  className="p-2 hover:bg-[#2e2e2e]/20 rounded-lg transition-colors"
+                  className="p-2 hover:bg-border/20 rounded-lg transition-colors"
                 >
-                  <ChevronRight className="w-5 h-5 text-[#9e9e9e]" />
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </button>
               </div>
             </div>
@@ -130,7 +130,7 @@ export function Calendario() {
               {/* Cabeçalhos dos Dias da Semana */}
               <div className="grid grid-cols-7 gap-2 mb-2">
                 {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((dia) => (
-                  <div key={dia} className="text-center text-sm text-[#9e9e9e] font-medium py-2">
+                  <div key={dia} className="text-center text-sm text-muted-foreground font-medium py-2">
                     {dia}
                   </div>
                 ))}
@@ -152,10 +152,10 @@ export function Calendario() {
                   return (
                     <div
                       key={dia}
-                      className={`aspect-square p-2 rounded-xl transition-all duration-200 cursor-pointer ${ ehHoje ? "bg-[#ff8c42] text-white " : diaTemEvento ? "bg-[#121212] border border-[#ff8c42]/30 text-white hover:border-[#ff8c42]/50" : "bg-[#121212] border border-[#2e2e2e]/20 text-[#9e9e9e] hover:border-[#2e2e2e]/40" }`}
+                      className={`aspect-square p-2 rounded-xl transition-all duration-200 cursor-pointer ${ ehHoje ? "bg-[#ff8c42] text-white " : diaTemEvento ? "bg-background border border-[#ff8c42]/30 text-foreground hover:border-[#ff8c42]/50" : "bg-background border border-border/20 text-muted-foreground hover:border-border/40" }`}
                     >
                       <div className="flex flex-col h-full">
-                        <span className={`text-sm font-medium ${ehHoje ? 'text-white' : ''}`}>
+                        <span className={`text-sm font-medium ${ehHoje ? 'text-foreground' : ''}`}>
                           {dia}
                         </span>
                         {diaTemEvento && !ehHoje && (
@@ -174,9 +174,9 @@ export function Calendario() {
 
         {/* Próximos Eventos */}
         <div className="xl:col-span-1">
-          <div className="bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30 overflow-hidden">
-            <div className="p-6 border-b border-[#2e2e2e]/30 flex items-center justify-between">
-              <h2 className="text-white">Próximos Eventos</h2>
+          <div className="bg-card rounded-2xl border border-border/30 overflow-hidden">
+            <div className="p-6 border-b border-border/30 flex items-center justify-between">
+              <h2 className="text-foreground">Próximos Eventos</h2>
               <button className="p-2 bg-[#ff8c42] text-white rounded-lg transition-all duration-300">
                 <Plus className="w-4 h-4" />
               </button>
@@ -191,11 +191,11 @@ export function Calendario() {
                     className={`p-4 rounded-xl border transition-all duration-200 ${obterCorDoTipo(evento.tipo)}`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-[#121212] flex flex-col items-center justify-center flex-shrink-0">
-                        <span className="text-xs text-[#9e9e9e]">
+                      <div className="w-10 h-10 rounded-lg bg-background flex flex-col items-center justify-center flex-shrink-0">
+                        <span className="text-xs text-muted-foreground">
                           {new Date(evento.data).toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase()}
                         </span>
-                        <span className="text-sm font-bold text-white">
+                        <span className="text-sm font-bold text-foreground">
                           {new Date(evento.data).getDate()}
                         </span>
                       </div>
@@ -205,7 +205,7 @@ export function Calendario() {
                         <div className="flex items-center gap-2">
                           <CalendarIcon className="w-3 h-3 opacity-60" />
                           <span className="text-xs opacity-80">{evento.horario}</span>
-                          <span className="px-2 py-0.5 rounded text-xs bg-[#121212]/50">
+                          <span className="px-2 py-0.5 rounded text-xs bg-background/50">
                             {evento.tipo}
                           </span>
                         </div>

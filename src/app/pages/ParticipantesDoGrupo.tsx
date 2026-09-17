@@ -107,24 +107,30 @@ export function ParticipantesDoGrupo() {
         <button
           type="button"
           onClick={() => navigate("/grupos")}
-          className="flex items-center gap-2 text-[#9e9e9e] hover:text-[#ff8c42] transition-colors mb-4 cursor-pointer"
+          className="flex items-center gap-2 text-muted-foreground hover:text-[#ff8c42] transition-colors mb-4 cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Voltar para Grupos</span>
         </button>
-        <div className="flex items-center gap-4 mb-2">
-          <div className="w-12 h-12 rounded-xl bg-[#ff8c42] flex items-center justify-center">
-            <Users className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-white text-xl font-bold">{nomeGrupoExibicao}</h1>
-            <p className="text-[#9e9e9e] text-sm">Gerenciar participantes e cargos do grupo</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#ff8c42] flex items-center justify-center shrink-0">
+              <Users className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-foreground text-2xl font-bold">
+                {grupo ? grupo.nome : `Grupo #${groupId}`}
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Gerencie os membros, líderes e pesquisadores vinculados ao grupo
+              </p>
+            </div>
           </div>
           <button
             type="button"
             onClick={carregarDados}
             disabled={loading}
-            className="p-2.5 bg-[#1e1e1e] hover:bg-[#2e2e2e]/30 border border-[#2e2e2e]/40 rounded-xl text-[#9e9e9e] hover:text-white transition-colors cursor-pointer self-start sm:self-auto"
+            className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer self-start sm:self-auto"
             title="Recarregar"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -132,56 +138,85 @@ export function ParticipantesDoGrupo() {
         </div>
       </div>
 
-      {/* Cards de Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Total de Participantes</span>
-            <Users className="w-5 h-5 text-[#4a9eff]" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-card rounded-2xl p-6 border border-border/30">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-[#4a9eff] flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs">Total de Membros</p>
+              <h3 className="text-foreground text-2xl font-bold">{totalParticipantes}</h3>
+            </div>
           </div>
-          <div className="text-white text-2xl font-bold">{totalAtivos}</div>
+          <span className="text-xs text-muted-foreground">Integrantes ativos no grupo</span>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Líderes</span>
-            <Crown className="w-5 h-5 text-[#ff8c42]" />
+        <div className="bg-card rounded-2xl p-6 border border-border/30">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+              <Crown className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs">Líderes Responsáveis</p>
+              <h3 className="text-foreground text-2xl font-bold text-[#ff8c42]">{totalLideres}</h3>
+            </div>
           </div>
           <div className="text-white text-2xl font-bold">{lideresCount}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Membros / Pesquisadores</span>
-            <UserCheck className="w-5 h-5 text-[#10b981]" />
+        <div className="bg-card rounded-2xl p-6 border border-border/30">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-[#10b981] flex items-center justify-center">
+              <UserCheck className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs">Pesquisadores</p>
+              <h3 className="text-foreground text-2xl font-bold text-[#10b981]">{totalPesquisadores}</h3>
+            </div>
           </div>
           <div className="text-white text-2xl font-bold">{membrosCount}</div>
         </div>
       </div>
 
-      <div className="bg-[#1e1e1e] rounded-2xl p-4 border border-[#2e2e2e]/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-card rounded-2xl p-4 border border-border/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar participantes por nome..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50 text-sm"
+            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
           />
           {termoBusca && (
             <button
               type="button"
               onClick={() => setTermoBusca("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9e9e9e] hover:text-white rounded-lg transition-colors cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        {/* Botão Adicionar Participante (Apenas Líder/Admin) */}
-        {podeConvidar ? (
+        <select
+          value={filtroFuncao}
+          onChange={(e) => setFiltroFuncao(e.target.value)}
+          className="px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 cursor-pointer"
+        >
+          <option value="all">Todos os Membros</option>
+          <option value="Líder">Apenas Líderes</option>
+          <option value="Pesquisador">Apenas Pesquisadores</option>
+        </select>
+      </div>
+
+      {actionError && (
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{actionError}</span>
+          </div>
           <button
             onClick={() => setModalConvidarAberto(true)}
             className="px-6 py-3 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium cursor-pointer shadow-lg shadow-[#ff8c42]/20 text-sm"
@@ -213,43 +248,47 @@ export function ParticipantesDoGrupo() {
 
       {/* Lista de Participantes */}
       <div className="space-y-4">
-        {loading ? (
-          <div className="py-20 text-center flex flex-col items-center justify-center gap-3 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
-            <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
-            <p className="text-[#9e9e9e] text-sm">Carregando participantes...</p>
-          </div>
-        ) : participantes.length === 0 ? (
-          <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
-            <UserCheck className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
-            <p className="text-white font-medium mb-1">Nenhum participante encontrado</p>
-            <p className="text-[#9e9e9e] text-xs">
-              {termoBusca ? `Nenhum resultado para "${termoBusca}"` : "Este grupo não possui participantes vinculados."}
-            </p>
-          </div>
-        ) : (
-          participantes.map((participante, idx) => {
-            const id = participante.usuarioId || participante.id || idx;
-            const cargoStr = participante.isLider
-              ? "Líder"
-              : (participante.cargo || participante.role || participante.titulo || "Membro");
+        {participantesFiltrados.map((participante) => (
+          <div
+            key={participante.usuarioId}
+            className="bg-card rounded-2xl p-6 border border-border/30 transition-all"
+          >
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+              <div className="flex-1">
+                <div className="flex items-start gap-4">
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-base shrink-0 ${participante.isLider
+                        ? "bg-[#ff8c42] text-white"
+                        : "bg-[#4a9eff]/20 text-[#4a9eff]"
+                      }`}
+                  >
+                    {participante.isLider ? (
+                      <Crown className="w-5 h-5" />
+                    ) : (
+                      participante.nome.charAt(0).toUpperCase()
+                    )}
+                  </div>
 
-            return (
-              <div
-                key={id}
-                className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300 hover:border-[#ff8c42]/30"
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-start gap-4">
-                      {/* Avatar */}
-                      <div
-                        className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg ${
-                          participante.isLider
-                            ? "bg-[#ff8c42] text-white shadow-lg shadow-[#ff8c42]/20"
-                            : "bg-[#2e2e2e] text-[#ff8c42] border border-[#ff8c42]/30"
-                        }`}
-                      >
-                        {getAvatarText(participante.nome)}
+                  <div className="flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <h3 className="text-foreground font-semibold text-base">{participante.nome}</h3>
+                      {participante.isLider ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 bg-[#ff8c42]/15 text-[#ff8c42] border border-[#ff8c42]/30">
+                          <Crown className="w-3.5 h-3.5" />
+                          Líder
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 bg-[#4a9eff]/15 text-[#4a9eff] border border-[#4a9eff]/30">
+                          <UserCheck className="w-3.5 h-3.5" />
+                          {participante.cargo || "Pesquisador"}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>{participante.email}</span>
                       </div>
 
                       {/* Detalhes */}
@@ -287,29 +326,151 @@ export function ParticipantesDoGrupo() {
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#10b981]/20 text-[#10b981]">
-                      Ativo
-                    </span>
-                  </div>
                 </div>
               </div>
-            );
-          })
-        )}
+
+              <div className="flex items-center gap-2 self-end lg:self-center">
+                <button
+                  type="button"
+                  onClick={() => handleOpenEdit(participante)}
+                  className="p-2 rounded-lg bg-background hover:bg-[#ff8c42]/10 transition-colors border border-border/30 text-[#ff8c42] cursor-pointer"
+                  title="Editar participante"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteParticipante(participante)}
+                  disabled={deletingId === participante.usuarioId}
+                  className="p-2 rounded-lg bg-background hover:bg-[#ef4444]/10 transition-colors border border-border/30 text-[#ef4444] cursor-pointer disabled:opacity-40"
+                  title="Remover do grupo"
+                >
+                  {deletingId === participante.usuarioId ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Modal Convidar Membro */}
-      <ModalConvidarMembro
-        isOpen={modalConvidarAberto}
-        onClose={() => {
-          setModalConvidarAberto(false);
-          carregarParticipantes();
-        }}
-        grupoId={numericGroupId}
-        nomeGrupo={nomeGrupoExibicao}
-      />
+      {participantesFiltrados.length === 0 && !loading && (
+        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+          <UserCheck className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">
+            {termoBusca || filtroFuncao !== "all"
+              ? "Nenhum participante encontrado para os filtros aplicados."
+              : "Nenhum participante vinculado a este grupo até o momento."}
+          </p>
+        </div>
+      )}
+
+      {editModalOpen && editingParticipante && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
+            <div className="p-6 border-b border-border/30 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                  <Edit className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-foreground font-semibold text-lg">Editar Participante</h3>
+                  <p className="text-muted-foreground text-xs">Atualize os dados cadastrais do membro</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(false)}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-border/20 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {editError && (
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleUpdateParticipante} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
+                    Nome Completo <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editNome}
+                    onChange={(e) => setEditNome(e.target.value)}
+                    disabled={updating}
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
+                    Telefone <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editTelefone}
+                    onChange={(e) => setEditTelefone(e.target.value)}
+                    disabled={updating}
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
+                    Titulação <span className="text-[#ff8c42]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editTitulo}
+                    onChange={(e) => setEditTitulo(e.target.value)}
+                    placeholder="Ex: Doutor, Mestre, Pesquisador"
+                    disabled={updating}
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditModalOpen(false)}
+                    disabled={updating}
+                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={updating}
+                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {updating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Salvando...</span>
+                      </>
+                    ) : (
+                      <span>Salvar Alterações</span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

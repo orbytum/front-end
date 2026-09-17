@@ -16,15 +16,15 @@ export function Dashboard() {
         {stats.map((stat, index) => (
           <div
             key={index}
-            className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300 group"
+            className="bg-card rounded-2xl p-6 border border-border/30 transition-all duration-300 group"
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[#9e9e9e] text-sm mb-2">{stat.label}</p>
-                <h3 className="text-white text-2xl font-bold">{stat.value}</h3>
+                <p className="text-muted-foreground text-sm mb-2">{stat.label}</p>
+                <h3 className="text-foreground text-2xl font-bold">{stat.value}</h3>
               </div>
               <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                <stat.icon className="w-6 h-6 text-white" />
+                <stat.icon className="w-6 h-6 text-foreground" />
               </div>
             </div>
             <div className="mt-4 flex items-center gap-1 text-xs text-[#10b981]">

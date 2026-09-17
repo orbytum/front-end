@@ -120,9 +120,42 @@ try {
 - **Indentação**: services/models/utils usam 4 espaços; componentes/páginas usam 2 espaços (siga o arquivo que estiver editando).
 - **Componentes**: function components nomeados (`export function MinhaPagina()`).
 - **Páginas** ficam em `src/app/pages/` e são registradas nas rotas em `src/main.tsx`.
-- **Estilo visual**: tema escuro. Paleta recorrente: fundo `#121212`, cards `#1e1e1e`, bordas `#2e2e2e`, texto primário `white`, texto secundário `#9e9e9e`, destaque/acento `#ff8c42` (laranja), sucesso `#10b981`, erro `#ef4444`. Cantos arredondados (`rounded-xl`/`rounded-2xl`).
+- **Estilo visual**: dois temas (claro/escuro) com cantos arredondados (`rounded-xl`/`rounded-2xl`). Use SOMENTE as classes semânticas de cor do tema (ver "Tema e cores" abaixo).
 - **Ícones**: `lucide-react`.
 - **Não criar** novos arquivos de configuração, clientes HTTP ou pastas fora da estrutura acima sem necessidade.
+
+## Tema e cores (OBRIGATÓRIO)
+
+Os temas ficam em `src/styles/theme.css` (Tailwind 4, `@theme inline` + `@custom-variant dark`):
+
+- **Claro** (`:root`) — fundo em escala de cinza claro, texto escuro.
+- **Escuro** (`.dark`) — tema "orbital" azul-marinho (`#0a1929`/`#0d1f30`) com acento laranja.
+
+A alternância é feita por `next-themes` (`ThemeProvider` em `src/main.tsx` com `attribute="class"` e `defaultTheme="dark"`). Para alternar, use `useTheme()` (ver `src/app/components/ThemeToggle.tsx`).
+
+### Regras de cor
+
+- **NUNCA** use cores hard-coded em classes (`bg-[#121212]`, `text-[#ff8c42]`, `border-[#2e2e2e]`, `text-white`, etc.).
+- Use **somente as classes semânticas** geradas a partir dos tokens do tema:
+
+| Propósito | Classe (usar) | Proibido (hard-coded) |
+|---|---|---|
+| Fundo da página | `bg-background` | `bg-[#121212]` / `bg-white` |
+| Card/painel | `bg-card` | `bg-[#1e1e1e]` |
+| Borda | `border-border` | `border-[#2e2e2e]` |
+| Texto primário | `text-foreground` | `text-white` |
+| Texto secundário | `text-muted-foreground` | `text-[#9e9e9e]` |
+| Destaque/acento | `text-primary` / `bg-primary` | `text-[#ff8c42]` |
+| Erro | `text-destructive` / `bg-destructive` | `text-[#ef4444]` |
+
+- Opacidade continua funcionando: `bg-background/50`, `border-border/30`, `text-muted-foreground/60`.
+- Para estilos específicos do tema escuro, use o variant `dark:` (ex.: `dark:bg-input/30`).
+- Texto branco (`text-white`) só é permitido sobre fundos coloridos (ex.: texto de botão em `bg-primary`).
+
+### Exceções permitidas
+
+- Cores de **status/categorias** que funcionam bem nos dois temas podem ficar fixas: verde `#10b981` (sucesso), vermelho `#ef4444` (erro), azul `#4a9eff`, âmbar `#f59e0b`, violeta `#7c3aed` (ex.: badges de status como `bg-[#10b981]/20 text-[#10b981]`).
+- O laranja `#ff8c42` pode ser usado fixo para **acentos de marca** (logo, avatares), mas prefira `text-primary`/`bg-primary`.
 
 ## Proibido
 
@@ -130,3 +163,4 @@ try {
 - ❌ Chamar `fetch` diretamente fora de `HttpRequest`.
 - ❌ Ignorar o schema Zod nas respostas (sempre passe o `schema` quando houver DTO).
 - ❌ Duplicar lógica de token/JWT fora do `AuthService`.
+- ❌ Usar cores hard-coded em classes (`bg-[#hex]`, `text-[#hex]`, `text-white`, etc.). Use os tokens semânticos do tema (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, ...).

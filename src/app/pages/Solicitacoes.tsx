@@ -167,7 +167,7 @@ export function Solicitacoes() {
       case "Financeiro": return "bg-[#10b981]/20 text-[#10b981]";
       case "Equipamento": return "bg-[#4a9eff]/20 text-[#4a9eff]";
       case "Material": return "bg-[#7c3aed]/20 text-[#7c3aed]";
-      default: return "bg-[#9e9e9e]/20 text-[#9e9e9e]";
+      default: return "bg-muted-foreground/20 text-muted-foreground";
     }
   };
 
@@ -176,7 +176,7 @@ export function Solicitacoes() {
       case "Aprovada": return <CheckCircle className="w-5 h-5 text-[#10b981]" />;
       case "Rejeitada": return <XCircle className="w-5 h-5 text-[#ef4444]" />;
       case "Em Análise": return <Clock className="w-5 h-5 text-[#ff8c42]" />;
-      default: return <AlertCircle className="w-5 h-5 text-[#9e9e9e]" />;
+      default: return <AlertCircle className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
@@ -185,7 +185,7 @@ export function Solicitacoes() {
       case "Aprovada": return "bg-[#10b981]/20 text-[#10b981]";
       case "Rejeitada": return "bg-[#ef4444]/20 text-[#ef4444]";
       case "Em Análise": return "bg-[#ff8c42]/20 text-[#ff8c42]";
-      default: return "bg-[#9e9e9e]/20 text-[#9e9e9e]";
+      default: return "bg-muted-foreground/20 text-muted-foreground";
     }
   };
 
@@ -193,58 +193,58 @@ export function Solicitacoes() {
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
       <div className="mb-6">
-        <h1 className="text-white font-bold mb-2">Solicitações de Recursos</h1>
-        <p className="text-[#9e9e9e]">Gerencie solicitações de verbas, equipamentos e materiais</p>
+        <h1 className="text-foreground mb-2">Solicitações de Recursos</h1>
+        <p className="text-muted-foreground">Gerencie solicitações de verbas, equipamentos e materiais</p>
       </div>
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Total</span>
+            <span className="text-muted-foreground text-sm">Total</span>
             <FileText className="w-5 h-5 text-[#4a9eff]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Pendentes</span>
-            <AlertCircle className="w-5 h-5 text-[#9e9e9e]" />
+            <span className="text-muted-foreground text-sm">Pendentes</span>
+            <AlertCircle className="w-5 h-5 text-muted-foreground" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.pendentes}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.pendentes}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Em Análise</span>
+            <span className="text-muted-foreground text-sm">Em Análise</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.emAnalise}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.emAnalise}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Aprovadas</span>
+            <span className="text-muted-foreground text-sm">Aprovadas</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.aprovadas}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.aprovadas}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Rejeitadas</span>
+            <span className="text-muted-foreground text-sm">Rejeitadas</span>
             <XCircle className="w-5 h-5 text-[#ef4444]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.rejeitadas}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.rejeitadas}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Aprovado</span>
+            <span className="text-muted-foreground text-sm">Aprovado</span>
             <DollarSign className="w-5 h-5 text-[#10b981]" />
           </div>
-          <div className="text-white text-lg font-bold">
+          <div className="text-foreground text-lg font-bold">
             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(estatisticas.valorTotal)}
           </div>
         </div>
@@ -254,13 +254,13 @@ export function Solicitacoes() {
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar solicitações..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -268,7 +268,7 @@ export function Solicitacoes() {
         <select
           value={filtroTipo}
           onChange={(e) => setFiltroTipo(e.target.value)}
-          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Tipos</option>
           <option value="Financeiro">Financeiro</option>
@@ -280,7 +280,7 @@ export function Solicitacoes() {
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Pendente">Pendentes</option>
@@ -301,7 +301,7 @@ export function Solicitacoes() {
         {solicitacoesFiltradas.map((solicitacao) => (
           <div
             key={solicitacao.id}
-            className="bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300"
+            className="bg-card rounded-2xl p-6 border border-border/30 transition-all duration-300"
           >
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Informações da Solicitação */}
@@ -312,43 +312,43 @@ export function Solicitacoes() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-white font-semibold">{solicitacao.titulo}</h3>
+                      <h3 className="text-foreground font-semibold">{solicitacao.titulo}</h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${obterCorTipo(solicitacao.tipo)}`}>
                         {solicitacao.tipo}
                       </span>
                     </div>
-                    <p className="text-sm text-[#9e9e9e] mb-3">{solicitacao.descricao}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{solicitacao.descricao}</p>
 
                     {/* Grade de Detalhes */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
                       <div>
-                        <span className="text-xs text-[#9e9e9e]">Solicitante</span>
-                        <p className="text-sm text-white">{solicitacao.solicitadoPor}</p>
+                        <span className="text-xs text-muted-foreground">Solicitante</span>
+                        <p className="text-sm text-foreground">{solicitacao.solicitadoPor}</p>
                       </div>
                       <div>
-                        <span className="text-xs text-[#9e9e9e]">Grupo</span>
-                        <p className="text-sm text-white">{solicitacao.grupo}</p>
+                        <span className="text-xs text-muted-foreground">Grupo</span>
+                        <p className="text-sm text-foreground">{solicitacao.grupo}</p>
                       </div>
                       <div>
-                        <span className="text-xs text-[#9e9e9e]">Valor</span>
+                        <span className="text-xs text-muted-foreground">Valor</span>
                         <p className="text-sm text-[#ff8c42] font-semibold">{solicitacao.valor}</p>
                       </div>
                       {solicitacao.quantidade && (
                         <div>
-                          <span className="text-xs text-[#9e9e9e]">Quantidade</span>
-                          <p className="text-sm text-white">{solicitacao.quantidade}</p>
+                          <span className="text-xs text-muted-foreground">Quantidade</span>
+                          <p className="text-sm text-foreground">{solicitacao.quantidade}</p>
                         </div>
                       )}
                     </div>
 
                     {/* Justificativa */}
-                    <div className="bg-[#121212] rounded-lg p-3 border border-[#2e2e2e]/30">
-                      <span className="text-xs text-[#9e9e9e] block mb-1">Justificativa</span>
-                      <p className="text-sm text-white">{solicitacao.justificativa}</p>
+                    <div className="bg-background rounded-lg p-3 border border-border/30">
+                      <span className="text-xs text-muted-foreground block mb-1">Justificativa</span>
+                      <p className="text-sm text-foreground">{solicitacao.justificativa}</p>
                     </div>
 
                     {solicitacao.projeto && (
-                      <div className="mt-2 text-xs text-[#9e9e9e]">
+                      <div className="mt-2 text-xs text-muted-foreground">
                         Projeto: <span className="text-[#4a9eff]">{solicitacao.projeto}</span>
                       </div>
                     )}
@@ -363,17 +363,17 @@ export function Solicitacoes() {
                   <span className="text-sm font-medium">{solicitacao.status}</span>
                 </div>
 
-                <div className="text-xs text-[#9e9e9e]">
+                <div className="text-xs text-muted-foreground">
                   Solicitado em:<br />
-                  <span className="text-white font-medium">
+                  <span className="text-foreground font-medium">
                     {new Date(solicitacao.dataSolicitacao).toLocaleDateString('pt-BR')}
                   </span>
                 </div>
 
                 {solicitacao.dataResposta && (
-                  <div className="text-xs text-[#9e9e9e]">
+                  <div className="text-xs text-muted-foreground">
                     Respondido em:<br />
-                    <span className="text-white font-medium">
+                    <span className="text-foreground font-medium">
                       {new Date(solicitacao.dataResposta).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
@@ -397,9 +397,9 @@ export function Solicitacoes() {
 
       {/* Estado Vazio */}
       {solicitacoesFiltradas.length === 0 && (
-        <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
-          <FileText className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
-          <p className="text-[#9e9e9e]">Nenhuma solicitação encontrada</p>
+        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+          <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">Nenhuma solicitação encontrada</p>
         </div>
       )}
     </div>

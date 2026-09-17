@@ -148,8 +148,8 @@ export function Eventos() {
     switch (status) {
       case "Próximo": return "bg-[#4a9eff]/20 text-[#4a9eff]";
       case "Em Andamento": return "bg-[#ff8c42]/20 text-[#ff8c42]";
-      case "Encerrado": return "bg-[#9e9e9e]/20 text-[#9e9e9e]";
-      default: return "bg-[#9e9e9e]/20 text-[#9e9e9e]";
+      case "Encerrado": return "bg-muted-foreground/20 text-muted-foreground";
+      default: return "bg-muted-foreground/20 text-muted-foreground";
     }
   };
 
@@ -173,42 +173,42 @@ export function Eventos() {
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
       <div className="mb-6">
-        <h1 className="text-white mb-2">Eventos</h1>
-        <p className="text-[#9e9e9e]">Gerencie palestras, workshops e eventos científicos</p>
+        <h1 className="text-foreground mb-2">Eventos</h1>
+        <p className="text-muted-foreground">Gerencie palestras, workshops e eventos científicos</p>
       </div>
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Total</span>
+            <span className="text-muted-foreground text-sm">Total</span>
             <CalendarIcon className="w-5 h-5 text-[#4a9eff]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.total}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Próximos</span>
+            <span className="text-muted-foreground text-sm">Próximos</span>
             <Clock className="w-5 h-5 text-[#4a9eff]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.proximos}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.proximos}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Em Andamento</span>
+            <span className="text-muted-foreground text-sm">Em Andamento</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.emAndamento}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.emAndamento}</div>
         </div>
 
-        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#2e2e2e]/30">
+        <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#9e9e9e] text-sm">Encerrados</span>
+            <span className="text-muted-foreground text-sm">Encerrados</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
           </div>
-          <div className="text-white text-2xl font-bold">{estatisticas.encerrados}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.encerrados}</div>
         </div>
       </div>
 
@@ -216,13 +216,13 @@ export function Eventos() {
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Busca */}
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9e9e9e]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar eventos..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white placeholder-[#9e9e9e] focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
@@ -230,7 +230,7 @@ export function Eventos() {
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-[#1e1e1e] rounded-xl border border-[#2e2e2e]/30 text-white focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Próximo">Próximos</option>
@@ -253,7 +253,7 @@ export function Eventos() {
           return (
             <div
               key={evento.id}
-              className={`bg-[#1e1e1e] rounded-2xl p-6 border border-[#2e2e2e]/30 transition-all duration-300 ${ evento.status === "Encerrado" ? "opacity-70" : "" }`}
+              className={`bg-card rounded-2xl p-6 border border-border/30 transition-all duration-300 ${ evento.status === "Encerrado" ? "opacity-70" : "" }`}
             >
               <div className="flex flex-col lg:flex-row gap-4">
                 {/* Informações do Evento */}
@@ -264,44 +264,44 @@ export function Eventos() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-white font-semibold">{evento.nome}</h3>
+                        <h3 className="text-foreground font-semibold">{evento.nome}</h3>
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${obterCorStatus(evento.status)}`}>
                           {evento.status}
                         </span>
                       </div>
-                      <p className="text-sm text-[#9e9e9e] mb-3">{evento.descricao}</p>
+                      <p className="text-sm text-muted-foreground mb-3">{evento.descricao}</p>
 
                       {/* Grade de Detalhes do Evento */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                         <div className="flex items-start gap-2">
                           <MapPin className="w-4 h-4 text-[#4a9eff] mt-0.5 flex-shrink-0" />
                           <div>
-                            <span className="text-xs text-[#9e9e9e] block">Localização</span>
-                            <span className="text-sm text-white">{evento.local}</span>
+                            <span className="text-xs text-muted-foreground block">Localização</span>
+                            <span className="text-sm text-foreground">{evento.local}</span>
                           </div>
                         </div>
 
                         <div className="flex items-start gap-2">
                           <Clock className="w-4 h-4 text-[#4a9eff] mt-0.5 flex-shrink-0" />
                           <div>
-                            <span className="text-xs text-[#9e9e9e] block">Horário e Duração</span>
-                            <span className="text-sm text-white">{evento.horario} - {evento.duracao}</span>
+                            <span className="text-xs text-muted-foreground block">Horário e Duração</span>
+                            <span className="text-sm text-foreground">{evento.horario} - {evento.duracao}</span>
                           </div>
                         </div>
 
                         <div className="flex items-start gap-2">
                           <Users className="w-4 h-4 text-[#4a9eff] mt-0.5 flex-shrink-0" />
                           <div>
-                            <span className="text-xs text-[#9e9e9e] block">Participantes</span>
-                            <span className="text-sm text-white">{evento.participantes} pessoas</span>
+                            <span className="text-xs text-muted-foreground block">Participantes</span>
+                            <span className="text-sm text-foreground">{evento.participantes} pessoas</span>
                           </div>
                         </div>
 
                         <div className="flex items-start gap-2">
                           <Users className="w-4 h-4 text-[#4a9eff] mt-0.5 flex-shrink-0" />
                           <div>
-                            <span className="text-xs text-[#9e9e9e] block">Organizador</span>
-                            <span className="text-sm text-white">{evento.organizador}</span>
+                            <span className="text-xs text-muted-foreground block">Organizador</span>
+                            <span className="text-sm text-foreground">{evento.organizador}</span>
                           </div>
                         </div>
                       </div>
@@ -311,19 +311,19 @@ export function Eventos() {
 
                 {/* Metadados do Evento */}
                 <div className="flex flex-col items-start lg:items-end gap-3 lg:min-w-[200px]">
-                  <div className="bg-[#121212] rounded-lg px-4 py-3 border border-[#2e2e2e]/30 text-center lg:min-w-[180px]">
+                  <div className="bg-background rounded-lg px-4 py-3 border border-border/30 text-center lg:min-w-[180px]">
                     <div className="text-3xl font-bold text-[#ff8c42] mb-1">
                       {new Date(evento.data).getDate()}
                     </div>
-                    <div className="text-xs text-[#9e9e9e] uppercase">
+                    <div className="text-xs text-muted-foreground uppercase">
                       {new Date(evento.data).toLocaleDateString('pt-BR', { month: 'short' })}
                     </div>
-                    <div className="text-sm text-white mt-1">
+                    <div className="text-sm text-foreground mt-1">
                       {new Date(evento.data).getFullYear()}
                     </div>
                   </div>
 
-                  <div className="text-xs text-[#9e9e9e] text-left lg:text-right">
+                  <div className="text-xs text-muted-foreground text-left lg:text-right">
                     {formatarData(evento.data)}
                   </div>
 
@@ -354,9 +354,9 @@ export function Eventos() {
 
       {/* Estado Vazio */}
       {eventosFiltrados.length === 0 && (
-        <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30">
-          <CalendarIcon className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
-          <p className="text-[#9e9e9e]">Nenhum evento encontrado</p>
+        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+          <CalendarIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">Nenhum evento encontrado</p>
         </div>
       )}
     </div>
