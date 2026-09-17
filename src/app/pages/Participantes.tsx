@@ -1,77 +1,73 @@
-import { UserCheck, Plus, Search, Mail, Phone, MoreVertical, BookOpen } from "lucide-react";
-import { useState } from "react";
+import { UserCheck, Search, Mail, Phone, MoreVertical, BookOpen, UserPlus, Lock, Crown, Loader2, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { useGrupo } from "../contexts/GrupoContext";
+import { AuthService } from "../services/auth/AuthService";
+import { GrupoService } from "../services/grupos/GrupoService";
+import { PesquisadorResponse } from "../models/dto/grupos/PesquisadorPaginado";
+import { ModalConvidarMembro } from "../components/ModalConvidarMembro";
 
 export function Participantes() {
   const [termoBusca, setTermoBusca] = useState("");
+  const [modalConvidarAberto, setModalConvidarAberto] = useState(false);
 
-  const participantes = [
-    {
-      id: 1,
-      nome: "João Pedro Oliveira",
-      funcao: "Doutorando",
-      grupo: "IA e Machine Learning",
-      email: "joao.oliveira@universidade.br",
-      telefone: "(11) 98765-4321",
-      status: "Ativo",
-      avatar: "JP"
-    },
-    {
-      id: 2,
-      nome: "Maria Eduarda Santos",
-      funcao: "Mestranda",
-      grupo: "Computação Quântica",
-      email: "maria.santos@universidade.br",
-      telefone: "(21) 97654-3210",
-      status: "Ativo",
-      avatar: "MS"
-    },
-    {
-      id: 3,
-      nome: "Lucas Ferreira Costa",
-      funcao: "Doutorando",
-      grupo: "Segurança Cibernética",
-      email: "lucas.costa@universidade.br",
-      telefone: "(31) 96543-2109",
-      status: "Ativo",
-      avatar: "LC"
-    },
-    {
-      id: 4,
-      nome: "Ana Carolina Lima",
-      funcao: "Pós-Doutoranda",
-      grupo: "IA e Machine Learning",
-      email: "ana.lima@universidade.br",
-      telefone: "(41) 95432-1098",
-      status: "Ativo",
-      avatar: "AL"
-    },
-    {
-      id: 5,
-      nome: "Rafael Henrique Souza",
-      funcao: "Mestrando",
-      grupo: "Blockchain e Criptomoedas",
-      email: "rafael.souza@universidade.br",
-      telefone: "(51) 94321-0987",
-      status: "Em Licença",
-      avatar: "RS"
-    },
-    {
-      id: 6,
-      nome: "Beatriz Almeida Rocha",
-      funcao: "Doutoranda",
-      grupo: "Segurança Cibernética",
-      email: "beatriz.rocha@universidade.br",
-      telefone: "(61) 93210-9876",
-      status: "Ativo",
-      avatar: "BR"
-    },
-  ];
+  const [participantes, setParticipantes] = useState<PesquisadorResponse[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
 
-  const participantesFiltrados = participantes.filter(p =>
-    p.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
-    p.grupo.toLowerCase().includes(termoBusca.toLowerCase()) ||
-    p.funcao.toLowerCase().includes(termoBusca.toLowerCase())
-  );
+  const { grupoAtual } = useGrupo();
+  const authService = new AuthService();
+  const grupoService = new GrupoService();
+
+  const isAdmin = authService.isAdmin();
+  const podeConvidar = isAdmin || Boolean(grupoAtual?.isLider);
+
+  const carregarParticipantes = useCallback(async () => {
+    if (!grupoAtual?.id) {
+      setParticipantes([]);
+      setTotalElements(0);
+      setTotalPages(1);
+      return;
+    }
+
+    setLoading(true);
+    setErro("");
+    try {
+      const res = await grupoService.listarPesquisadores(grupoAtual.id, {
+        page,
+        size: 10,
+        nome: termoBusca || undefined,
+      });
+      setParticipantes(res.items || []);
+      setTotalPages(res.totalPages || 1);
+      setTotalElements(res.totalElements || 0);
+    } catch (err: any) {
+      setErro(err?.mensagem || err?.message || "Erro ao carregar participantes do grupo.");
+      setParticipantes([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [grupoAtual?.id, page, termoBusca]);
+
+  useEffect(() => {
+    carregarParticipantes();
+  }, [carregarParticipantes]);
+
+  const handleBuscaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTermoBusca(e.target.value);
+    setPage(1);
+  };
+
+  const getAvatarText = (nome: string) => {
+    if (!nome) return "U";
+    const partes = nome.trim().split(" ");
+    if (partes.length >= 2) {
+      return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+    }
+    return nome.substring(0, 2).toUpperCase();
+  };
 
   return (
     <div className="h-full overflow-auto p-6">
@@ -88,18 +84,36 @@ export function Participantes() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Buscar por nome, grupo ou função..."
+            placeholder="Buscar participante por nome..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
-        {/* Botão Novo Participante */}
-        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
-          <Plus className="w-5 h-5" />
-          <span>Novo Participante</span>
-        </button>
+        {/* Botão Convidar Participante (Apenas Líder ou Admin) */}
+        {podeConvidar && grupoAtual ? (
+          <button
+            onClick={() => setModalConvidarAberto(true)}
+            className="px-6 py-3 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium cursor-pointer shadow-lg shadow-[#ff8c42]/20 text-sm"
+          >
+            <UserPlus className="w-5 h-5" />
+            <span>Convidar Membro</span>
+          </button>
+        ) : (
+          <div className="relative group">
+            <button
+              disabled
+              className="px-6 py-3 bg-[#2e2e2e]/40 text-[#9e9e9e] rounded-xl flex items-center gap-2 font-medium cursor-not-allowed text-sm border border-[#2e2e2e]/30"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Convidar Membro</span>
+            </button>
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-[#121212] text-[#9e9e9e] text-xs px-3 py-1.5 rounded-lg border border-[#2e2e2e]/40 whitespace-nowrap shadow-xl z-10">
+              {!grupoAtual ? "Selecione um grupo no header para convidar membros" : "Apenas o líder do grupo pode convidar membros"}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tabela de Participantes */}
@@ -168,7 +182,7 @@ export function Participantes() {
             </tbody>
           </table>
         </div>
-      </div>
+      )}
 
       {/* Estado Vazio */}
       {participantesFiltrados.length === 0 && (
@@ -176,6 +190,153 @@ export function Participantes() {
           <UserCheck className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">Nenhum participante encontrado</p>
         </div>
+      ) : (
+        <>
+          {/* Tabela de Participantes */}
+          <div className="bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30 overflow-hidden shadow-xl">
+            {loading ? (
+              <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
+                <p className="text-[#9e9e9e] text-sm">Carregando participantes do banco de dados...</p>
+              </div>
+            ) : participantes.length === 0 ? (
+              <div className="text-center py-16">
+                <UserCheck className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
+                <p className="text-white font-medium text-base mb-1">Nenhum participante encontrado</p>
+                <p className="text-[#9e9e9e] text-xs">
+                  {termoBusca ? `Nenhum resultado para "${termoBusca}"` : "Este grupo ainda não possui participantes cadastrados."}
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#2e2e2e]/30 bg-[#121212]/40">
+                      <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#9e9e9e]">Participante</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#9e9e9e]">Cargo / Função</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#9e9e9e]">Grupo</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#9e9e9e]">Contato</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#9e9e9e]">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {participantes.map((participante, index) => {
+                      const id = participante.usuarioId || participante.id || index;
+                      const cargoStr = participante.isLider
+                        ? "Líder"
+                        : (participante.cargo || participante.role || participante.titulo || "Membro");
+
+                      return (
+                        <tr
+                          key={id}
+                          className={`border-b border-[#2e2e2e]/30 hover:bg-[#121212]/50 transition-colors ${
+                            index === participantes.length - 1 ? "border-b-0" : ""
+                          }`}
+                        >
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm ${
+                                participante.isLider ? "bg-[#ff8c42] text-white" : "bg-[#2e2e2e] text-[#ff8c42] border border-[#ff8c42]/30"
+                              }`}>
+                                {getAvatarText(participante.nome)}
+                              </div>
+                              <div>
+                                <div className="text-white font-medium flex items-center gap-2">
+                                  <span>{participante.nome}</span>
+                                  {participante.isLider && (
+                                    <Crown className="w-4 h-4 text-[#ff8c42] inline" title="Líder do Grupo" />
+                                  )}
+                                </div>
+                                {participante.titulo && (
+                                  <div className="text-xs text-[#9e9e9e]">{participante.titulo}</div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2 text-[#9e9e9e]">
+                              {participante.isLider ? (
+                                <Crown className="w-4 h-4 text-[#ff8c42]" />
+                              ) : (
+                                <BookOpen className="w-4 h-4 text-[#ff8c42]" />
+                              )}
+                              <span className={participante.isLider ? "text-[#ff8c42] font-semibold" : ""}>
+                                {cargoStr}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-[#9e9e9e] font-medium">{grupoAtual.nome}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 text-sm text-[#9e9e9e]">
+                                <Mail className="w-3.5 h-3.5 text-[#ff8c42]" />
+                                <span>{participante.email}</span>
+                              </div>
+                              {participante.telefone && (
+                                <div className="flex items-center gap-2 text-sm text-[#9e9e9e]">
+                                  <Phone className="w-3.5 h-3.5 text-[#9e9e9e]" />
+                                  <span>{participante.telefone}</span>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#10b981]/20 text-[#10b981]">
+                              Ativo
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Paginação */}
+            {!loading && totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-[#2e2e2e]/30 bg-[#121212]/40 flex items-center justify-between">
+                <span className="text-xs text-[#9e9e9e]">
+                  Mostrando {participantes.length} de {totalElements} participantes
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="p-2 rounded-lg bg-[#1e1e1e] border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white hover:border-[#ff8c42]/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-xs text-white px-2">
+                    Página {page} de {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    className="p-2 rounded-lg bg-[#1e1e1e] border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white hover:border-[#ff8c42]/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Modal Convidar Membro */}
+      {grupoAtual && (
+        <ModalConvidarMembro
+          isOpen={modalConvidarAberto}
+          onClose={() => {
+            setModalConvidarAberto(false);
+            carregarParticipantes();
+          }}
+          grupoId={grupoAtual.id}
+          nomeGrupo={grupoAtual.nome}
+        />
       )}
     </div>
   );

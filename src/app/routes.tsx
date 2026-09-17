@@ -33,6 +33,11 @@ export const router = createBrowserRouter([
     Component: CriarAdminInicial,
   },
   {
+    path: "/cadastrar-admin-inicial",
+    Component: CadastrarAdminInicial,
+  },
+
+  {
     path: "/convite",
     Component: AceitarConviteCadastro,
   },

@@ -1,25 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
-import {
-  ArrowLeft,
-  Search,
-  UserCheck,
-  Edit,
-  Trash2,
-  Crown,
-  Users,
-  Loader2,
-  AlertTriangle,
-  X,
-  Phone,
-  GraduationCap,
-  Mail,
-  RefreshCw,
-} from "lucide-react";
+import { ArrowLeft, Search, UserCheck, Shield, Crown, User, Users, Lock, UserPlus, Loader2, Mail, Phone } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { useGrupo } from "../contexts/GrupoContext";
+import { AuthService } from "../services/auth/AuthService";
 import { GrupoService } from "../services/grupos/GrupoService";
-import { GrupoDetalhe } from "../models/dto/grupos/GrupoDetalhe";
-import { ParticipanteResponse } from "../models/dto/grupos/Participante";
-import { HttpError } from "../utils/HttpError";
+import { PesquisadorResponse } from "../models/dto/grupos/PesquisadorPaginado";
+import { ModalConvidarMembro } from "../components/ModalConvidarMembro";
 
 export function ParticipantesDoGrupo() {
   const { groupId } = useParams();
@@ -32,112 +19,57 @@ export function ParticipantesDoGrupo() {
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
   const [termoBusca, setTermoBusca] = useState("");
-  const [filtroFuncao, setFiltroFuncao] = useState("all");
+  const [modalConvidarAberto, setModalConvidarAberto] = useState(false);
 
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingParticipante, setEditingParticipante] = useState<ParticipanteResponse | null>(null);
-  const [editNome, setEditNome] = useState("");
-  const [editTelefone, setEditTelefone] = useState("");
-  const [editTitulo, setEditTitulo] = useState("");
-  const [updating, setUpdating] = useState(false);
-  const [editError, setEditError] = useState("");
+  const [participantes, setParticipantes] = useState<PesquisadorResponse[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState("");
 
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const { grupoAtual } = useGrupo();
+  const authService = new AuthService();
+  const grupoService = new GrupoService();
 
-  const carregarDados = useCallback(async () => {
-    if (!groupId || isNaN(Number(groupId))) {
-      navigate("/grupos");
-      return;
-    }
+  const isAdmin = authService.isAdmin();
+  const numericGroupId = Number(groupId) || grupoAtual?.id || 0;
+  const podeConvidar = isAdmin || (grupoAtual?.id === numericGroupId && Boolean(grupoAtual?.isLider));
 
-    const id = Number(groupId);
+  const nomeGrupoExibicao = (grupoAtual && grupoAtual.id === numericGroupId) ? grupoAtual.nome : `Grupo #${numericGroupId}`;
+
+  const carregarParticipantes = useCallback(async () => {
+    if (!numericGroupId) return;
+
     setLoading(true);
-    setError("");
-    setActionError("");
-
+    setErro("");
     try {
-      const [grupoRes, participantesRes] = await Promise.all([
-        grupoService.buscarPorId(id),
-        grupoService.listarParticipantes(id),
-      ]);
-      setGrupo(grupoRes);
-      setParticipantes(participantesRes);
-    } catch (err) {
-      if (err instanceof HttpError) {
-        setError(err.response?.mensagem || err.message);
-      } else {
-        setError("Não foi possível carregar os dados do grupo e participantes.");
-      }
+      const res = await grupoService.listarPesquisadores(numericGroupId, {
+        page: 1,
+        size: 50,
+        nome: termoBusca || undefined,
+      });
+      setParticipantes(res.items || []);
+    } catch (err: any) {
+      setErro(err?.mensagem || err?.message || "Erro ao carregar participantes do grupo.");
+      setParticipantes([]);
     } finally {
       setLoading(false);
     }
-  }, [groupId, navigate]);
+  }, [numericGroupId, termoBusca]);
 
   useEffect(() => {
-    carregarDados();
-  }, [carregarDados]);
+    carregarParticipantes();
+  }, [carregarParticipantes]);
 
-  const handleOpenEdit = (p: ParticipanteResponse) => {
-    setEditingParticipante(p);
-    setEditNome(p.nome);
-    setEditTelefone(p.telefone || "");
-    setEditTitulo(p.titulo || "");
-    setEditError("");
-    setEditModalOpen(true);
-  };
+  const totalAtivos = participantes.length;
+  const lideresCount = participantes.filter((p) => p.isLider).length;
+  const membrosCount = totalAtivos - lideresCount;
 
-  const handleUpdateParticipante = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingParticipante || !groupId) return;
-
-    if (!editNome.trim()) {
-      setEditError("O nome é obrigatório.");
-      return;
+  const getAvatarText = (nome: string) => {
+    if (!nome) return "U";
+    const partes = nome.trim().split(" ");
+    if (partes.length >= 2) {
+      return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
     }
-
-    setUpdating(true);
-    setEditError("");
-    try {
-      await grupoService.atualizarParticipante(Number(groupId), editingParticipante.usuarioId, {
-        nome: editNome.trim(),
-        telefone: editTelefone.trim(),
-        titulo: editTitulo.trim(),
-      });
-      setEditModalOpen(false);
-      setEditingParticipante(null);
-      carregarDados();
-    } catch (err) {
-      if (err instanceof HttpError) {
-        setEditError(err.response?.mensagem || err.message);
-      } else {
-        setEditError("Erro ao atualizar participante.");
-      }
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handleDeleteParticipante = async (p: ParticipanteResponse) => {
-    if (!groupId) return;
-    setActionError("");
-
-    if (!window.confirm(`Deseja realmente remover o participante "${p.nome}" deste grupo?`)) {
-      return;
-    }
-
-    setDeletingId(p.usuarioId);
-    try {
-      await grupoService.removerParticipante(Number(groupId), p.usuarioId);
-      carregarDados();
-    } catch (err) {
-      if (err instanceof HttpError) {
-        setActionError(err.response?.mensagem || err.message);
-      } else {
-        setActionError("Erro ao remover participante.");
-      }
-    } finally {
-      setDeletingId(null);
-    }
+    return nome.substring(0, 2).toUpperCase();
   };
 
   const participantesFiltrados = participantes.filter((p) => {
@@ -230,7 +162,7 @@ export function ParticipantesDoGrupo() {
               <h3 className="text-foreground text-2xl font-bold text-[#ff8c42]">{totalLideres}</h3>
             </div>
           </div>
-          <span className="text-xs text-[#ff8c42]">Supervisão do grupo</span>
+          <div className="text-white text-2xl font-bold">{lideresCount}</div>
         </div>
 
         <div className="bg-card rounded-2xl p-6 border border-border/30">
@@ -243,7 +175,7 @@ export function ParticipantesDoGrupo() {
               <h3 className="text-foreground text-2xl font-bold text-[#10b981]">{totalPesquisadores}</h3>
             </div>
           </div>
-          <span className="text-xs text-[#10b981]">Equipe de pesquisa</span>
+          <div className="text-white text-2xl font-bold">{membrosCount}</div>
         </div>
       </div>
 
@@ -252,7 +184,7 @@ export function ParticipantesDoGrupo() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Buscar por nome, e-mail, título..."
+            placeholder="Buscar participantes por nome..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
             className="w-full pl-11 pr-10 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
@@ -286,31 +218,35 @@ export function ParticipantesDoGrupo() {
             <span>{actionError}</span>
           </div>
           <button
-            type="button"
-            onClick={() => setActionError("")}
-            className="p-1 rounded-lg hover:bg-[#ef4444]/20 transition-colors cursor-pointer"
+            onClick={() => setModalConvidarAberto(true)}
+            className="px-6 py-3 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium cursor-pointer shadow-lg shadow-[#ff8c42]/20 text-sm"
           >
-            <X className="w-4 h-4" />
+            <UserPlus className="w-5 h-5" />
+            <span>Convidar Membro</span>
           </button>
-        </div>
-      )}
-
-      {error && (
-        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
+        ) : (
+          <div className="relative group">
+            <button
+              disabled
+              className="px-6 py-3 bg-[#2e2e2e]/40 text-[#9e9e9e] rounded-xl flex items-center gap-2 font-medium cursor-not-allowed text-sm border border-[#2e2e2e]/30"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Convidar Membro</span>
+            </button>
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-[#121212] text-[#9e9e9e] text-xs px-3 py-1.5 rounded-lg border border-[#2e2e2e]/40 whitespace-nowrap shadow-xl z-10">
+              Apenas o líder do grupo pode convidar participantes
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setError("")}
-            className="p-1 rounded-lg hover:bg-[#ef4444]/20 transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
+        )}
+      </div>
+
+      {erro && (
+        <div className="mb-6 p-4 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl text-[#ef4444] text-sm">
+          {erro}
         </div>
       )}
 
+      {/* Lista de Participantes */}
       <div className="space-y-4">
         {participantesFiltrados.map((participante) => (
           <div
@@ -354,18 +290,40 @@ export function ParticipantesDoGrupo() {
                         <Mail className="w-3.5 h-3.5" />
                         <span>{participante.email}</span>
                       </div>
-                      {participante.telefone && (
-                        <div className="flex items-center gap-1.5">
-                          <Phone className="w-3.5 h-3.5" />
-                          <span>{participante.telefone}</span>
+
+                      {/* Detalhes */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-white font-semibold text-base">{participante.nome}</h3>
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${
+                              participante.isLider
+                                ? "bg-[#ff8c42]/20 text-[#ff8c42] border border-[#ff8c42]/30"
+                                : "bg-[#4a9eff]/20 text-[#4a9eff] border border-[#4a9eff]/30"
+                            }`}
+                          >
+                            {participante.isLider ? (
+                              <Crown className="w-3.5 h-3.5" />
+                            ) : (
+                              <UserCheck className="w-3.5 h-3.5" />
+                            )}
+                            {cargoStr}
+                          </span>
                         </div>
-                      )}
-                      {participante.titulo && (
-                        <div className="flex items-center gap-1.5">
-                          <GraduationCap className="w-3.5 h-3.5" />
-                          <span>{participante.titulo}</span>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm text-[#9e9e9e]">
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="w-4 h-4 text-[#ff8c42]" />
+                            <span>{participante.email}</span>
+                          </div>
+                          {participante.telefone && (
+                            <div className="flex items-center gap-1.5">
+                              <Phone className="w-4 h-4 text-[#9e9e9e]" />
+                              <span>{participante.telefone}</span>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 </div>
