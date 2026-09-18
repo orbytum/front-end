@@ -44,23 +44,27 @@ export class HttpRequest {
         });
     }
     public post<T>(url: string, data: any, headers: Record<string, string> = {}, baseUrl: string = this.baseUrl): Promise<T> {
+        const isFormData = typeof FormData !== "undefined" && data instanceof FormData;
+        const defaultHeaders: Record<string, string> = isFormData ? {} : { 'Content-Type': 'application/json' };
         return this.executar<T>(`${baseUrl}${url}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                ...defaultHeaders,
                 ...headers,
             },
-            body: JSON.stringify(data),
+            body: isFormData ? data : JSON.stringify(data),
         });
     }
     public put<T>(url: string, data: any, headers: Record<string, string> = {}, baseUrl: string = this.baseUrl): Promise<T> {
+        const isFormData = typeof FormData !== "undefined" && data instanceof FormData;
+        const defaultHeaders: Record<string, string> = isFormData ? {} : { 'Content-Type': 'application/json' };
         return this.executar<T>(`${baseUrl}${url}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
+                ...defaultHeaders,
                 ...headers,
             },
-            body: JSON.stringify(data),
+            body: isFormData ? data : JSON.stringify(data),
         });
     }
     public delete<T>(url: string, headers: Record<string, string> = {}, baseUrl: string = this.baseUrl): Promise<T> {
@@ -70,13 +74,15 @@ export class HttpRequest {
         });
     }
     public patch<T>(url: string, data: any, headers: Record<string, string> = {}, baseUrl: string = this.baseUrl): Promise<T> {
+        const isFormData = typeof FormData !== "undefined" && data instanceof FormData;
+        const defaultHeaders: Record<string, string> = isFormData ? {} : { 'Content-Type': 'application/json' };
         return this.executar<T>(`${baseUrl}${url}`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json',
+                ...defaultHeaders,
                 ...headers,
             },
-            body: JSON.stringify(data),
+            body: isFormData ? data : JSON.stringify(data),
         });
     }
 }

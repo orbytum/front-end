@@ -1,360 +1,589 @@
-import { useState } from "react";
-import { BookOpen, Plus, Search, ExternalLink, Paperclip, Calendar, Tag, X, Filter } from "lucide-react";
-
-type TipoPublicacao = "Artigo" | "Tese" | "Dissertação" | "Relatório" | "Capítulo" | "Conferência" | "Outro";
-
-interface Publicacao {
-  id: number;
-  titulo: string;
-  descricao: string;
-  tipo: TipoPublicacao;
-  dataPublicacao: string;
-  link?: string;
-  temDocumento: boolean;
-  grupo: string;
-  autores: string[];
-}
-
-const TIPOS: TipoPublicacao[] = ["Artigo", "Tese", "Dissertação", "Relatório", "Capítulo", "Conferência", "Outro"];
-
-const CORES_DOS_TIPOS: Record<TipoPublicacao, string> = {
-  "Artigo": "bg-[#4a9eff]/20 text-[#4a9eff]",
-  "Tese": "bg-[#7c3aed]/20 text-[#a78bfa]",
-  "Dissertação": "bg-[#10b981]/20 text-[#10b981]",
-  "Relatório": "bg-[#f59e0b]/20 text-[#f59e0b]",
-  "Capítulo": "bg-[#ec4899]/20 text-[#ec4899]",
-  "Conferência": "bg-[#ff8c42]/20 text-[#ff8c42]",
-  "Outro": "bg-muted-foreground/20 text-muted-foreground",
-};
-
-const publicacoesExemplo: Publicacao[] = [
-  {
-    id: 1,
-    titulo: "Deep Learning para Detecção de Anomalias em Redes IoT",
-    descricao: "Este artigo propõe uma abordagem baseada em redes neurais convolucionais para detecção de intrusões em ambientes IoT, alcançando 97.3% de acurácia.",
-    tipo: "Artigo",
-    dataPublicacao: "2024-03-15",
-    link: "https://doi.org/10.1145/example",
-    temDocumento: true,
-    grupo: "IA e Machine Learning",
-    autores: ["João Pedro Oliveira", "Ana Carolina Lima"],
-  },
-  {
-    id: 2,
-    titulo: "Implementação de Algoritmos Quânticos em Hardware Supercondutores",
-    descricao: "Dissertação que explora a implementação prática de algoritmos de Grover e Shor em processadores quânticos de estado sólido.",
-    tipo: "Dissertação",
-    dataPublicacao: "2024-02-28",
-    link: "https://repositorio.usp.br/example",
-    temDocumento: true,
-    grupo: "Computação Quântica",
-    autores: ["Maria Eduarda Santos"],
-  },
-  {
-    id: 3,
-    titulo: "Análise de Vulnerabilidades em Contratos Inteligentes Ethereum",
-    descricao: "Relatório técnico sobre as principais classes de vulnerabilidades encontradas em contratos inteligentes, com análise de 500 contratos reais.",
-    tipo: "Relatório",
-    dataPublicacao: "2024-04-01",
-    temDocumento: false,
-    grupo: "Blockchain e Criptomoedas",
-    autores: ["Rafael Henrique Souza", "Beatriz Almeida Rocha"],
-  },
-  {
-    id: 4,
-    titulo: "Zero-Trust Architecture em Ambientes Corporativos",
-    descricao: "Trabalho apresentado no SBSEG 2024 propondo um framework de implementação de Zero-Trust para médias empresas.",
-    tipo: "Conferência",
-    dataPublicacao: "2024-03-22",
-    link: "https://sbseg2024.example.com/paper/123",
-    temDocumento: true,
-    grupo: "Segurança Cibernética",
-    autores: ["Lucas Ferreira Costa", "Dr. Roberto Mendes"],
-  },
-  {
-    id: 5,
-    titulo: "Redes Neurais Recorrentes para Previsão de Séries Temporais Financeiras",
-    descricao: "Investigação do uso de LSTMs e Transformers para previsão de preços de ativos, com comparação frente a modelos ARIMA clássicos.",
-    tipo: "Artigo",
-    dataPublicacao: "2024-01-18",
-    link: "https://arxiv.org/abs/example",
-    temDocumento: false,
-    grupo: "IA e Machine Learning",
-    autores: ["Ana Carolina Lima", "Dr. Carlos Silva"],
-  },
-];
-
-interface DadosDoFormularioDePublicacao {
-  titulo: string;
-  descricao: string;
-  tipo: TipoPublicacao;
-  dataPublicacao: string;
-  link: string;
-}
+import { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  BookOpen,
+  Plus,
+  Search,
+  ExternalLink,
+  FileText,
+  Calendar,
+  X,
+  Filter,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  AlertCircle,
+  UploadCloud,
+  CheckCircle2,
+  FolderKanban,
+} from "lucide-react";
+import { PublicacaoService } from "../services/publicacoes/PublicacaoService";
+import { PublicacaoResponse } from "../models/dto/publicacoes/Publicacao";
 
 export function Publicacoes() {
+  const publicacaoService = useMemo(() => new PublicacaoService(), []);
+
+  // Estados de listagem e filtros
+  const [publicacoes, setPublicacoes] = useState<PublicacaoResponse[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [totalElementos, setTotalElementos] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const tamanhoPagina = 9;
+
+  // Filtros
   const [termoBusca, setTermoBusca] = useState("");
-  const [filtroTipo, setFiltroTipo] = useState("all");
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const [publicacoes, setPublicacoes] = useState<Publicacao[]>(publicacoesExemplo);
-  const [formulario, setFormulario] = useState<DadosDoFormularioDePublicacao>({
-    titulo: "",
-    descricao: "",
-    tipo: "Artigo",
-    dataPublicacao: "",
-    link: "",
-  });
+  const [filtroDataInicio, setFiltroDataInicio] = useState("");
+  const [filtroDataFim, setFiltroDataFim] = useState("");
 
-  const filtradas = publicacoes.filter((p) => {
-    const correspondeBusca =
-      p.titulo.toLowerCase().includes(termoBusca.toLowerCase()) ||
-      p.descricao.toLowerCase().includes(termoBusca.toLowerCase()) ||
-      p.autores.some((a) => a.toLowerCase().includes(termoBusca.toLowerCase()));
-    const correspondeTipo = filtroTipo === "all" || p.tipo === filtroTipo;
-    return correspondeBusca && correspondeTipo;
-  });
+  // Modal de Criação
+  const [mostrarModalCriacao, setMostrarModalCriacao] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+  const [erroCriacao, setErroCriacao] = useState<string | null>(null);
+  const [novoTitulo, setNovoTitulo] = useState("");
+  const [novaDescricao, setNovaDescricao] = useState("");
+  const [novoProjetoId, setNovoProjetoId] = useState<string>("");
+  const [arquivoPdf, setArquivoPdf] = useState<File | null>(null);
 
-  const adicionarPublicacao = () => {
-    if (!formulario.titulo || !formulario.dataPublicacao) return;
-    const novaPublicacao: Publicacao = {
-      id: Date.now(),
-      titulo: formulario.titulo,
-      descricao: formulario.descricao,
-      tipo: formulario.tipo,
-      dataPublicacao: formulario.dataPublicacao,
-      link: formulario.link || undefined,
-      temDocumento: false,
-      grupo: "Grupo de Pesquisa",
-      autores: ["Usuário Atual"],
-    };
-    setPublicacoes([novaPublicacao, ...publicacoes]);
-    setFormulario({ titulo: "", descricao: "", tipo: "Artigo", dataPublicacao: "", link: "" });
-    setMostrarModal(false);
+  // Modal de Confirmação de Inativação
+  const [publicacaoParaInativar, setPublicacaoParaInativar] = useState<PublicacaoResponse | null>(null);
+  const [inativando, setInativando] = useState(false);
+
+  // Feedback de sucesso
+  const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
+
+  const carregarPublicacoes = useCallback(async () => {
+    setCarregando(true);
+    try {
+      const response = await publicacaoService.listarPublicacoes({
+        page: paginaAtual,
+        size: tamanhoPagina,
+        titulo: termoBusca.trim() || undefined,
+        dataInicio: filtroDataInicio || undefined,
+        dataFim: filtroDataFim || undefined,
+      });
+
+      setPublicacoes(response.items);
+      setTotalElementos(response.totalElements);
+      setTotalPaginas(response.totalPages);
+    } catch {
+      // O erro já é tratado e despachado globalmente pelo BaseService / TratarExcecao
+    } finally {
+      setCarregando(false);
+    }
+  }, [publicacaoService, paginaAtual, termoBusca, filtroDataInicio, filtroDataFim]);
+
+  useEffect(() => {
+    carregarPublicacoes();
+  }, [carregarPublicacoes]);
+
+  const handleBuscar = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPaginaAtual(1);
+    carregarPublicacoes();
+  };
+
+  const limparFiltros = () => {
+    setTermoBusca("");
+    setFiltroDataInicio("");
+    setFiltroDataFim("");
+    setPaginaAtual(1);
+  };
+
+  const handleArquivoChange = (file: File | null) => {
+    setErroCriacao(null);
+    if (!file) {
+      setArquivoPdf(null);
+      return;
+    }
+
+    const isPdf =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
+
+    if (!isPdf) {
+      setErroCriacao("A publicação deve ser exclusivamente no formato PDF.");
+      setArquivoPdf(null);
+      return;
+    }
+
+    setArquivoPdf(file);
+  };
+
+  const handleCriarPublicacao = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErroCriacao(null);
+
+    if (!novoTitulo.trim()) {
+      setErroCriacao("O título da publicação é obrigatório.");
+      return;
+    }
+    if (!novaDescricao.trim()) {
+      setErroCriacao("A descrição da publicação é obrigatória.");
+      return;
+    }
+    const projetoIdNum = Number(novoProjetoId);
+    if (!novoProjetoId || isNaN(projetoIdNum) || projetoIdNum <= 0) {
+      setErroCriacao("Informe um ID de projeto válido.");
+      return;
+    }
+    if (!arquivoPdf) {
+      setErroCriacao("O arquivo PDF da publicação é obrigatório.");
+      return;
+    }
+
+    setSalvando(true);
+    try {
+      await publicacaoService.criarPublicacao({
+        titulo: novoTitulo.trim(),
+        descricao: novaDescricao.trim(),
+        projetoId: projetoIdNum,
+        arquivo: arquivoPdf,
+      });
+
+      setMensagemSucesso("Publicação criada e enviada ao Amazon S3 com sucesso!");
+      setTimeout(() => setMensagemSucesso(null), 4000);
+
+      // Limpar formulário e fechar modal
+      setNovoTitulo("");
+      setNovaDescricao("");
+      setNovoProjetoId("");
+      setArquivoPdf(null);
+      setMostrarModalCriacao(false);
+
+      // Recarregar lista
+      setPaginaAtual(1);
+      carregarPublicacoes();
+    } catch (err: any) {
+      const msg = err?.response?.mensagem || err?.message || "Erro ao criar publicação.";
+      setErroCriacao(msg);
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const handleConfirmarInativacao = async () => {
+    if (!publicacaoParaInativar) return;
+
+    setInativando(true);
+    try {
+      await publicacaoService.inativarPublicacao(publicacaoParaInativar.id);
+      setMensagemSucesso(`Publicação "${publicacaoParaInativar.titulo}" inativada com sucesso.`);
+      setTimeout(() => setMensagemSucesso(null), 4000);
+      setPublicacaoParaInativar(null);
+      carregarPublicacoes();
+    } catch {
+      // Tratado globalmente
+    } finally {
+      setInativando(false);
+    }
+  };
+
+  const formatarTamanho = (bytes: number) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  const formatarData = (dataIso: string) => {
+    try {
+      return new Date(dataIso).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    } catch {
+      return dataIso;
+    }
   };
 
   return (
-    <div className="h-full overflow-auto p-6">
+    <div className="h-full overflow-auto p-6 space-y-6">
+      {/* Notificação de Sucesso Local */}
+      {mensagemSucesso && (
+        <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-4 py-3 rounded-xl flex items-center gap-3 animate-in fade-in">
+          <CheckCircle2 className="w-5 h-5 shrink-0" />
+          <span className="text-sm font-medium">{mensagemSucesso}</span>
+        </div>
+      )}
+
       {/* Cabeçalho */}
-      <div className="mb-6">
-        <h1 className="text-foreground mb-2">Publicações</h1>
-        <p className="text-muted-foreground">Repositório de produções científicas do grupo de pesquisa</p>
-      </div>
-
-      {/* Estatísticas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-card rounded-xl p-4 border border-border/30">
-          <div className="text-muted-foreground text-sm mb-1">Total</div>
-          <div className="text-foreground text-2xl font-bold">{publicacoes.length}</div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Publicações</h1>
+          <p className="text-muted-foreground text-sm">
+            Repositório de produções científicas e documentos PDF armazenados no Amazon S3
+          </p>
         </div>
-        {(["Artigo", "Dissertação", "Conferência"] as TipoPublicacao[]).map((tipo) => (
-          <div key={tipo} className="bg-card rounded-xl p-4 border border-border/30">
-            <div className="text-muted-foreground text-sm mb-1">{tipo}s</div>
-            <div className="text-foreground text-2xl font-bold">
-              {publicacoes.filter((p) => p.tipo === tipo).length}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Barra de Ações */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar por título, autor ou conteúdo..."
-            value={termoBusca}
-            onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
-          />
-        </div>
-
-        <div className="flex items-center gap-2 px-4 py-3 bg-card rounded-xl border border-border/30">
-          <Filter className="w-4 h-4 text-muted-foreground" />
-          <select
-            value={filtroTipo}
-            onChange={(e) => setFiltroTipo(e.target.value)}
-            className="bg-transparent text-foreground focus:outline-none text-sm"
-          >
-            <option value="all">Todos os Tipos</option>
-            {TIPOS.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-        </div>
-
         <button
-          onClick={() => setMostrarModal(true)}
-          className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
+          onClick={() => {
+            setErroCriacao(null);
+            setMostrarModalCriacao(true);
+          }}
+          className="px-5 py-2.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm"
         >
           <Plus className="w-5 h-5" />
           Nova Publicação
         </button>
       </div>
 
+      {/* Barra de Filtros */}
+      <form onSubmit={handleBuscar} className="bg-card rounded-2xl p-4 border border-border/30 shadow-xs space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+          {/* Busca por título */}
+          <div className="md:col-span-5 relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Filtrar por título..."
+              value={termoBusca}
+              onChange={(e) => setTermoBusca(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
+            />
+          </div>
+
+          {/* Data Início */}
+          <div className="md:col-span-3 flex items-center gap-2">
+            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">De:</span>
+            <input
+              type="date"
+              value={filtroDataInicio}
+              onChange={(e) => setFiltroDataInicio(e.target.value)}
+              className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
+            />
+          </div>
+
+          {/* Data Fim */}
+          <div className="md:col-span-3 flex items-center gap-2">
+            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">Até:</span>
+            <input
+              type="date"
+              value={filtroDataFim}
+              onChange={(e) => setFiltroDataFim(e.target.value)}
+              className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
+            />
+          </div>
+
+          {/* Botões de Ação */}
+          <div className="md:col-span-1 flex items-center gap-2">
+            <button
+              type="submit"
+              className="p-2 bg-[#ff8c42]/15 text-[#ff8c42] hover:bg-[#ff8c42]/25 rounded-xl transition-colors cursor-pointer flex items-center justify-center shrink-0 w-full"
+              title="Filtrar"
+            >
+              <Filter className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {(termoBusca || filtroDataInicio || filtroDataFim) && (
+          <div className="flex items-center justify-between pt-2 border-t border-border/20 text-xs text-muted-foreground">
+            <span>Filtros ativos aplicados</span>
+            <button
+              type="button"
+              onClick={limparFiltros}
+              className="text-[#ff8c42] hover:underline cursor-pointer"
+            >
+              Limpar filtros
+            </button>
+          </div>
+        )}
+      </form>
+
       {/* Lista de Publicações */}
-      <div className="space-y-4">
-        {filtradas.map((publicacao) => (
-          <div
-            key={publicacao.id}
-            className="bg-card rounded-2xl p-6 border border-border/30 transition-all duration-300"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                {/* Badge de tipo + título */}
-                <div className="flex items-center gap-3 mb-2 flex-wrap">
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${CORES_DOS_TIPOS[publicacao.tipo]}`}>
-                    {publicacao.tipo}
-                  </span>
-                  {publicacao.temDocumento && (
-                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-border/30 text-muted-foreground">
-                      <Paperclip className="w-3 h-3" />
+      {carregando ? (
+        <div className="py-20 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
+          <span className="text-muted-foreground text-sm">Carregando publicações...</span>
+        </div>
+      ) : publicacoes.length === 0 ? (
+        <div className="text-center py-16 bg-card rounded-2xl border border-border/30 p-6">
+          <BookOpen className="w-14 h-14 text-muted-foreground/50 mx-auto mb-3" />
+          <h3 className="text-foreground font-semibold text-lg mb-1">Nenhuma publicação encontrada</h3>
+          <p className="text-muted-foreground text-sm max-w-md mx-auto mb-4">
+            {termoBusca || filtroDataInicio || filtroDataFim
+              ? "Tente ajustar os filtros de título e datas para encontrar o que procura."
+              : "Cadastre a primeira publicação vinculando um arquivo PDF que será salvo no Amazon S3."}
+          </p>
+          {(termoBusca || filtroDataInicio || filtroDataFim) && (
+            <button
+              onClick={limparFiltros}
+              className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 rounded-xl text-sm transition-colors cursor-pointer"
+            >
+              Limpar Filtros
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {publicacoes.map((publicacao) => (
+            <div
+              key={publicacao.id}
+              className="bg-card rounded-2xl p-5 border border-border/30 shadow-xs flex flex-col justify-between hover:border-border/60 transition-all duration-200 group"
+            >
+              <div>
+                {/* Cabeçalho do Card */}
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#ff8c42]/10 text-[#ff8c42]">
+                      <FileText className="w-3.5 h-3.5" />
                       PDF
                     </span>
-                  )}
+                    {publicacao.projetoTitulo && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-border/30 text-muted-foreground truncate max-w-[180px]">
+                        <FolderKanban className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{publicacao.projetoTitulo}</span>
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setPublicacaoParaInativar(publicacao)}
+                    className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
+                    title="Inativar publicação"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-                <h3 className="text-foreground font-semibold mb-2 leading-snug">{publicacao.titulo}</h3>
-                <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{publicacao.descricao}</p>
 
-                {/* Linha de metadados */}
-                <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <Tag className="w-3.5 h-3.5" />
-                    <span>{publicacao.grupo}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>{new Date(publicacao.dataPublicacao).toLocaleDateString("pt-BR")}</span>
-                  </div>
-                  <span>por {publicacao.autores.join(", ")}</span>
-                </div>
+                {/* Título & Descrição */}
+                <h3 className="text-foreground font-semibold text-base mb-2 line-clamp-2 leading-snug">
+                  {publicacao.titulo}
+                </h3>
+                <p className="text-muted-foreground text-sm line-clamp-3 mb-4 leading-relaxed">
+                  {publicacao.descricao}
+                </p>
               </div>
 
-              {/* Ações */}
-              <div className="flex flex-col items-end gap-2 shrink-0">
-                {publicacao.link && (
-                  <a
-                    href={publicacao.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4a9eff]/10 text-[#4a9eff] hover:bg-[#4a9eff]/20 text-xs font-medium transition-colors"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    Acessar
-                  </a>
-                )}
-                {publicacao.temDocumento && (
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-border/20 text-muted-foreground hover:bg-border/30 text-xs font-medium transition-colors">
-                    <Paperclip className="w-3.5 h-3.5" />
-                    Documento
-                  </button>
-                )}
+              {/* Rodapé do Card */}
+              <div className="pt-3 border-t border-border/20 flex items-center justify-between text-xs text-muted-foreground gap-2">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>{formatarData(publicacao.dthRegistro)}</span>
+                </div>
+
+                <a
+                  href={publicacao.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#ff8c42]/15 text-[#ff8c42] hover:bg-[#ff8c42]/25 font-medium transition-colors cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Ver PDF
+                </a>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {filtradas.length === 0 && (
-        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
-          <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">Nenhuma publicação encontrada</p>
+          ))}
         </div>
       )}
 
-      {/* Modal */}
-      {mostrarModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-card rounded-2xl border border-border/30 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-foreground font-semibold">Nova Publicação</h2>
+      {/* Paginação */}
+      {totalPaginas > 1 && (
+        <div className="flex items-center justify-between pt-4 border-t border-border/20 text-sm text-muted-foreground">
+          <span>
+            Página {paginaAtual} de {totalPaginas} ({totalElementos} {totalElementos === 1 ? "publicação" : "publicações"})
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPaginaAtual((p) => Math.max(1, p - 1))}
+              disabled={paginaAtual <= 1}
+              className="p-2 rounded-lg border border-border/30 hover:bg-border/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setPaginaAtual((p) => Math.min(totalPaginas, p + 1))}
+              disabled={paginaAtual >= totalPaginas}
+              className="p-2 rounded-lg border border-border/30 hover:bg-border/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Criação de Publicação */}
+      {mostrarModalCriacao && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="w-full max-w-lg bg-card rounded-2xl border border-border/30 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-lg font-bold text-foreground">Nova Publicação</h2>
+                <p className="text-xs text-muted-foreground">O arquivo será armazenado com segurança no Amazon S3</p>
+              </div>
               <button
-                onClick={() => setMostrarModal(false)}
-                className="p-2 hover:bg-border/20 rounded-lg transition-colors"
+                onClick={() => setMostrarModalCriacao(false)}
+                disabled={salvando}
+                className="p-2 hover:bg-border/20 rounded-lg transition-colors cursor-pointer text-muted-foreground hover:text-foreground"
               >
-                <X className="w-5 h-5 text-muted-foreground" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            {erroCriacao && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{erroCriacao}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCriarPublicacao} className="space-y-4">
               <div>
-                <label className="block text-sm text-muted-foreground mb-1.5 font-normal">Título *</label>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Título da Publicação *
+                </label>
                 <input
                   type="text"
-                  value={formulario.titulo}
-                  onChange={(e) => setFormulario({ ...formulario, titulo: e.target.value })}
-                  placeholder="Título da publicação"
-                  className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
+                  required
+                  placeholder="Ex: Análise de Algoritmos Distribuídos"
+                  value={novoTitulo}
+                  onChange={(e) => setNovoTitulo(e.target.value)}
+                  disabled={salvando}
+                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-muted-foreground mb-1.5 font-normal">Descrição</label>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Descrição / Resumo *
+                </label>
                 <textarea
-                  value={formulario.descricao}
-                  onChange={(e) => setFormulario({ ...formulario, descricao: e.target.value })}
-                  placeholder="Resumo ou descrição"
+                  required
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50 resize-none"
+                  placeholder="Breve resumo da publicação científica..."
+                  value={novaDescricao}
+                  onChange={(e) => setNovaDescricao(e.target.value)}
+                  disabled={salvando}
+                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm resize-none"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">Tipo</label>
-                  <select
-                    value={formulario.tipo}
-                    onChange={(e) => setFormulario({ ...formulario, tipo: e.target.value as TipoPublicacao })}
-                    className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
-                  >
-                    {TIPOS.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">Data da Publicação *</label>
-                  <input
-                    type="date"
-                    value={formulario.dataPublicacao}
-                    onChange={(e) => setFormulario({ ...formulario, dataPublicacao: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
-                  />
-                </div>
-              </div>
-
               <div>
-                <label className="block text-sm text-muted-foreground mb-1.5 font-normal">Link (DOI, repositório...)</label>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  ID do Projeto Vinculado *
+                </label>
                 <input
-                  type="url"
-                  value={formulario.link}
-                  onChange={(e) => setFormulario({ ...formulario, link: e.target.value })}
-                  placeholder="https://doi.org/..."
-                  className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
+                  type="number"
+                  min="1"
+                  required
+                  placeholder="Ex: 1"
+                  value={novoProjetoId}
+                  onChange={(e) => setNovoProjetoId(e.target.value)}
+                  disabled={salvando}
+                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
                 />
               </div>
 
+              {/* Upload do Arquivo PDF */}
               <div>
-                <label className="block text-sm text-muted-foreground mb-1.5 font-normal">Documento PDF</label>
-                <div className="w-full px-4 py-3 bg-background rounded-xl border border-dashed border-border/50 text-muted-foreground text-sm flex items-center gap-2 cursor-pointer hover:border-[#ff8c42]/40 transition-colors">
-                  <Paperclip className="w-4 h-4" />
-                  Clique para anexar PDF
-                </div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Arquivo PDF * <span className="text-muted-foreground font-normal">(apenas arquivos .pdf)</span>
+                </label>
+
+                {!arquivoPdf ? (
+                  <label className="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-border/50 hover:border-[#ff8c42]/60 rounded-xl cursor-pointer bg-background/50 hover:bg-background transition-colors group">
+                    <UploadCloud className="w-8 h-8 text-muted-foreground group-hover:text-[#ff8c42] transition-colors mb-2" />
+                    <span className="text-sm font-medium text-foreground">Clique para selecionar o PDF</span>
+                    <span className="text-xs text-muted-foreground mt-1">Formato exclusivamente PDF</span>
+                    <input
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      required
+                      disabled={salvando}
+                      onChange={(e) => handleArquivoChange(e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                  </label>
+                ) : (
+                  <div className="flex items-center justify-between p-3 bg-background rounded-xl border border-border/40">
+                    <div className="flex items-center gap-2.5 truncate">
+                      <FileText className="w-5 h-5 text-[#ff8c42] shrink-0" />
+                      <div className="truncate text-left">
+                        <p className="text-sm font-medium text-foreground truncate">{arquivoPdf.name}</p>
+                        <p className="text-xs text-muted-foreground">{formatarTamanho(arquivoPdf.size)}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setArquivoPdf(null)}
+                      disabled={salvando}
+                      className="p-1.5 text-muted-foreground hover:text-red-500 rounded-lg transition-colors cursor-pointer"
+                      title="Remover arquivo"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/20">
+                <button
+                  type="button"
+                  onClick={() => setMostrarModalCriacao(false)}
+                  disabled={salvando}
+                  className="px-4 py-2 rounded-xl border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={salvando}
+                  className="px-5 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  {salvando ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Enviando para o S3...
+                    </>
+                  ) : (
+                    "Cadastrar Publicação"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação de Inativação */}
+      {publicacaoParaInativar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="w-full max-w-md bg-card rounded-2xl border border-border/30 p-6 shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-500 mx-auto">
+              <Trash2 className="w-6 h-6" />
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="text-center space-y-1">
+              <h3 className="text-base font-bold text-foreground">Inativar Publicação</h3>
+              <p className="text-xs text-muted-foreground">
+                Tem certeza que deseja inativar a publicação <strong>"{publicacaoParaInativar.titulo}"</strong>? Ela não será mais exibida nas listagens ativas.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 pt-2">
               <button
-                onClick={() => setMostrarModal(false)}
-                className="flex-1 py-2.5 rounded-xl border border-border/30 text-muted-foreground hover:text-foreground hover:border-border/60 transition-colors"
+                type="button"
+                onClick={() => setPublicacaoParaInativar(null)}
+                disabled={inativando}
+                className="flex-1 py-2 rounded-xl border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
-                onClick={adicionarPublicacao}
-                className="flex-1 py-2.5 bg-[#ff8c42] text-white rounded-xl font-medium transition-all"
+                type="button"
+                onClick={handleConfirmarInativacao}
+                disabled={inativando}
+                className="flex-1 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                Cadastrar
+                {inativando ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Inativando...
+                  </>
+                ) : (
+                  "Confirmar"
+                )}
               </button>
             </div>
           </div>

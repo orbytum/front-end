@@ -94,4 +94,12 @@ export class AuthService {
         const level = this.getUserAccessLevel();
         return level === "admin" || level === "initial_admin";
     }
+
+    /**
+     * Verifica se o usuário logado possui perfil de usuário comum (user)
+     */
+    isUser(): boolean {
+        const level = this.getUserAccessLevel();
+        return level === "user";
+    }
 }
