@@ -29,6 +29,8 @@ export function Login() {
         localStorage.setItem("token_tipo", response.tipo || "Bearer");
         if (authService.getUserAccessLevel() === "initial_admin") {
           navigate("/criar-admin-inicial");
+        } else if (authService.isAdmin()) {
+          navigate(redirect && redirect !== "/" ? redirect : "/grupos");
         } else {
           navigate(redirect);
         }

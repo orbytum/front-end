@@ -15,6 +15,7 @@ import {
   MailPlus,
   Loader2,
   BookOpen,
+  Bell,
 } from "lucide-react";
 import { useState } from "react";
 import { AuthService } from "../services/auth/AuthService";
@@ -33,7 +34,6 @@ export function Layout() {
   }
 
   const isAdmin = authService.isAdminOrInitialAdmin();
-  const isUser = authService.isUser();
   const { grupoAtual, semGrupos, carregandoGrupos } = useGrupo();
 
   // Se for usuário comum e não pertencer a nenhum grupo, renderiza tela explicativa
@@ -46,31 +46,33 @@ export function Layout() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <span className="text-muted-foreground text-sm font-medium">Carregando grupos de pesquisa...</span>
         </div>
       </div>
     );
   }
 
-  const navItems = [
-    { path: "/", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/grupos", label: "Grupos de Pesquisa", icon: Users },
-    ...(isAdmin
-      ? [{ path: "/gestao-convites", label: "Convites de Cadastro", icon: MailPlus }]
-      : []),
-    ...(isUser
-      ? [{ path: "/publicacoes", label: "Publicações", icon: BookOpen }]
-      : []),
-    { path: "/recursos", label: "Recursos Financeiros", icon: Hexagon },
-    { path: "/solicitacoes", label: "Solicitações", icon: FileText },
-    { path: "/materiais", label: "Materiais", icon: Box },
-    { path: "/projetos", label: "Projetos", icon: FolderKanban },
-    { path: "/atividades", label: "Atividades", icon: ListTodo },
-    { path: "/editais", label: "Editais", icon: Megaphone },
-    { path: "/eventos", label: "Eventos", icon: CalendarDays },
-    { path: "/calendario", label: "Calendário", icon: Calendar },
-  ];
+  // Admin tem acesso estrito a Convites de cadastro, Grupos, Solicitações e Recursos Financeiros
+  // Usuários têm acesso estrito ao restante
+  const navItems = isAdmin
+    ? [
+        { path: "/grupos", label: "Grupos de Pesquisa", icon: Users },
+        { path: "/gestao-convites", label: "Convites de Cadastro", icon: MailPlus },
+        { path: "/recursos", label: "Recursos Financeiros", icon: Hexagon },
+        { path: "/solicitacoes", label: "Solicitações", icon: FileText },
+      ]
+    : [
+        { path: "/", label: "Dashboard", icon: LayoutDashboard },
+        { path: "/publicacoes", label: "Publicações", icon: BookOpen },
+        { path: "/projetos", label: "Projetos", icon: FolderKanban },
+        { path: "/atividades", label: "Atividades", icon: ListTodo },
+        { path: "/editais", label: "Editais", icon: Megaphone },
+        { path: "/eventos", label: "Eventos", icon: CalendarDays },
+        { path: "/calendario", label: "Calendário", icon: Calendar },
+        { path: "/materiais", label: "Materiais", icon: Box },
+        { path: "/lembretes", label: "Lembretes", icon: Bell },
+      ];
 
   return (
     <div className="flex h-full bg-background">
@@ -82,7 +84,7 @@ export function Layout() {
         <div className="h-16 flex items-center justify-between px-4 border-b border-border/30">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[#ff8c42]" />
+              <div className="w-8 h-8 rounded-full bg-primary" />
               <span className="text-foreground font-semibold">SGA</span>
             </div>
           )}
@@ -108,7 +110,7 @@ export function Layout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                   isActive
-                    ? "bg-background text-[#ff8c42]"
+                    ? "bg-background text-primary font-medium"
                     : "hover:bg-background/50 text-muted-foreground hover:text-foreground"
                 }`
               }
@@ -116,7 +118,7 @@ export function Layout() {
               {({ isActive }) => (
                 <>
                   <item.icon
-                    className={`w-5 h-5 ${ isActive ? "text-[#ff8c42]" : "text-muted-foreground group-hover:text-foreground" }`}
+                    className={`w-5 h-5 ${ isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground" }`}
                   />
                   {sidebarOpen && (
                     <span className="text-sm font-medium">{item.label}</span>
@@ -135,7 +137,7 @@ export function Layout() {
               <div className="text-muted-foreground mt-1">v1.0.0</div>
             </div>
           ) : (
-            <div className="w-2 h-2 rounded-full bg-[#ff8c42] mx-auto" />
+            <div className="w-2 h-2 rounded-full bg-primary mx-auto" />
           )}
         </div>
       </aside>
@@ -146,8 +148,12 @@ export function Layout() {
         <header className="h-16 bg-card/50 backdrop-blur-sm border-b border-border/30 flex items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <h2 className="text-foreground font-bold tracking-wide">ORBYTUM</h2>
-            <span className="text-muted-foreground/50 font-light select-none">/</span>
-            <GrupoCombobox />
+            {!isAdmin && (
+              <>
+                <span className="text-muted-foreground/50 font-light select-none">/</span>
+                <GrupoCombobox />
+              </>
+            )}
           </div>
           
           <div className="flex items-center gap-4">
@@ -157,8 +163,8 @@ export function Layout() {
                 {isAdmin ? "Administrador" : (grupoAtual?.role || "Pesquisador")}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-[#ff8c42] flex items-center justify-center shadow-md shadow-[#ff8c42]/10">
-              <span className="text-white text-sm font-semibold">
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-md shadow-primary/10">
+              <span className="text-primary-foreground text-sm font-semibold">
                 {isAdmin ? "A" : (grupoAtual?.isLider ? "L" : "U")}
               </span>
             </div>

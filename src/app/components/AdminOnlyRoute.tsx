@@ -2,11 +2,11 @@ import React from "react";
 import { Navigate, useLocation } from "react-router";
 import { AuthService } from "../services/auth/AuthService";
 
-interface UserOnlyRouteProps {
+interface AdminOnlyRouteProps {
   children: React.ReactNode;
 }
 
-export function UserOnlyRoute({ children }: UserOnlyRouteProps) {
+export function AdminOnlyRoute({ children }: AdminOnlyRouteProps) {
   const location = useLocation();
   const authService = new AuthService();
 
@@ -15,8 +15,8 @@ export function UserOnlyRoute({ children }: UserOnlyRouteProps) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!authService.isUser()) {
-    return <Navigate to="/grupos" replace />;
+  if (!authService.isAdminOrInitialAdmin()) {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

@@ -1,5 +1,5 @@
-import { UserCheck, Search, Mail, Phone, MoreVertical, BookOpen, UserPlus, Lock, Crown, Loader2, ChevronLeft, ChevronRight, Users } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { UserCheck, Search, Mail, Phone, BookOpen, UserPlus, Lock, Crown, Loader2, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useGrupo } from "../contexts/GrupoContext";
 import { AuthService } from "../services/auth/AuthService";
 import { GrupoService } from "../services/grupos/GrupoService";
@@ -73,8 +73,8 @@ export function Participantes() {
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
       <div className="mb-6">
-        <h1 className="text-foreground mb-2">Participantes</h1>
-        <p className="text-muted-foreground">Gerencie os participantes dos grupos de pesquisa</p>
+        <h1 className="text-foreground text-2xl font-bold mb-2">Participantes</h1>
+        <p className="text-muted-foreground">Gerencie os participantes do grupo de pesquisa</p>
       </div>
 
       {/* Barra de Ações */}
@@ -86,16 +86,16 @@ export function Participantes() {
             type="text"
             placeholder="Buscar participante por nome..."
             value={termoBusca}
-            onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
+            onChange={handleBuscaChange}
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/50 text-sm"
           />
         </div>
 
-        {/* Botão Convidar Participante (Apenas Líder ou Admin) */}
+        {/* Botão Convidar Participante */}
         {podeConvidar && grupoAtual ? (
           <button
             onClick={() => setModalConvidarAberto(true)}
-            className="px-6 py-3 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium cursor-pointer shadow-lg shadow-[#ff8c42]/20 text-sm"
+            className="px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-300 flex items-center gap-2 font-medium cursor-pointer shadow-lg shadow-primary/20 text-sm whitespace-nowrap"
           >
             <UserPlus className="w-5 h-5" />
             <span>Convidar Membro</span>
@@ -104,226 +104,167 @@ export function Participantes() {
           <div className="relative group">
             <button
               disabled
-              className="px-6 py-3 bg-[#2e2e2e]/40 text-[#9e9e9e] rounded-xl flex items-center gap-2 font-medium cursor-not-allowed text-sm border border-[#2e2e2e]/30"
+              className="px-6 py-3 bg-card text-muted-foreground rounded-xl flex items-center gap-2 font-medium cursor-not-allowed text-sm border border-border/30 whitespace-nowrap"
             >
               <Lock className="w-4 h-4" />
               <span>Convidar Membro</span>
             </button>
-            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-[#121212] text-[#9e9e9e] text-xs px-3 py-1.5 rounded-lg border border-[#2e2e2e]/40 whitespace-nowrap shadow-xl z-10">
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-card text-muted-foreground text-xs px-3 py-1.5 rounded-lg border border-border/40 whitespace-nowrap shadow-xl z-10">
               {!grupoAtual ? "Selecione um grupo no header para convidar membros" : "Apenas o líder do grupo pode convidar membros"}
             </div>
           </div>
         )}
       </div>
 
-      {/* Tabela de Participantes */}
-      <div className="bg-card rounded-2xl border border-border/30 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border/30">
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Participante</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Função</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Grupo</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Contato</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Status</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {participantesFiltrados.map((participante, index) => (
-                <tr 
-                  key={participante.id}
-                  className={`border-b border-border/30 hover:bg-background/50 transition-colors ${ index === participantesFiltrados.length - 1 ? 'border-b-0' : '' }`}
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#ff8c42] flex items-center justify-center">
-                        <span className="text-white text-sm font-semibold">{participante.avatar}</span>
-                      </div>
-                      <div>
-                        <div className="text-foreground font-medium">{participante.nome}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <BookOpen className="w-4 h-4" />
-                      <span>{participante.funcao}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-muted-foreground">{participante.grupo}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Mail className="w-3 h-3" />
-                        <span>{participante.email}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Phone className="w-3 h-3" />
-                        <span>{participante.telefone}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${ participante.status === "Ativo" ? "bg-[#10b981]/20 text-[#10b981]" : "bg-[#ff8c42]/20 text-[#ff8c42]" }`}>
-                      {participante.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button className="p-2 hover:bg-border/20 rounded-lg transition-colors">
-                      <MoreVertical className="w-5 h-5 text-muted-foreground" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {erro && (
+        <div className="mb-6 p-4 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl text-[#ef4444] text-sm">
+          {erro}
         </div>
       )}
 
-      {/* Estado Vazio */}
-      {participantesFiltrados.length === 0 && (
-        <div className="text-center py-12">
-          <UserCheck className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">Nenhum participante encontrado</p>
+      {!grupoAtual ? (
+        <div className="bg-card rounded-2xl p-12 border border-border/30 text-center">
+          <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-foreground font-semibold text-lg mb-2">Nenhum grupo selecionado</h3>
+          <p className="text-muted-foreground text-sm max-w-md mx-auto">
+            Por favor, selecione um grupo de pesquisa no menu superior (header) para visualizar seus participantes.
+          </p>
         </div>
       ) : (
-        <>
-          {/* Tabela de Participantes */}
-          <div className="bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]/30 overflow-hidden shadow-xl">
-            {loading ? (
-              <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
-                <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
-                <p className="text-[#9e9e9e] text-sm">Carregando participantes do banco de dados...</p>
-              </div>
-            ) : participantes.length === 0 ? (
-              <div className="text-center py-16">
-                <UserCheck className="w-16 h-16 text-[#2e2e2e] mx-auto mb-4" />
-                <p className="text-white font-medium text-base mb-1">Nenhum participante encontrado</p>
-                <p className="text-[#9e9e9e] text-xs">
-                  {termoBusca ? `Nenhum resultado para "${termoBusca}"` : "Este grupo ainda não possui participantes cadastrados."}
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#2e2e2e]/30 bg-[#121212]/40">
-                      <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#9e9e9e]">Participante</th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#9e9e9e]">Cargo / Função</th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#9e9e9e]">Grupo</th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#9e9e9e]">Contato</th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#9e9e9e]">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {participantes.map((participante, index) => {
-                      const id = participante.usuarioId || participante.id || index;
-                      const cargoStr = participante.isLider
-                        ? "Líder"
-                        : (participante.cargo || participante.role || participante.titulo || "Membro");
+        <div className="bg-card rounded-2xl border border-border/30 overflow-hidden shadow-xl">
+          {loading ? (
+            <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              <p className="text-muted-foreground text-sm">Carregando participantes...</p>
+            </div>
+          ) : participantes.length === 0 ? (
+            <div className="text-center py-16">
+              <UserCheck className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-foreground font-medium text-base mb-1">Nenhum participante encontrado</p>
+              <p className="text-muted-foreground text-xs">
+                {termoBusca ? `Nenhum resultado para "${termoBusca}"` : "Este grupo ainda não possui participantes cadastrados."}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border/30 bg-background/40">
+                    <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Participante</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cargo / Função</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Grupo</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contato</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {participantes.map((participante, index) => {
+                    const id = participante.usuarioId || participante.id || index;
+                    const cargoStr = participante.isLider
+                      ? "Líder"
+                      : (participante.cargo || participante.role || participante.titulo || "Membro");
 
-                      return (
-                        <tr
-                          key={id}
-                          className={`border-b border-[#2e2e2e]/30 hover:bg-[#121212]/50 transition-colors ${
-                            index === participantes.length - 1 ? "border-b-0" : ""
-                          }`}
-                        >
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm ${
-                                participante.isLider ? "bg-[#ff8c42] text-white" : "bg-[#2e2e2e] text-[#ff8c42] border border-[#ff8c42]/30"
-                              }`}>
-                                {getAvatarText(participante.nome)}
-                              </div>
-                              <div>
-                                <div className="text-white font-medium flex items-center gap-2">
-                                  <span>{participante.nome}</span>
-                                  {participante.isLider && (
-                                    <Crown className="w-4 h-4 text-[#ff8c42] inline" title="Líder do Grupo" />
-                                  )}
-                                </div>
-                                {participante.titulo && (
-                                  <div className="text-xs text-[#9e9e9e]">{participante.titulo}</div>
+                    return (
+                      <tr
+                        key={id}
+                        className={`border-b border-border/30 hover:bg-background/50 transition-colors ${
+                          index === participantes.length - 1 ? "border-b-0" : ""
+                        }`}
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm ${
+                              participante.isLider
+                                ? "bg-primary/15 text-primary border border-primary/30"
+                                : "bg-[#4a9eff]/15 text-[#4a9eff] border border-[#4a9eff]/30"
+                            }`}>
+                              {getAvatarText(participante.nome)}
+                            </div>
+                            <div>
+                              <div className="text-foreground font-medium flex items-center gap-2">
+                                <span>{participante.nome}</span>
+                                {participante.isLider && (
+                                  <span title="Líder do Grupo">
+                                    <Crown className="w-4 h-4 text-primary inline" />
+                                  </span>
                                 )}
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2 text-[#9e9e9e]">
-                              {participante.isLider ? (
-                                <Crown className="w-4 h-4 text-[#ff8c42]" />
-                              ) : (
-                                <BookOpen className="w-4 h-4 text-[#ff8c42]" />
-                              )}
-                              <span className={participante.isLider ? "text-[#ff8c42] font-semibold" : ""}>
-                                {cargoStr}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="text-[#9e9e9e] font-medium">{grupoAtual.nome}</span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2 text-sm text-[#9e9e9e]">
-                                <Mail className="w-3.5 h-3.5 text-[#ff8c42]" />
-                                <span>{participante.email}</span>
-                              </div>
-                              {participante.telefone && (
-                                <div className="flex items-center gap-2 text-sm text-[#9e9e9e]">
-                                  <Phone className="w-3.5 h-3.5 text-[#9e9e9e]" />
-                                  <span>{participante.telefone}</span>
-                                </div>
+                              {participante.titulo && (
+                                <div className="text-xs text-muted-foreground">{participante.titulo}</div>
                               )}
                             </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#10b981]/20 text-[#10b981]">
-                              Ativo
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            {participante.isLider ? (
+                              <Crown className="w-4 h-4 text-primary" />
+                            ) : (
+                              <BookOpen className="w-4 h-4 text-primary" />
+                            )}
+                            <span className={participante.isLider ? "text-primary font-semibold" : ""}>
+                              {cargoStr}
                             </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-muted-foreground font-medium">{grupoAtual.nome}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Mail className="w-3.5 h-3.5 text-primary" />
+                              <span>{participante.email}</span>
+                            </div>
+                            {participante.telefone && (
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                                <span>{participante.telefone}</span>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#10b981]/20 text-[#10b981]">
+                            Ativo
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-            {/* Paginação */}
-            {!loading && totalPages > 1 && (
-              <div className="px-6 py-4 border-t border-[#2e2e2e]/30 bg-[#121212]/40 flex items-center justify-between">
-                <span className="text-xs text-[#9e9e9e]">
-                  Mostrando {participantes.length} de {totalElements} participantes
+          {/* Paginação */}
+          {!loading && totalPages > 1 && (
+            <div className="px-6 py-4 border-t border-border/30 bg-background/40 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                Mostrando {participantes.length} de {totalElements} participantes
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="p-2 rounded-lg bg-card border border-border/40 text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-xs text-foreground px-2">
+                  Página {page} de {totalPages}
                 </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="p-2 rounded-lg bg-[#1e1e1e] border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white hover:border-[#ff8c42]/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <span className="text-xs text-white px-2">
-                    Página {page} de {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page >= totalPages}
-                    className="p-2 rounded-lg bg-[#1e1e1e] border border-[#2e2e2e]/40 text-[#9e9e9e] hover:text-white hover:border-[#ff8c42]/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="p-2 rounded-lg bg-card border border-border/40 text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
-            )}
-          </div>
-        </>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Modal Convidar Membro */}

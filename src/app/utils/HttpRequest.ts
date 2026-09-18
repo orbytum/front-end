@@ -45,7 +45,7 @@ export class HttpRequest {
     }
     public post<T>(url: string, data: any, headers: Record<string, string> = {}, baseUrl: string = this.baseUrl): Promise<T> {
         const isFormData = typeof FormData !== "undefined" && data instanceof FormData;
-        const defaultHeaders = isFormData ? {} : { 'Content-Type': 'application/json' };
+        const defaultHeaders: Record<string, string> = isFormData ? {} : { 'Content-Type': 'application/json' };
         return this.executar<T>(`${baseUrl}${url}`, {
             method: 'POST',
             headers: {
@@ -57,7 +57,7 @@ export class HttpRequest {
     }
     public put<T>(url: string, data: any, headers: Record<string, string> = {}, baseUrl: string = this.baseUrl): Promise<T> {
         const isFormData = typeof FormData !== "undefined" && data instanceof FormData;
-        const defaultHeaders = isFormData ? {} : { 'Content-Type': 'application/json' };
+        const defaultHeaders: Record<string, string> = isFormData ? {} : { 'Content-Type': 'application/json' };
         return this.executar<T>(`${baseUrl}${url}`, {
             method: 'PUT',
             headers: {
@@ -75,7 +75,7 @@ export class HttpRequest {
     }
     public patch<T>(url: string, data: any, headers: Record<string, string> = {}, baseUrl: string = this.baseUrl): Promise<T> {
         const isFormData = typeof FormData !== "undefined" && data instanceof FormData;
-        const defaultHeaders = isFormData ? {} : { 'Content-Type': 'application/json' };
+        const defaultHeaders: Record<string, string> = isFormData ? {} : { 'Content-Type': 'application/json' };
         return this.executar<T>(`${baseUrl}${url}`, {
             method: 'PATCH',
             headers: {
