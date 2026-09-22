@@ -20,7 +20,17 @@ import {
 import { PublicacaoService } from "../services/publicacoes/PublicacaoService";
 import { PublicacaoResponse } from "../models/dto/publicacoes/Publicacao";
 
-export function Publicacoes() {
+export interface PublicacoesProps {
+  projetoId?: number;
+  projetoTitulo?: string;
+  ocultarCabecalho?: boolean;
+}
+
+export function Publicacoes({
+  projetoId,
+  projetoTitulo,
+  ocultarCabecalho = false,
+}: PublicacoesProps = {}) {
   const publicacaoService = useMemo(() => new PublicacaoService(), []);
 
   // Estados de listagem e filtros
@@ -42,15 +52,25 @@ export function Publicacoes() {
   const [erroCriacao, setErroCriacao] = useState<string | null>(null);
   const [novoTitulo, setNovoTitulo] = useState("");
   const [novaDescricao, setNovaDescricao] = useState("");
-  const [novoProjetoId, setNovoProjetoId] = useState<string>("");
+  const [novoProjetoId, setNovoProjetoId] = useState<string>(
+    projetoId ? String(projetoId) : ""
+  );
   const [arquivoPdf, setArquivoPdf] = useState<File | null>(null);
 
   // Modal de Confirmação de Inativação
-  const [publicacaoParaInativar, setPublicacaoParaInativar] = useState<PublicacaoResponse | null>(null);
+  const [publicacaoParaInativar, setPublicacaoParaInativar] =
+    useState<PublicacaoResponse | null>(null);
   const [inativando, setInativando] = useState(false);
 
   // Feedback de sucesso
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
+
+  // Atualiza novoProjetoId quando projetoId prop mudar
+  useEffect(() => {
+    if (projetoId) {
+      setNovoProjetoId(String(projetoId));
+    }
+  }, [projetoId]);
 
   const carregarPublicacoes = useCallback(async () => {
     setCarregando(true);
@@ -61,6 +81,7 @@ export function Publicacoes() {
         titulo: termoBusca.trim() || undefined,
         dataInicio: filtroDataInicio || undefined,
         dataFim: filtroDataFim || undefined,
+        projetoId: projetoId ?? (novoProjetoId ? Number(novoProjetoId) : undefined),
       });
 
       setPublicacoes(response.items);
@@ -71,7 +92,19 @@ export function Publicacoes() {
     } finally {
       setCarregando(false);
     }
-  }, [publicacaoService, paginaAtual, termoBusca, filtroDataInicio, filtroDataFim]);
+  }, [
+    publicacaoService,
+    paginaAtual,
+    termoBusca,
+    filtroDataInicio,
+    filtroDataFim,
+    projetoId,
+    novoProjetoId,
+  ]);
+
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [projetoId]);
 
   useEffect(() => {
     carregarPublicacoes();
@@ -114,6 +147,8 @@ export function Publicacoes() {
     e.preventDefault();
     setErroCriacao(null);
 
+    const targetProjetoId = projetoId ?? Number(novoProjetoId);
+
     if (!novoTitulo.trim()) {
       setErroCriacao("O título da publicação é obrigatório.");
       return;
@@ -122,9 +157,8 @@ export function Publicacoes() {
       setErroCriacao("A descrição da publicação é obrigatória.");
       return;
     }
-    const projetoIdNum = Number(novoProjetoId);
-    if (!novoProjetoId || isNaN(projetoIdNum) || projetoIdNum <= 0) {
-      setErroCriacao("Informe um ID de projeto válido.");
+    if (!targetProjetoId || isNaN(targetProjetoId) || targetProjetoId <= 0) {
+      setErroCriacao("Informe um projeto válido.");
       return;
     }
     if (!arquivoPdf) {
@@ -137,17 +171,19 @@ export function Publicacoes() {
       await publicacaoService.criarPublicacao({
         titulo: novoTitulo.trim(),
         descricao: novaDescricao.trim(),
-        projetoId: projetoIdNum,
+        projetoId: targetProjetoId,
         arquivo: arquivoPdf,
       });
 
-      setMensagemSucesso("Publicação criada e enviada ao Amazon S3 com sucesso!");
+      setMensagemSucesso(
+        "Publicação criada com sucesso!"
+      );
       setTimeout(() => setMensagemSucesso(null), 4000);
 
       // Limpar formulário e fechar modal
       setNovoTitulo("");
       setNovaDescricao("");
-      setNovoProjetoId("");
+      if (!projetoId) setNovoProjetoId("");
       setArquivoPdf(null);
       setMostrarModalCriacao(false);
 
@@ -155,7 +191,10 @@ export function Publicacoes() {
       setPaginaAtual(1);
       carregarPublicacoes();
     } catch (err: any) {
-      const msg = err?.response?.mensagem || err?.message || "Erro ao criar publicação.";
+      const msg =
+        err?.response?.mensagem ||
+        err?.message ||
+        "Erro ao criar publicação.";
       setErroCriacao(msg);
     } finally {
       setSalvando(false);
@@ -168,7 +207,9 @@ export function Publicacoes() {
     setInativando(true);
     try {
       await publicacaoService.inativarPublicacao(publicacaoParaInativar.id);
-      setMensagemSucesso(`Publicação "${publicacaoParaInativar.titulo}" inativada com sucesso.`);
+      setMensagemSucesso(
+        `Publicação "${publicacaoParaInativar.titulo}" inativada com sucesso.`
+      );
       setTimeout(() => setMensagemSucesso(null), 4000);
       setPublicacaoParaInativar(null);
       carregarPublicacoes();
@@ -200,7 +241,7 @@ export function Publicacoes() {
   };
 
   return (
-    <div className="h-full overflow-auto p-6 space-y-6">
+    <div className="space-y-6">
       {/* Notificação de Sucesso Local */}
       {mensagemSucesso && (
         <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-4 py-3 rounded-xl flex items-center gap-3 animate-in fade-in">
@@ -209,28 +250,62 @@ export function Publicacoes() {
         </div>
       )}
 
-      {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Publicações</h1>
-          <p className="text-muted-foreground text-sm">
-            Repositório de produções científicas e documentos PDF armazenados no Amazon S3
-          </p>
+      {/* Cabeçalho (exibido apenas se ocultarCabecalho for false) */}
+      {!ocultarCabecalho && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              Publicações {projetoTitulo ? `- ${projetoTitulo}` : ""}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Repositório de publicações
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setErroCriacao(null);
+              setMostrarModalCriacao(true);
+            }}
+            className="px-5 py-2.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm"
+          >
+            <Plus className="w-5 h-5" />
+            Nova Publicação
+          </button>
         </div>
-        <button
-          onClick={() => {
-            setErroCriacao(null);
-            setMostrarModalCriacao(true);
-          }}
-          className="px-5 py-2.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm"
-        >
-          <Plus className="w-5 h-5" />
-          Nova Publicação
-        </button>
-      </div>
+      )}
+
+      {/* Se o cabeçalho for ocultado, exibimos a barra de ação superior simples */}
+      {ocultarCabecalho && (
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-[#ff8c42]" />
+            <h2 className="text-lg font-bold text-foreground">
+              Publicações do Projeto
+            </h2>
+            {totalElementos > 0 && (
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#ff8c42]/10 text-[#ff8c42]">
+                {totalElementos}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => {
+              setErroCriacao(null);
+              setMostrarModalCriacao(true);
+            }}
+            className="px-4 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Nova Publicação
+          </button>
+        </div>
+      )}
 
       {/* Barra de Filtros */}
-      <form onSubmit={handleBuscar} className="bg-card rounded-2xl p-4 border border-border/30 shadow-xs space-y-4">
+      <form
+        onSubmit={handleBuscar}
+        className="bg-card rounded-2xl p-4 border border-border/30 shadow-xs space-y-4"
+      >
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           {/* Busca por título */}
           <div className="md:col-span-5 relative">
@@ -246,7 +321,9 @@ export function Publicacoes() {
 
           {/* Data Início */}
           <div className="md:col-span-3 flex items-center gap-2">
-            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">De:</span>
+            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
+              De:
+            </span>
             <input
               type="date"
               value={filtroDataInicio}
@@ -257,7 +334,9 @@ export function Publicacoes() {
 
           {/* Data Fim */}
           <div className="md:col-span-3 flex items-center gap-2">
-            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">Até:</span>
+            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
+              Até:
+            </span>
             <input
               type="date"
               value={filtroDataFim}
@@ -296,16 +375,22 @@ export function Publicacoes() {
       {carregando ? (
         <div className="py-20 flex flex-col items-center justify-center gap-3">
           <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
-          <span className="text-muted-foreground text-sm">Carregando publicações...</span>
+          <span className="text-muted-foreground text-sm">
+            Carregando publicações...
+          </span>
         </div>
       ) : publicacoes.length === 0 ? (
         <div className="text-center py-16 bg-card rounded-2xl border border-border/30 p-6">
           <BookOpen className="w-14 h-14 text-muted-foreground/50 mx-auto mb-3" />
-          <h3 className="text-foreground font-semibold text-lg mb-1">Nenhuma publicação encontrada</h3>
+          <h3 className="text-foreground font-semibold text-lg mb-1">
+            Nenhuma publicação encontrada
+          </h3>
           <p className="text-muted-foreground text-sm max-w-md mx-auto mb-4">
             {termoBusca || filtroDataInicio || filtroDataFim
               ? "Tente ajustar os filtros de título e datas para encontrar o que procura."
-              : "Cadastre a primeira publicação vinculando um arquivo PDF que será salvo no Amazon S3."}
+              : projetoTitulo
+              ? `Nenhuma publicação cadastrada para o projeto "${projetoTitulo}".`
+              : "Cadastre a primeira publicação vinculando um arquivo PDF."}
           </p>
           {(termoBusca || filtroDataInicio || filtroDataFim) && (
             <button
@@ -331,10 +416,12 @@ export function Publicacoes() {
                       <FileText className="w-3.5 h-3.5" />
                       PDF
                     </span>
-                    {publicacao.projetoTitulo && (
+                    {(publicacao.projetoTitulo || projetoTitulo) && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-border/30 text-muted-foreground truncate max-w-[180px]">
                         <FolderKanban className="w-3 h-3 shrink-0" />
-                        <span className="truncate">{publicacao.projetoTitulo}</span>
+                        <span className="truncate">
+                          {publicacao.projetoTitulo || projetoTitulo}
+                        </span>
                       </span>
                     )}
                   </div>
@@ -382,7 +469,8 @@ export function Publicacoes() {
       {totalPaginas > 1 && (
         <div className="flex items-center justify-between pt-4 border-t border-border/20 text-sm text-muted-foreground">
           <span>
-            Página {paginaAtual} de {totalPaginas} ({totalElementos} {totalElementos === 1 ? "publicação" : "publicações"})
+            Página {paginaAtual} de {totalPaginas} ({totalElementos}{" "}
+            {totalElementos === 1 ? "publicação" : "publicações"})
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -393,7 +481,9 @@ export function Publicacoes() {
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
-              onClick={() => setPaginaAtual((p) => Math.min(totalPaginas, p + 1))}
+              onClick={() =>
+                setPaginaAtual((p) => Math.min(totalPaginas, p + 1))
+              }
               disabled={paginaAtual >= totalPaginas}
               className="p-2 rounded-lg border border-border/30 hover:bg-border/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
@@ -409,8 +499,9 @@ export function Publicacoes() {
           <div className="w-full max-w-lg bg-card rounded-2xl border border-border/30 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-lg font-bold text-foreground">Nova Publicação</h2>
-                <p className="text-xs text-muted-foreground">O arquivo será armazenado com segurança no Amazon S3</p>
+                <h2 className="text-lg font-bold text-foreground">
+                  Nova Publicação
+                </h2>
               </div>
               <button
                 onClick={() => setMostrarModalCriacao(false)}
@@ -459,39 +550,56 @@ export function Publicacoes() {
                 />
               </div>
 
+              {/* Projeto Vinculado */}
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">
-                  ID do Projeto Vinculado *
+                  Projeto *
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  required
-                  placeholder="Ex: 1"
-                  value={novoProjetoId}
-                  onChange={(e) => setNovoProjetoId(e.target.value)}
-                  disabled={salvando}
-                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
-                />
+                {projetoId ? (
+                  <div className="w-full px-3.5 py-2.5 bg-muted/40 rounded-xl border border-border/40 text-foreground text-sm font-medium flex items-center gap-2">
+                    <FolderKanban className="w-4 h-4 text-[#ff8c42]" />
+                    <span>{projetoTitulo || `Projeto #${projetoId}`}</span>
+                  </div>
+                ) : (
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    placeholder="Ex: 1"
+                    value={novoProjetoId}
+                    onChange={(e) => setNovoProjetoId(e.target.value)}
+                    disabled={salvando}
+                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
+                  />
+                )}
               </div>
 
               {/* Upload do Arquivo PDF */}
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">
-                  Arquivo PDF * <span className="text-muted-foreground font-normal">(apenas arquivos .pdf)</span>
+                  Arquivo PDF *{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (apenas arquivos .pdf)
+                  </span>
                 </label>
 
                 {!arquivoPdf ? (
                   <label className="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-border/50 hover:border-[#ff8c42]/60 rounded-xl cursor-pointer bg-background/50 hover:bg-background transition-colors group">
                     <UploadCloud className="w-8 h-8 text-muted-foreground group-hover:text-[#ff8c42] transition-colors mb-2" />
-                    <span className="text-sm font-medium text-foreground">Clique para selecionar o PDF</span>
-                    <span className="text-xs text-muted-foreground mt-1">Formato exclusivamente PDF</span>
+                    <span className="text-sm font-medium text-foreground">
+                      Clique para selecionar o PDF
+                    </span>
+                    <span className="text-xs text-muted-foreground mt-1">
+                      Formato exclusivamente PDF
+                    </span>
                     <input
                       type="file"
                       accept=".pdf,application/pdf"
                       required
                       disabled={salvando}
-                      onChange={(e) => handleArquivoChange(e.target.files?.[0] || null)}
+                      onChange={(e) =>
+                        handleArquivoChange(e.target.files?.[0] || null)
+                      }
                       className="hidden"
                     />
                   </label>
@@ -500,8 +608,12 @@ export function Publicacoes() {
                     <div className="flex items-center gap-2.5 truncate">
                       <FileText className="w-5 h-5 text-[#ff8c42] shrink-0" />
                       <div className="truncate text-left">
-                        <p className="text-sm font-medium text-foreground truncate">{arquivoPdf.name}</p>
-                        <p className="text-xs text-muted-foreground">{formatarTamanho(arquivoPdf.size)}</p>
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {arquivoPdf.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatarTamanho(arquivoPdf.size)}
+                        </p>
                       </div>
                     </div>
                     <button
@@ -534,7 +646,7 @@ export function Publicacoes() {
                   {salvando ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Enviando para o S3...
+                      Enviando...
                     </>
                   ) : (
                     "Cadastrar Publicação"
@@ -555,9 +667,13 @@ export function Publicacoes() {
             </div>
 
             <div className="text-center space-y-1">
-              <h3 className="text-base font-bold text-foreground">Inativar Publicação</h3>
+              <h3 className="text-base font-bold text-foreground">
+                Inativar Publicação
+              </h3>
               <p className="text-xs text-muted-foreground">
-                Tem certeza que deseja inativar a publicação <strong>"{publicacaoParaInativar.titulo}"</strong>? Ela não será mais exibida nas listagens ativas.
+                Tem certeza que deseja inativar a publicação{" "}
+                <strong>"{publicacaoParaInativar.titulo}"</strong>? Ela não será
+                mais exibida nas listagens ativas.
               </p>
             </div>
 

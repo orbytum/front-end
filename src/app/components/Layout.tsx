@@ -64,8 +64,7 @@ export function Layout() {
       ]
     : [
         { path: "/", label: "Dashboard", icon: LayoutDashboard },
-        { path: "/publicacoes", label: "Publicações", icon: BookOpen },
-        { path: "/projetos", label: "Projetos", icon: FolderKanban },
+        { path: "/projetos", label: "Painel de Projetos", icon: FolderKanban },
         { path: "/atividades", label: "Atividades", icon: ListTodo },
         { path: "/editais", label: "Editais", icon: Megaphone },
         { path: "/eventos", label: "Eventos", icon: CalendarDays },
@@ -145,7 +144,7 @@ export function Layout() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="h-16 bg-card/50 backdrop-blur-sm border-b border-border/30 flex items-center justify-between px-6">
+        <header className="relative z-50 h-16 bg-card/50 backdrop-blur-sm border-b border-border/30 flex items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <h2 className="text-foreground font-bold tracking-wide">ORBYTUM</h2>
             {!isAdmin && (

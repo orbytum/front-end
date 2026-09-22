@@ -9,7 +9,7 @@ import { ParticipantesDoGrupo } from "./pages/ParticipantesDoGrupo";
 import { Recursos } from "./pages/Recursos";
 import { Solicitacoes } from "./pages/Solicitacoes";
 import { Materiais } from "./pages/Materiais";
-import { Projetos } from "./pages/Projetos";
+import { PainelDeProjetos } from "./pages/PainelDeProjetos";
 import { Atividades } from "./pages/Atividades";
 import { Editais } from "./pages/Editais";
 import { Eventos } from "./pages/Eventos";
@@ -76,7 +76,7 @@ export const router = createBrowserRouter([
         path: "publicacoes",
         element: (
           <UserOnlyRoute>
-            <Publicacoes />
+            <Navigate to="/projetos" replace />
           </UserOnlyRoute>
         ),
       },
@@ -92,7 +92,7 @@ export const router = createBrowserRouter([
         path: "projetos",
         element: (
           <UserOnlyRoute>
-            <Projetos />
+            <PainelDeProjetos />
           </UserOnlyRoute>
         ),
       },
