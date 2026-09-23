@@ -102,4 +102,12 @@ export class AuthService {
         const level = this.getUserAccessLevel();
         return level === "user";
     }
+
+    /**
+     * Retorna o email do usuário logado contido no payload JWT (claim 'sub')
+     */
+    getUserEmail(): string | null {
+        const payload = this.getTokenPayload();
+        return payload?.sub || null;
+    }
 }
