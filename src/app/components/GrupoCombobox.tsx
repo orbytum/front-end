@@ -43,7 +43,7 @@ export function GrupoCombobox() {
   };
 
   return (
-    <div className="relative z-[9999] inline-block text-left" ref={containerRef}>
+    <div className="relative z-10 inline-block text-left" ref={containerRef}>
       <button
         type="button"
         onClick={() => setAberto(!aberto)}
@@ -69,7 +69,7 @@ export function GrupoCombobox() {
       </button>
 
       {aberto && (
-        <div className="absolute left-0 mt-2 w-72 origin-top-left rounded-xl bg-card border border-border/60 p-1.5 shadow-2xl shadow-black/80 z-[9999] animate-in fade-in-50 zoom-in-95 duration-150">
+        <div className="absolute left-0 mt-2 w-72 origin-top-left rounded-xl bg-card border border-border/60 p-1.5 shadow-2xl shadow-black/80 z-40 animate-in fade-in-50 zoom-in-95 duration-150">
           <div className="px-3 py-2 border-b border-border/40 mb-1">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               Seus Grupos de Pesquisa
