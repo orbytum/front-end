@@ -23,6 +23,7 @@ import { useGrupo } from "../contexts/GrupoContext";
 import { GrupoCombobox } from "./GrupoCombobox";
 import { SemGrupoView } from "./SemGrupoView";
 import { ThemeToggle } from "./ThemeToggle";
+import { PerfilMenu } from "./PerfilMenu";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -162,11 +163,11 @@ export function Layout() {
                 {isAdmin ? "Administrador" : (grupoAtual?.role || "Pesquisador")}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-md shadow-primary/10">
-              <span className="text-primary-foreground text-sm font-semibold">
-                {isAdmin ? "A" : (grupoAtual?.isLider ? "L" : "U")}
-              </span>
-            </div>
+            <PerfilMenu
+              isAdmin={isAdmin}
+              role={grupoAtual?.role || "Pesquisador"}
+              avatarLabel={isAdmin ? "A" : (grupoAtual?.isLider ? "L" : "U")}
+            />
           </div>
         </header>
 
