@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check, FolderKanban, Loader2, Clock, CheckCircle2, AlertCircle, Circle } from "lucide-react";
+import { ChevronDown, Check, FolderKanban, Loader2, Clock, CheckCircle2, AlertCircle, Circle, Star } from "lucide-react";
 import { ProjetoResponse } from "../models/dto/projetos/Projeto";
 
 interface ProjetoComboboxProps {
@@ -87,7 +87,7 @@ export function ProjetoCombobox({
   };
 
   return (
-    <div className="relative inline-block text-left max-w-full z-[99]" ref={containerRef}>
+    <div className="relative inline-block text-left max-w-full z-10" ref={containerRef}>
       {/* Botão Principal Trigger */}
       <button
         type="button"
@@ -117,7 +117,7 @@ export function ProjetoCombobox({
 
       {/* Popover Menu Suspenso */}
       {aberto && (
-        <div className="absolute left-0 mt-2 w-80 sm:w-96 origin-top-left rounded-2xl bg-card border border-border/60 p-2 shadow-2xl shadow-black/80 z-[999] animate-in fade-in-50 zoom-in-95 duration-150">
+        <div className="absolute left-0 mt-2 w-80 sm:w-96 origin-top-left rounded-2xl bg-card border border-border/60 p-2 shadow-2xl shadow-black/80 z-40 animate-in fade-in-50 zoom-in-95 duration-150">
           <div className="px-3 py-2 border-b border-border/40 mb-1 flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Projetos do Grupo
@@ -142,6 +142,9 @@ export function ProjetoCombobox({
                   }`}
                 >
                   <div className="flex items-center gap-2.5 truncate">
+                    {proj.isFavorito && (
+                      <Star className="w-3.5 h-3.5 text-[#f59e0b] shrink-0" fill="currentColor" />
+                    )}
                     <span className="truncate text-sm font-medium">{proj.titulo}</span>
                   </div>
 
