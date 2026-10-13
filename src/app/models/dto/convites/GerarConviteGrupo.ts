@@ -11,16 +11,16 @@ export const gerarConviteGrupoRequestSchema = z.object({
 export type GerarConviteGrupoRequest = z.infer<typeof gerarConviteGrupoRequestSchema>;
 
 export const conviteGrupoResponseSchema = z.object({
-  id: z.number(),
+  idConvite: z.number(),
   token: z.string(),
   urlConvite: z.string(),
   idGrupo: z.number(),
   nomeGrupo: z.string(),
-  idsProjeto: z.array(z.number()).optional(),
+  idsProjeto: z.array(z.number()).optional().nullable(),
   dthRegistro: z.string().optional().nullable(),
   dthExpiracao: z.string().optional().nullable(),
   isAtivo: z.boolean().optional(),
-  nomeCargo: z.string().optional().nullable(),
+  cargo: z.string().optional().nullable(),
   limiteUso: z.number().optional().nullable(),
   usos: z.number().optional().nullable(),
 });
@@ -42,7 +42,7 @@ export const conviteGrupoEnviadoResponseSchema = z.object({
   idGrupo: z.number(),
   nomeGrupo: z.string(),
   emailConvidado: z.string().optional().nullable(),
-  idsProjeto: z.array(z.number()).optional(),
+  projetoIds: z.array(z.number()).optional().nullable(),
   dthRegistro: z.string().optional().nullable(),
   dthExpiracao: z.string().optional().nullable(),
   isAtivo: z.boolean().optional(),

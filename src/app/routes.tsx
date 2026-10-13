@@ -17,6 +17,7 @@ import { Calendario } from "./pages/Calendario";
 import { Login } from "./pages/Login";
 import { Publicacoes } from "./pages/Publicacoes";
 import { Lembretes } from "./pages/Lembretes";
+import { Noticias } from "./pages/Noticias";
 import { AceitarConviteCadastro } from "./pages/AceitarConviteCadastro";
 import { AceitarConviteGrupo } from "./pages/AceitarConviteGrupo";
 import { GestaoConvitesCadastro } from "./pages/GestaoConvitesCadastro";
@@ -101,6 +102,14 @@ export const router = createBrowserRouter([
         element: (
           <UserOnlyRoute>
             <Atividades />
+          </UserOnlyRoute>
+        ),
+      },
+      {
+        path: "noticias",
+        element: (
+          <UserOnlyRoute>
+            <Noticias />
           </UserOnlyRoute>
         ),
       },

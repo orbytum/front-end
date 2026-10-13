@@ -43,6 +43,19 @@ export class HttpRequest {
             headers: headers,
         });
     }
+
+    /**
+     * Busca uma URL absoluta externa e retorna o corpo como texto puro.
+     * Não anexa o token JWT nem o baseUrl da API (uso para leitura de páginas externas).
+     */
+    public async getExternalText(url: string): Promise<string> {
+        const response = await fetch(url, { method: 'GET' });
+        if (!response.ok) {
+            throw new HttpError(response.status, null);
+        }
+        return response.text();
+    }
+
     public post<T>(url: string, data: any, headers: Record<string, string> = {}, baseUrl: string = this.baseUrl): Promise<T> {
         const isFormData = typeof FormData !== "undefined" && data instanceof FormData;
         const defaultHeaders: Record<string, string> = isFormData ? {} : { 'Content-Type': 'application/json' };

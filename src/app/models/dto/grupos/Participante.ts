@@ -15,6 +15,16 @@ export type ParticipanteResponse = z.infer<typeof participanteResponseSchema>;
 export type PesquisadorResponse = ParticipanteResponse;
 export const pesquisadorResponseSchema = participanteResponseSchema;
 
+export const participantePaginadoResponseSchema = z.object({
+    items: z.array(participanteResponseSchema),
+    totalElements: z.number(),
+    totalPages: z.number(),
+    page: z.number(),
+    size: z.number(),
+});
+
+export type ParticipantePaginadoResponse = z.infer<typeof participantePaginadoResponseSchema>;
+
 export const editParticipanteRequestSchema = z.object({
     nome: z.string().min(1, "O nome é obrigatório"),
     telefone: z.string().min(1, "O telefone é obrigatório"),
