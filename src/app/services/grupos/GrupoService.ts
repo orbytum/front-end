@@ -34,7 +34,8 @@ import {
 import {
     ParticipanteResponse,
     EditParticipanteRequest,
-    participanteResponseSchema
+    participanteResponseSchema,
+    participantePaginadoResponseSchema
 } from "../../models/dto/grupos/Participante"
 export class GrupoService extends BaseService {
     async listarGrupos(params: ListarGruposParams = {}): Promise<GrupoPaginadoResponse> {
@@ -85,7 +86,12 @@ export class GrupoService extends BaseService {
     }
 
     async listarParticipantes(grupoId: number): Promise<ParticipanteResponse[]> {
-        return this.get(`/grupos/${grupoId}/pesquisadores`, {}, z.array(participanteResponseSchema));
+        const response = await this.get(
+            `/grupos/${grupoId}/pesquisadores`,
+            {},
+            participantePaginadoResponseSchema
+        );
+        return response.items;
     }
 
     async atualizarParticipante(

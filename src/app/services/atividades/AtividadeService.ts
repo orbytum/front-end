@@ -3,13 +3,30 @@ import { BaseService } from "../BaseService";
 import {
   AtividadeResponse,
   atividadeResponseSchema,
+  atividadePaginadoResponseSchema,
   CriarAtividadeRequest,
   EditarAtividadeRequest,
 } from "../../models/dto/atividades/Atividade";
 
+export interface ListarAtividadesParams {
+  page?: number;
+  size?: number;
+}
+
 export class AtividadeService extends BaseService {
-  async listarPorProjeto(projetoId: number): Promise<AtividadeResponse[]> {
-    return this.get(`/atividades/projeto/${projetoId}`, {}, z.array(atividadeResponseSchema));
+  async listarPorProjeto(
+    projetoId: number,
+    params: ListarAtividadesParams = {}
+  ): Promise<AtividadeResponse[]> {
+    const searchParams = new URLSearchParams();
+    searchParams.append("page", String(params.page ?? 1));
+    searchParams.append("size", String(params.size ?? 200));
+    const response = await this.get(
+      `/atividades/projeto/${projetoId}?${searchParams.toString()}`,
+      {},
+      atividadePaginadoResponseSchema
+    );
+    return response.items;
   }
 
   async listarAtrasadasPorProjeto(projetoId: number): Promise<AtividadeResponse[]> {

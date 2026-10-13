@@ -19,6 +19,16 @@ export const atividadeResponseSchema = z.object({
 
 export type AtividadeResponse = z.infer<typeof atividadeResponseSchema>;
 
+export const atividadePaginadoResponseSchema = z.object({
+  items: z.array(atividadeResponseSchema),
+  totalElements: z.number(),
+  totalPages: z.number(),
+  currentPage: z.number(),
+  pageSize: z.number(),
+});
+
+export type AtividadePaginadoResponse = z.infer<typeof atividadePaginadoResponseSchema>;
+
 export const criarAtividadeRequestSchema = z.object({
   projetoId: z.number(),
   responsavelId: z.number(),
