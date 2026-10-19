@@ -32,6 +32,7 @@ import { ProjetoResponse } from "../models/dto/projetos/Projeto";
 import { ParticipanteProjetoResponse } from "../models/dto/projetos/ParticipanteProjeto";
 import { NivelMembro, nivelEhCoordenadorOuAcima } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
+import { DateInput } from "./DateInput";
 
 interface AtividadesBoardProps {
   projeto: ProjetoResponse | null;
@@ -673,10 +674,10 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                   <label className="block text-sm text-muted-foreground mb-1.5">
                     Prazo {!editando && <span className="text-[#ff8c42]">*</span>}
                   </label>
-                  <input
+                  <DateInput
                     type="datetime-local"
                     value={formPrazo}
-                    onChange={(e) => setFormPrazo(e.target.value)}
+                    onChange={setFormPrazo}
                     disabled={salvando}
                     className={inputClass}
                   />
