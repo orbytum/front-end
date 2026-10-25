@@ -20,6 +20,7 @@ import {
 } from "../models/dto/materiais/Material";
 import { nivelEhCoordenadorOuAcima } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
+import { DateInput } from "../components/DateInput";
 
 const inputClass =
   "w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm disabled:opacity-50";
@@ -516,10 +517,10 @@ export function Materiais() {
 
               <div>
                 <label className={labelClass}>Data de aquisição *</label>
-                <input
+                <DateInput
                   type="datetime-local"
                   value={formDthCompra}
-                  onChange={(e) => setFormDthCompra(e.target.value)}
+                  onChange={setFormDthCompra}
                   className={inputClass}
                   required
                 />

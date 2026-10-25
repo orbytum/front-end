@@ -11,8 +11,6 @@ import { Solicitacoes } from "./pages/Solicitacoes";
 import { Materiais } from "./pages/Materiais";
 import { PainelDeProjetos } from "./pages/PainelDeProjetos";
 import { Atividades } from "./pages/Atividades";
-import { Editais } from "./pages/Editais";
-import { Eventos } from "./pages/Eventos";
 import { Calendario } from "./pages/Calendario";
 import { Login } from "./pages/Login";
 import { Publicacoes } from "./pages/Publicacoes";
@@ -110,22 +108,6 @@ export const router = createBrowserRouter([
         element: (
           <UserOnlyRoute>
             <Noticias />
-          </UserOnlyRoute>
-        ),
-      },
-      {
-        path: "editais",
-        element: (
-          <UserOnlyRoute>
-            <Editais />
-          </UserOnlyRoute>
-        ),
-      },
-      {
-        path: "eventos",
-        element: (
-          <UserOnlyRoute>
-            <Eventos />
           </UserOnlyRoute>
         ),
       },

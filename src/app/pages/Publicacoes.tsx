@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { PublicacaoService } from "../services/publicacoes/PublicacaoService";
 import { PublicacaoResponse } from "../models/dto/publicacoes/Publicacao";
+import { DateInput } from "../components/DateInput";
 
 export interface PublicacoesProps {
   projetoId?: number;
@@ -324,10 +325,10 @@ export function Publicacoes({
             <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
               De:
             </span>
-            <input
+            <DateInput
               type="date"
               value={filtroDataInicio}
-              onChange={(e) => setFiltroDataInicio(e.target.value)}
+              onChange={setFiltroDataInicio}
               className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
             />
           </div>
@@ -337,10 +338,10 @@ export function Publicacoes({
             <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
               Até:
             </span>
-            <input
+            <DateInput
               type="date"
               value={filtroDataFim}
-              onChange={(e) => setFiltroDataFim(e.target.value)}
+              onChange={setFiltroDataFim}
               className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
             />
           </div>

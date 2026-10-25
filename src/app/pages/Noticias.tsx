@@ -29,6 +29,7 @@ import {
 } from "../models/dto/noticias/Noticia";
 import { nivelEhCoordenadorOuAcima } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
+import { DateInput } from "../components/DateInput";
 
 type Aba = "publicadas" | "aprovacoes";
 
@@ -397,20 +398,20 @@ export function Noticias() {
 
             <div className="md:col-span-3 flex items-center gap-2">
               <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">De:</span>
-              <input
+              <DateInput
                 type="date"
                 value={filtroDataInicio}
-                onChange={(e) => setFiltroDataInicio(e.target.value)}
+                onChange={setFiltroDataInicio}
                 className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
               />
             </div>
 
             <div className="md:col-span-3 flex items-center gap-2">
               <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">Até:</span>
-              <input
+              <DateInput
                 type="date"
                 value={filtroDataFim}
-                onChange={(e) => setFiltroDataFim(e.target.value)}
+                onChange={setFiltroDataFim}
                 className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
               />
             </div>
@@ -718,10 +719,10 @@ export function Noticias() {
                   <label className="block text-xs font-semibold text-foreground mb-1.5">
                     Início da exibição
                   </label>
-                  <input
+                  <DateInput
                     type="date"
                     value={formDataInicio}
-                    onChange={(e) => setFormDataInicio(e.target.value)}
+                    onChange={setFormDataInicio}
                     disabled={salvando}
                     className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />
@@ -730,10 +731,10 @@ export function Noticias() {
                   <label className="block text-xs font-semibold text-foreground mb-1.5">
                     Fim da exibição
                   </label>
-                  <input
+                  <DateInput
                     type="date"
                     value={formDataFim}
-                    onChange={(e) => setFormDataFim(e.target.value)}
+                    onChange={setFormDataFim}
                     disabled={salvando}
                     className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />

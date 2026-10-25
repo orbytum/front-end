@@ -1,173 +1,274 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Bell, Plus, Search, Calendar, Clock, MapPin, Link2, Users, X,
-  FileText, Presentation, Coffee, Megaphone, CheckCircle, Filter,
-  Repeat, Upload, UserCheck
+  FileText, Presentation, Coffee, PenBox, CheckCircle, Filter,
+  Repeat, Upload, UserCheck, Pencil, Trash2, Loader2, AlertCircle, RefreshCw,
+  ChevronLeft, ChevronRight,
+  Group
 } from "lucide-react";
+import { useGrupo } from "../contexts/GrupoContext";
+import { LembreteService } from "../services/lembretes/LembreteService";
+import {
+  LembreteResponse,
+  TIPOS_LEMBRETE,
+  TIPOS_RECORRENCIA,
+  TipoLembrete,
+  TipoRecorrencia,
+} from "../models/dto/lembretes/Lembrete";
+import { proximaOcorrencia } from "../utils/Recorrencia";
+import { HttpError } from "../utils/HttpError";
+import { DateInput } from "../components/DateInput";
 
-type TipoLembrete = "Edital" | "Reunião" | "Apresentação" | "Workshop";
-type StatusLembrete = "Em Andamento" | "Próximo" | "Encerrado";
-type TipoRecorrencia = "Nenhuma" | "Diária" | "Semanal" | "Mensal" | "Anual";
+type StatusLembrete = "Agendado" | "Próximo" | "Encerrado";
 
-interface Lembrete {
-  id: number;
-  titulo: string;
-  descricao: string;
-  tipo: TipoLembrete;
-  dataHora: string;
-  local?: string;
-  link?: string;
-  organizador: string;
-  participantes: string[];
-  grupo: string;
+interface LembreteExibicao extends LembreteResponse {
+  proxima: Date;
   status: StatusLembrete;
-  recorrencia: TipoRecorrencia;
-  presencaConfirmada?: boolean;
-  temAta?: boolean;
 }
 
+const DIAS_PROXIMO = 3;
+const TAMANHO_PAGINA = 10;
+const ATRASO_BUSCA_MS = 500;
+
 const CONFIG_TIPO: Record<TipoLembrete, { icone: React.ElementType; cor: string; fundo: string }> = {
-  Edital: { icone: Megaphone, cor: "text-[#f59e0b]", fundo: "bg-[#f59e0b]/20" },
+  Edital: { icone: FileText, cor: "text-[#f59e0b]", fundo: "bg-[#f59e0b]/20" },
   Reunião: { icone: Coffee, cor: "text-[#4a9eff]", fundo: "bg-[#4a9eff]/20" },
   Apresentação: { icone: Presentation, cor: "text-[#10b981]", fundo: "bg-[#10b981]/20" },
-  Workshop: { icone: FileText, cor: "text-[#a78bfa]", fundo: "bg-[#a78bfa]/20" },
+  Workshop: { icone: Users, cor: "text-[#a78bfa]", fundo: "bg-[#a78bfa]/20" },
 };
 
 const SECOES_DE_STATUS: { chave: StatusLembrete; rotulo: string; cor: string }[] = [
-  { chave: "Em Andamento", rotulo: "Em Andamento", cor: "text-[#ff8c42]" },
-  { chave: "Próximo", rotulo: "Próximos (3 dias)", cor: "text-[#4a9eff]" },
+  { chave: "Próximo", rotulo: `Próximos (${DIAS_PROXIMO} dias)`, cor: "text-[#4a9eff]" },
+  { chave: "Agendado", rotulo: "Agendados", cor: "text-[#ff8c42]" },
   { chave: "Encerrado", rotulo: "Encerrados", cor: "text-muted-foreground" },
 ];
 
-const lembretesExemplo: Lembrete[] = [
-  {
-    id: 1,
-    titulo: "Reunião Semanal de Acompanhamento",
-    descricao: "Revisão do progresso semanal do grupo, impedimentos e próximos passos.",
-    tipo: "Reunião",
-    dataHora: "2026-08-19T14:00",
-    local: "Sala 302 - Bloco A",
-    link: "https://meet.google.com/abc-def",
-    organizador: "Dr. Carlos Silva",
-    participantes: ["João Pedro Oliveira", "Ana Carolina Lima", "Maria Eduarda Santos"],
-    grupo: "IA e Machine Learning",
-    status: "Em Andamento",
-    recorrencia: "Semanal",
-    presencaConfirmada: true,
-    temAta: false,
-  },
-  {
-    id: 2,
-    titulo: "Edital CNPq - Pesquisa em IA 2026",
-    descricao: "Prazo final para submissão de projetos ao edital de fomento à pesquisa em inteligência artificial.",
-    tipo: "Edital",
-    dataHora: "2026-08-22T23:59",
-    link: "https://cnpq.br/editais/2026/ia",
-    organizador: "Administrador",
-    participantes: ["Todos os grupos"],
-    grupo: "Todos",
-    status: "Próximo",
-    recorrencia: "Nenhuma",
-  },
-  {
-    id: 3,
-    titulo: "Workshop de Computação Quântica",
-    descricao: "Apresentação introdutória sobre fundamentos de computação quântica para pesquisadores iniciantes.",
-    tipo: "Workshop",
-    dataHora: "2026-08-21T09:00",
-    local: "Auditório Central",
-    organizador: "Dra. Ana Paula Santos",
-    participantes: ["Maria Eduarda Santos", "Rafael Henrique Souza"],
-    grupo: "Computação Quântica",
-    status: "Próximo",
-    recorrencia: "Nenhuma",
-  },
-  {
-    id: 4,
-    titulo: "Apresentação de Resultados — Projeto Deep Learning",
-    descricao: "Defesa dos resultados obtidos no projeto de detecção de anomalias com redes neurais.",
-    tipo: "Apresentação",
-    dataHora: "2026-08-10T10:00",
-    local: "Sala de Defesas - Bloco C",
-    organizador: "João Pedro Oliveira",
-    participantes: ["Dr. Carlos Silva", "Banca Avaliadora"],
-    grupo: "IA e Machine Learning",
-    status: "Encerrado",
-    recorrencia: "Nenhuma",
-    temAta: true,
-  },
-  {
-    id: 5,
-    titulo: "Edital FAPESP — Auxílio à Pesquisa 2025",
-    descricao: "Resultado do edital anterior. Grupo contemplado com R$ 45.000,00 para período 2025-2026.",
-    tipo: "Edital",
-    dataHora: "2025-12-01T00:00",
-    link: "https://fapesp.br/resultado/2025",
-    organizador: "Administrador",
-    participantes: [],
-    grupo: "Todos",
-    status: "Encerrado",
-    recorrencia: "Anual",
-  },
-];
+const FORMULARIO_VAZIO = {
+  titulo: "",
+  descricao: "",
+  tipo: "Reunião" as TipoLembrete,
+  dataHora: "",
+  local: "",
+  link: "",
+  recorrencia: "Nenhuma" as TipoRecorrencia,
+};
+
+/** Calcula a próxima ocorrência e o status com base nela (e não na data original). */
+function prepararParaExibicao(lembrete: LembreteResponse, agora: Date): LembreteExibicao {
+  const proxima = lembrete.proximaOcorrencia
+    ? new Date(lembrete.proximaOcorrencia)
+    : proximaOcorrencia(new Date(lembrete.dataHora), lembrete.recorrencia, agora);
+  const diasAte = (proxima.getTime() - agora.getTime()) / (1000 * 60 * 60 * 24);
+  let status: StatusLembrete;
+  if (diasAte < 0) status = "Encerrado";
+  else if (diasAte <= DIAS_PROXIMO) status = "Próximo";
+  else status = "Agendado";
+  return { ...lembrete, proxima, status };
+}
+
+function mensagemDeErro(err: unknown, padrao: string): string {
+  if (err instanceof HttpError) return err.response?.mensagem || err.message;
+  return padrao;
+}
 
 export function Lembretes() {
+  const { grupoAtual } = useGrupo();
+  const lembreteService = useMemo(() => new LembreteService(), []);
+  const inputAtaRef = useRef<HTMLInputElement>(null);
+  const lembreteAtaRef = useRef<number | null>(null);
+
+  // Valor do campo de busca (a requisição só sai depois que o usuário para de digitar)
   const [termoBusca, setTermoBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState<"all" | TipoLembrete>("all");
+  // Filtros efetivamente aplicados na última pesquisa
+  const [filtrosAplicados, setFiltrosAplicados] = useState<{ busca: string; tipo: "all" | TipoLembrete }>({
+    busca: "",
+    tipo: "all",
+  });
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [lembretes, setLembretes] = useState<Lembrete[]>(lembretesExemplo);
-  const [formulario, setFormulario] = useState({
-    titulo: "",
-    descricao: "",
-    tipo: "Reunião" as TipoLembrete,
-    dataHora: "",
-    local: "",
-    link: "",
-    recorrencia: "Nenhuma" as TipoRecorrencia,
-  });
+  const [editando, setEditando] = useState<LembreteResponse | null>(null);
+  const [lembretes, setLembretes] = useState<LembreteResponse[]>([]);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [totalElementos, setTotalElementos] = useState(0);
+  const [totaisPorTipo, setTotaisPorTipo] = useState<Record<string, number>>({});
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+  const [salvando, setSalvando] = useState(false);
+  const [erroForm, setErroForm] = useState("");
+  const [excluindo, setExcluindo] = useState<LembreteResponse | null>(null);
+  const [formulario, setFormulario] = useState(FORMULARIO_VAZIO);
 
-  const filtrados = lembretes.filter((l) => {
-    const correspondeBusca =
-      l.titulo.toLowerCase().includes(termoBusca.toLowerCase()) ||
-      l.descricao.toLowerCase().includes(termoBusca.toLowerCase()) ||
-      l.organizador.toLowerCase().includes(termoBusca.toLowerCase());
-    const correspondeTipo = filtroTipo === "all" || l.tipo === filtroTipo;
-    return correspondeBusca && correspondeTipo;
-  });
+  const grupoId = grupoAtual?.id;
 
-  const adicionarLembrete = () => {
-    if (!formulario.titulo || !formulario.dataHora) return;
+  const carregarLembretes = useCallback(async () => {
+    if (!grupoId) {
+      setLembretes([]);
+      setCarregando(false);
+      return;
+    }
+    setCarregando(true);
+    setErro("");
+    try {
+      const resposta = await lembreteService.listarPorGrupo(grupoId, {
+        busca: filtrosAplicados.busca,
+        tipo: filtrosAplicados.tipo === "all" ? undefined : filtrosAplicados.tipo,
+        page: paginaAtual,
+        size: TAMANHO_PAGINA,
+      });
+      setLembretes(resposta.items);
+      setTotalPaginas(resposta.totalPages);
+      setTotalElementos(resposta.totalElements);
+      setTotaisPorTipo(resposta.totaisPorTipo);
+      // Página deixou de existir (ex.: último item excluído): volta para a última válida
+      if (resposta.totalPages > 0 && paginaAtual > resposta.totalPages) {
+        setPaginaAtual(resposta.totalPages);
+      }
+    } catch (err) {
+      setLembretes([]);
+      setErro(mensagemDeErro(err, "Erro ao carregar lembretes."));
+    } finally {
+      setCarregando(false);
+    }
+  }, [grupoId, lembreteService, filtrosAplicados, paginaAtual]);
+
+  // Trocar de grupo volta para a primeira página
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [grupoId]);
+
+  useEffect(() => {
+    carregarLembretes();
+  }, [carregarLembretes]);
+
+  const atualizarNaLista = (atualizado: LembreteResponse) =>
+    setLembretes((atual) => atual.map((l) => (l.id === atualizado.id ? atualizado : l)));
+
+  // Próxima ocorrência calculada a cada carga/alteração da lista
+  const exibicao = useMemo(() => {
     const agora = new Date();
-    const dt = new Date(formulario.dataHora);
-    let status: StatusLembrete = "Próximo";
-    const diasDiferenca = (dt.getTime() - agora.getTime()) / (1000 * 60 * 60 * 24);
-    if (diasDiferenca < 0) status = "Encerrado";
-    else if (diasDiferenca <= 3) status = "Próximo";
-    else status = "Em Andamento";
+    return lembretes.map((l) => prepararParaExibicao(l, agora));
+  }, [lembretes]);
 
-    const novoLembrete: Lembrete = {
-      id: Date.now(),
-      titulo: formulario.titulo,
-      descricao: formulario.descricao,
-      tipo: formulario.tipo,
-      dataHora: formulario.dataHora,
-      local: formulario.local || undefined,
-      link: formulario.link || undefined,
-      organizador: "Usuário Atual",
-      participantes: [],
-      grupo: "Grupo de Pesquisa",
-      status,
-      recorrencia: formulario.recorrencia,
-    };
-    setLembretes([novoLembrete, ...lembretes]);
-    setFormulario({ titulo: "", descricao: "", tipo: "Reunião", dataHora: "", local: "", link: "", recorrencia: "Nenhuma" });
-    setMostrarModal(false);
+  // Filtragem feita pela API; aqui só pesquisamos (novo objeto => nova requisição)
+  // Busca por texto: aguarda o usuário parar de digitar antes de consultar a API
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFiltrosAplicados((atual) => {
+        if (atual.busca === termoBusca) return atual;
+        setPaginaAtual(1);
+        return { ...atual, busca: termoBusca };
+      });
+    }, ATRASO_BUSCA_MS);
+    return () => clearTimeout(timer);
+  }, [termoBusca]);
+
+  // Filtro de tipo: consulta imediatamente ao mudar
+  const alterarTipo = (tipo: "all" | TipoLembrete) => {
+    setFiltroTipo(tipo);
+    setPaginaAtual(1);
+    setFiltrosAplicados((atual) => ({ ...atual, tipo }));
+  };
+  const filtrados = exibicao;
+
+  const abrirModalCriar = () => {
+    setEditando(null);
+    setFormulario(FORMULARIO_VAZIO);
+    setErroForm("");
+    setMostrarModal(true);
   };
 
-  const agrupadosPorStatus = SECOES_DE_STATUS.map((secao) => ({
-    ...secao,
-    itens: filtrados.filter((l) => l.status === secao.chave),
-  }));
+  const abrirModalEditar = (l: LembreteResponse) => {
+    setEditando(l);
+    setFormulario({
+      titulo: l.titulo,
+      descricao: l.descricao ?? "",
+      tipo: l.tipo,
+      dataHora: l.dataHora.slice(0, 16),
+      local: l.localizacao ?? "",
+      link: l.link ?? "",
+      recorrencia: l.recorrencia ?? "Nenhuma",
+    });
+    setErroForm("");
+    setMostrarModal(true);
+  };
+
+  const salvarLembrete = async () => {
+    if (!formulario.titulo.trim() || !formulario.dataHora) {
+      setErroForm("Título e data/horário são obrigatórios.");
+      return;
+    }
+    if (!editando && !grupoId) {
+      setErroForm("Selecione um grupo de pesquisa para criar o lembrete.");
+      return;
+    }
+    setSalvando(true);
+    setErroForm("");
+    const dados = {
+      titulo: formulario.titulo.trim(),
+      descricao: formulario.descricao.trim(),
+      tipo: formulario.tipo,
+      dataHora: formulario.dataHora.length === 16 ? `${formulario.dataHora}:00` : formulario.dataHora,
+      localizacao: formulario.local.trim() || undefined,
+      link: formulario.link.trim() || undefined,
+      recorrencia: formulario.recorrencia,
+    };
+    try {
+      if (editando) {
+        await lembreteService.atualizar(editando.id, dados);
+      } else {
+        await lembreteService.criar({ ...dados, grupoId: grupoId! });
+      }
+      setMostrarModal(false);
+      // A posição na ordem cronológica pode ter mudado: recarrega a página atual
+      await carregarLembretes();
+    } catch (err) {
+      setErroForm(mensagemDeErro(err, "Erro ao salvar lembrete."));
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const confirmarExclusao = async () => {
+    if (!excluindo) return;
+    setSalvando(true);
+    try {
+      await lembreteService.excluir(excluindo.id);
+      await carregarLembretes();
+    } catch (err) {
+      setErro(mensagemDeErro(err, "Erro ao excluir lembrete."));
+    } finally {
+      setExcluindo(null);
+      setSalvando(false);
+    }
+  };
+
+  const alternarPresenca = async (l: LembreteResponse) => {
+    try {
+      atualizarNaLista(await lembreteService.alternarPresenca(l.id));
+    } catch (err) {
+      setErro(mensagemDeErro(err, "Erro ao atualizar presença."));
+    }
+  };
+
+  const enviarAta = async (arquivo: File | undefined) => {
+    const id = lembreteAtaRef.current;
+    if (!arquivo || id === null) return;
+    try {
+      atualizarNaLista(await lembreteService.inserirAta(id, arquivo));
+    } catch (err) {
+      setErro(mensagemDeErro(err, "Erro ao enviar ata."));
+    } finally {
+      lembreteAtaRef.current = null;
+      if (inputAtaRef.current) inputAtaRef.current.value = "";
+    }
+  };
+
+  const agrupadosPorStatus = SECOES_DE_STATUS.map((secao) => {
+    // A API já devolve em ordem cronológica (próxima ocorrência); mantém a ordem recebida
+    const itens = filtrados.filter((l) => l.status === secao.chave);
+    return { ...secao, itens };
+  });
 
   return (
     <div className="h-full overflow-auto p-6">
@@ -179,7 +280,7 @@ export function Lembretes() {
 
       {/* Estatísticas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {(["Edital", "Reunião", "Apresentação", "Workshop"] as TipoLembrete[]).map((tipo) => {
+        {TIPOS_LEMBRETE.map((tipo) => {
           const config = CONFIG_TIPO[tipo];
           const Icone = config.icone;
           return (
@@ -189,7 +290,7 @@ export function Lembretes() {
                 <Icone className={`w-5 h-5 ${config.cor}`} />
               </div>
               <div className="text-foreground text-2xl font-bold">
-                {lembretes.filter((l) => l.tipo === tipo).length}
+                {totaisPorTipo[tipo] ?? 0}
               </div>
             </div>
           );
@@ -213,7 +314,7 @@ export function Lembretes() {
           <Filter className="w-4 h-4 text-muted-foreground" />
           <select
             value={filtroTipo}
-            onChange={(e) => setFiltroTipo(e.target.value as "all" | TipoLembrete)}
+            onChange={(e) => alterarTipo(e.target.value as "all" | TipoLembrete)}
             className="bg-transparent text-foreground focus:outline-none text-sm"
           >
             <option value="all">Todos os Tipos</option>
@@ -225,13 +326,32 @@ export function Lembretes() {
         </div>
 
         <button
-          onClick={() => setMostrarModal(true)}
-          className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
+          onClick={abrirModalCriar}
+          disabled={!grupoId}
+          className="px-6 py-3 disabled:opacity-50 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
         >
           <Plus className="w-5 h-5" />
           Novo Lembrete
         </button>
       </div>
+
+      {erro && (
+        <div className="mb-6 flex items-center gap-3 p-4 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444] text-sm">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span className="flex-1">{erro}</span>
+          <button onClick={carregarLembretes} title="Recarregar" className="p-1 hover:opacity-70">
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      <input
+        ref={inputAtaRef}
+        type="file"
+        accept=".pdf,.doc,.docx"
+        className="hidden"
+        onChange={(e) => enviarAta(e.target.files?.[0])}
+      />
 
       {/* Lista seccionada */}
       <div className="space-y-8">
@@ -285,22 +405,22 @@ export function Lembretes() {
                             <div className="flex items-center gap-1.5">
                               <Calendar className="w-3.5 h-3.5" />
                               <span>
-                                {new Date(lembrete.dataHora).toLocaleDateString("pt-BR", {
+                                {lembrete.proxima.toLocaleDateString("pt-BR", {
                                   day: "2-digit", month: "short", year: "numeric"
                                 })}
                               </span>
                               <Clock className="w-3.5 h-3.5 ml-1" />
                               <span>
-                                {new Date(lembrete.dataHora).toLocaleTimeString("pt-BR", {
+                                {lembrete.proxima.toLocaleTimeString("pt-BR", {
                                   hour: "2-digit", minute: "2-digit"
                                 })}
                               </span>
                             </div>
 
-                            {lembrete.local && (
+                            {lembrete.localizacao && (
                               <div className="flex items-center gap-1.5">
                                 <MapPin className="w-3.5 h-3.5" />
-                                <span>{lembrete.local}</span>
+                                <span>{lembrete.localizacao}</span>
                               </div>
                             )}
 
@@ -327,21 +447,29 @@ export function Lembretes() {
                             )}
 
                             {lembrete.tipo === "Reunião" && chave !== "Encerrado" && (
-                              <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${ lembrete.presencaConfirmada ? "bg-[#10b981]/10 text-[#10b981]" : "bg-border/20 text-muted-foreground hover:bg-border/30" }`}>
+                              <button onClick={() => alternarPresenca(lembrete)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${ lembrete.presencaConfirmada ? "bg-[#10b981]/10 text-[#10b981]" : "bg-border/20 text-muted-foreground hover:bg-border/30" }`}>
                                 <CheckCircle className="w-3.5 h-3.5" />
                                 {lembrete.presencaConfirmada ? "Presença Confirmada" : "Confirmar Presença"}
                               </button>
                             )}
 
-                            {lembrete.tipo === "Reunião" && lembrete.temAta && (
-                              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-border/20 text-muted-foreground hover:bg-border/30 text-xs font-medium transition-colors">
+                            {lembrete.tipo === "Reunião" && lembrete.temAta && lembrete.ataUrl && (
+                              <a
+                                href={lembrete.ataUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-border/20 text-muted-foreground hover:bg-border/30 text-xs font-medium transition-colors"
+                              >
                                 <FileText className="w-3.5 h-3.5" />
                                 Ver Ata
-                              </button>
+                              </a>
                             )}
 
                             {lembrete.tipo === "Reunião" && chave === "Encerrado" && !lembrete.temAta && (
-                              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-border/20 text-muted-foreground hover:bg-border/30 text-xs font-medium transition-colors">
+                              <button
+                                onClick={() => { lembreteAtaRef.current = lembrete.id; inputAtaRef.current?.click(); }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-border/20 text-muted-foreground hover:bg-border/30 text-xs font-medium transition-colors"
+                              >
                                 <Upload className="w-3.5 h-3.5" />
                                 Inserir Ata
                               </button>
@@ -349,7 +477,21 @@ export function Lembretes() {
 
                             <div className="flex items-center gap-1.5 ml-auto">
                               <UserCheck className="w-3.5 h-3.5 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">por {lembrete.organizador}</span>
+                              <span className="text-xs text-muted-foreground">por {lembrete.organizador || lembrete.criadorNome}</span>
+                              <button
+                                onClick={() => abrirModalEditar(lembrete)}
+                                title="Editar"
+                                className="ml-2 p-1.5 rounded-lg hover:bg-border/30 text-muted-foreground"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setExcluindo(lembrete)}
+                                title="Excluir"
+                                className="p-1.5 rounded-lg hover:bg-[#ef4444]/10 text-[#ef4444]"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -363,10 +505,71 @@ export function Lembretes() {
         ))}
       </div>
 
-      {filtrados.length === 0 && (
+      {carregando ? (
+        <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          Carregando lembretes...
+        </div>
+      ) : filtrados.length === 0 && (
         <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
           <Bell className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">Nenhum lembrete encontrado</p>
+          <p className="text-muted-foreground">
+            {grupoId ? "Nenhum lembrete encontrado" : "Selecione um grupo de pesquisa para ver os lembretes"}
+          </p>
+        </div>
+      )}
+
+      {/* Paginação */}
+      {!carregando && totalPaginas > 1 && (
+        <div className="flex items-center justify-between mt-8 pt-4 border-t border-border/20 text-sm text-muted-foreground">
+          <span>
+            Página {paginaAtual} de {totalPaginas} ({totalElementos}{" "}
+            {totalElementos === 1 ? "lembrete" : "lembretes"})
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPaginaAtual((p) => Math.max(1, p - 1))}
+              disabled={paginaAtual <= 1}
+              className="p-2 rounded-lg border border-border/30 hover:bg-border/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setPaginaAtual((p) => Math.min(totalPaginas, p + 1))}
+              disabled={paginaAtual >= totalPaginas}
+              className="p-2 rounded-lg border border-border/30 hover:bg-border/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmação de exclusão */}
+      {excluindo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-card rounded-2xl border border-border/30 p-6">
+            <h2 className="text-foreground font-semibold mb-2">Excluir lembrete</h2>
+            <p className="text-muted-foreground text-sm mb-6">
+              Deseja excluir "{excluindo.titulo}"? Essa ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setExcluindo(null)}
+                disabled={salvando}
+                className="flex-1 py-2.5 rounded-xl border border-border/30 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarExclusao}
+                disabled={salvando}
+                className="flex-1 py-2.5 bg-[#ef4444] text-white rounded-xl font-medium disabled:opacity-50"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -375,7 +578,7 @@ export function Lembretes() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-lg bg-card rounded-2xl border border-border/30 p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-foreground font-semibold">Novo Lembrete</h2>
+              <h2 className="text-foreground font-semibold">{editando ? "Editar Lembrete" : "Novo Lembrete"}</h2>
               <button
                 onClick={() => setMostrarModal(false)}
                 className="p-2 hover:bg-border/20 rounded-lg transition-colors"
@@ -415,10 +618,7 @@ export function Lembretes() {
                     onChange={(e) => setFormulario({ ...formulario, tipo: e.target.value as TipoLembrete })}
                     className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
                   >
-                    <option>Edital</option>
-                    <option>Reunião</option>
-                    <option>Apresentação</option>
-                    <option>Workshop</option>
+                    {TIPOS_LEMBRETE.map((t) => <option key={t}>{t}</option>)}
                   </select>
                 </div>
                 <div>
@@ -428,21 +628,17 @@ export function Lembretes() {
                     onChange={(e) => setFormulario({ ...formulario, recorrencia: e.target.value as TipoRecorrencia })}
                     className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
                   >
-                    <option>Nenhuma</option>
-                    <option>Diária</option>
-                    <option>Semanal</option>
-                    <option>Mensal</option>
-                    <option>Anual</option>
+                    {TIPOS_RECORRENCIA.map((r) => <option key={r}>{r}</option>)}
                   </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm text-muted-foreground mb-1.5 font-normal">Data e Horário *</label>
-                <input
+                <DateInput
                   type="datetime-local"
                   value={formulario.dataHora}
-                  onChange={(e) => setFormulario({ ...formulario, dataHora: e.target.value })}
+                  onChange={(v) => setFormulario({ ...formulario, dataHora: v })}
                   className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
@@ -470,6 +666,8 @@ export function Lembretes() {
               </div>
             </div>
 
+            {erroForm && <p className="mt-4 text-sm text-[#ef4444]">{erroForm}</p>}
+
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setMostrarModal(false)}
@@ -478,10 +676,11 @@ export function Lembretes() {
                 Cancelar
               </button>
               <button
-                onClick={adicionarLembrete}
-                className="flex-1 py-2.5 bg-[#ff8c42] text-white rounded-xl font-medium transition-all"
+                onClick={salvarLembrete}
+                disabled={salvando}
+                className="flex-1 py-2.5 bg-[#ff8c42] text-white rounded-xl font-medium transition-all disabled:opacity-50"
               >
-                Criar Lembrete
+                {salvando ? "Salvando..." : editando ? "Salvar Alterações" : "Criar Lembrete"}
               </button>
             </div>
           </div>
