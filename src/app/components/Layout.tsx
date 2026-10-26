@@ -2,6 +2,7 @@ import { Outlet, NavLink, Navigate } from "react-router";
 import {
   LayoutDashboard,
   Users,
+  UserCheck,
   Hexagon,
   FileText,
   Box,
@@ -66,6 +67,7 @@ export function Layout() {
         { path: "/", label: "Dashboard", icon: LayoutDashboard },
         { path: "/projetos", label: "Painel de Projetos", icon: FolderKanban },
         { path: "/atividades", label: "Atividades", icon: ListTodo },
+        { path: "/participantes", label: "Participantes", icon: UserCheck },
         { path: "/noticias", label: "Notícias", icon: Newspaper },
         { path: "/calendario", label: "Calendário", icon: Calendar },
         { path: "/materiais", label: "Materiais", icon: Box },

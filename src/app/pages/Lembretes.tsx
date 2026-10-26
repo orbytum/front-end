@@ -17,6 +17,8 @@ import {
 } from "../models/dto/lembretes/Lembrete";
 import { proximaOcorrencia } from "../utils/Recorrencia";
 import { HttpError } from "../utils/HttpError";
+import { nivelEhLider, nivelPodeEscrever } from "../models/dto/NivelMembro";
+import { AuthService } from "../services/auth/AuthService";
 import { DateInput } from "../components/DateInput";
 
 type StatusLembrete = "Agendado" | "Próximo" | "Encerrado";
@@ -100,6 +102,11 @@ export function Lembretes() {
   const [formulario, setFormulario] = useState(FORMULARIO_VAZIO);
 
   const grupoId = grupoAtual?.id;
+  const isAdmin = useMemo(() => new AuthService().isAdminOrInitialAdmin(), []);
+  // Criam lembretes: Líder do grupo ou Líder de algum projeto do grupo
+  const podeCriarLembrete =
+    isAdmin || nivelEhLider(grupoAtual?.nivel) || Boolean(grupoAtual?.isLiderDeProjeto);
+  const podeEscrever = isAdmin || nivelPodeEscrever(grupoAtual?.nivel);
 
   const carregarLembretes = useCallback(async () => {
     if (!grupoId) {
@@ -327,7 +334,8 @@ export function Lembretes() {
 
         <button
           onClick={abrirModalCriar}
-          disabled={!grupoId}
+          disabled={!grupoId || !podeCriarLembrete}
+          title={podeCriarLembrete ? undefined : "Apenas Líderes do grupo ou de projeto criam lembretes"}
           className="px-6 py-3 disabled:opacity-50 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
         >
           <Plus className="w-5 h-5" />
@@ -446,7 +454,7 @@ export function Lembretes() {
                               </a>
                             )}
 
-                            {lembrete.tipo === "Reunião" && chave !== "Encerrado" && (
+                            {lembrete.tipo === "Reunião" && chave !== "Encerrado" && podeEscrever && (
                               <button onClick={() => alternarPresenca(lembrete)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${ lembrete.presencaConfirmada ? "bg-[#10b981]/10 text-[#10b981]" : "bg-border/20 text-muted-foreground hover:bg-border/30" }`}>
                                 <CheckCircle className="w-3.5 h-3.5" />
                                 {lembrete.presencaConfirmada ? "Presença Confirmada" : "Confirmar Presença"}

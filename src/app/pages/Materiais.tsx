@@ -18,7 +18,7 @@ import {
   MaterialStatusLabels,
   MATERIAL_STATUS,
 } from "../models/dto/materiais/Material";
-import { nivelEhCoordenadorOuAcima } from "../models/dto/NivelMembro";
+import { nivelEhLider } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "../components/DateInput";
 
@@ -52,7 +52,7 @@ export function Materiais() {
   const authService = useMemo(() => new AuthService(), []);
 
   const podeGerenciar =
-    authService.isAdmin() || nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+    authService.isAdmin() || nivelEhLider(grupoAtual?.nivel);
 
   const [materiais, setMateriais] = useState<MaterialResponse[]>([]);
   const [carregando, setCarregando] = useState(true);

@@ -33,11 +33,7 @@ import {
   projetoEstaAberto,
 } from "../models/dto/projetos/Projeto";
 import { ParticipanteProjetoResponse } from "../models/dto/projetos/ParticipanteProjeto";
-import {
-  NivelMembro,
-  NivelMembroLabels,
-  nivelEhCoordenadorOuAcima,
-} from "../models/dto/NivelMembro";
+import { nivelEhLider } from "../models/dto/NivelMembro";
 import { Publicacoes } from "./Publicacoes";
 import { ProjetoCombobox } from "../components/ProjetoCombobox";
 import { AtividadesBoard } from "../components/AtividadesBoard";
@@ -80,12 +76,13 @@ export function PainelDeProjetos() {
   const [participantes, setParticipantes] = useState<ParticipanteProjetoResponse[]>([]);
   const [carregandoParticipantes, setCarregandoParticipantes] = useState(false);
   const [novoParticipanteId, setNovoParticipanteId] = useState("");
-  const [novoNivel, setNovoNivel] = useState<NivelMembro>("PESQUISADOR");
+  const [novoLiderProjeto, setNovoLiderProjeto] = useState(false);
   const [adicionandoParticipante, setAdicionandoParticipante] = useState(false);
   const [erroParticipantes, setErroParticipantes] = useState("");
 
   const isAdmin = authService.isAdminOrInitialAdmin();
-  const podeGerenciar = isAdmin || nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+  // Projetos e participantes são gerenciados pelo Líder do grupo
+  const podeGerenciar = isAdmin || nivelEhLider(grupoAtual?.nivel);
 
   const carregarProjetos = useCallback(async () => {
     if (!grupoAtual?.id) {
@@ -305,7 +302,7 @@ export function PainelDeProjetos() {
     setParticipantesModalAberto(true);
     setErroParticipantes("");
     setNovoParticipanteId("");
-    setNovoNivel("PESQUISADOR");
+    setNovoLiderProjeto(false);
     setCarregandoParticipantes(true);
     try {
       const lista = await projetoService.listarParticipantes(projeto.id);
@@ -331,10 +328,17 @@ export function PainelDeProjetos() {
     try {
       const adicionado = await projetoService.adicionarParticipante(projetoSelecionado.id, {
         usuarioId: Number(novoParticipanteId),
-        nivel: novoNivel,
+        liderProjeto: novoLiderProjeto,
       });
-      setParticipantes((prev) => [...prev.filter((p) => p.usuarioId !== adicionado.usuarioId), adicionado]);
+      // Só pode haver um líder por projeto: os demais deixam de ser líder
+      setParticipantes((prev) => [
+        ...prev
+          .filter((p) => p.usuarioId !== adicionado.usuarioId)
+          .map((p) => (adicionado.liderProjeto ? { ...p, liderProjeto: false } : p)),
+        adicionado,
+      ]);
       setNovoParticipanteId("");
+      setNovoLiderProjeto(false);
     } catch (err) {
       if (err instanceof HttpError) {
         setErroParticipantes(err.response?.mensagem || err.message);
@@ -847,18 +851,16 @@ export function PainelDeProjetos() {
                       </option>
                     ))}
                   </select>
-                  <select
-                    value={novoNivel}
-                    onChange={(e) => setNovoNivel(e.target.value as NivelMembro)}
-                    disabled={adicionandoParticipante}
-                    className={`${inputClass} sm:w-44`}
-                  >
-                    {(["PESQUISADOR", "COORDENADOR", "LIDER"] as NivelMembro[]).map((n) => (
-                      <option key={n} value={n}>
-                        {NivelMembroLabels[n]}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="flex items-center gap-2 px-3 text-sm text-foreground whitespace-nowrap cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={novoLiderProjeto}
+                      onChange={(e) => setNovoLiderProjeto(e.target.checked)}
+                      disabled={adicionandoParticipante}
+                      className="accent-primary"
+                    />
+                    Líder do projeto
+                  </label>
                   <button
                     type="button"
                     onClick={handleAdicionarParticipante}
@@ -902,8 +904,8 @@ export function PainelDeProjetos() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-[11px] px-2 py-0.5 rounded-full bg-card border border-border/40 text-muted-foreground flex items-center gap-1">
-                          {p.nivel === "LIDER" && <Crown className="w-3 h-3" />}
-                          {p.nivel ? NivelMembroLabels[p.nivel] : "Pesquisador"}
+                          {p.liderProjeto && <Crown className="w-3 h-3" />}
+                          {p.liderProjeto ? "Líder do projeto" : "Participante"}
                         </span>
                         <button
                           type="button"

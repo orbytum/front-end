@@ -697,10 +697,10 @@ export function Grupos() {
                 <div className="p-5 bg-[#10b981]/10 border border-[#10b981]/30 rounded-xl space-y-3">
                   <div className="flex items-center gap-2 text-[#10b981] font-semibold text-sm">
                     <CheckCircle2 className="w-5 h-5" />
-                    <span>Grupo criado e convite de Líder enviado com sucesso!</span>
+                    <span>Grupo criado e líder adicionado com sucesso!</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    O grupo <strong>{createdGrupo.nome}</strong> foi cadastrado. Um convite de Líder com validade de 7 dias foi emitido para o e-mail informado.
+                    O grupo <strong>{createdGrupo.nome}</strong> foi cadastrado e o líder foi adicionado.
                   </p>
                   <div className="pt-2 flex justify-end">
                     <button

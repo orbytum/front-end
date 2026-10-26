@@ -1,16 +1,24 @@
 import { z } from "zod";
 
-export const nivelMembroSchema = z.enum(["LIDER", "COORDENADOR", "PESQUISADOR"]);
+/**
+ * Nível do usuário no grupo. O "Líder de projeto" não é um nível de grupo:
+ * vem da flag liderProjeto do participante do projeto (ou isLiderDeProjeto do grupo atual).
+ */
+export const nivelMembroSchema = z.enum(["LIDER", "MEMBRO", "COLABORADOR"]);
 
 export type NivelMembro = z.infer<typeof nivelMembroSchema>;
 
 export const NivelMembroLabels: Record<NivelMembro, string> = {
     LIDER: "Líder",
-    COORDENADOR: "Coordenador",
-    PESQUISADOR: "Pesquisador",
+    MEMBRO: "Pesquisador",
+    COLABORADOR: "Colaborador",
 };
 
-export function nivelEhCoordenadorOuAcima(nivel?: NivelMembro | null): boolean {
-    debugger
-    return nivel === "LIDER" || nivel === "COORDENADOR";
+export function nivelEhLider(nivel?: NivelMembro | null): boolean {
+    return nivel === "LIDER";
+}
+
+/** Colaborador tem acesso somente de leitura. */
+export function nivelPodeEscrever(nivel?: NivelMembro | null): boolean {
+    return nivel === "LIDER" || nivel === "MEMBRO";
 }

@@ -5,6 +5,7 @@ import { GrupoProvider } from "./contexts/GrupoContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Dashboard } from "./pages/Dashboard";
 import { Grupos } from "./pages/Grupos";
+import { Participantes } from "./pages/Participantes";
 import { ParticipantesDoGrupo } from "./pages/ParticipantesDoGrupo";
 import { Recursos } from "./pages/Recursos";
 import { Solicitacoes } from "./pages/Solicitacoes";
@@ -148,9 +149,9 @@ export const router = createBrowserRouter([
       {
         path: "participantes",
         element: (
-          <AdminOnlyRoute>
-            <Navigate to="/grupos" replace />
-          </AdminOnlyRoute>
+          <UserOnlyRoute>
+            <Participantes />
+          </UserOnlyRoute>
         ),
       },
       {

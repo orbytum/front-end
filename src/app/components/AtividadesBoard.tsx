@@ -30,7 +30,8 @@ import {
 } from "../models/dto/atividades/Atividade";
 import { ProjetoResponse } from "../models/dto/projetos/Projeto";
 import { ParticipanteProjetoResponse } from "../models/dto/projetos/ParticipanteProjeto";
-import { NivelMembro, nivelEhCoordenadorOuAcima } from "../models/dto/NivelMembro";
+import { NivelMembro, nivelEhLider, nivelPodeEscrever } from "../models/dto/NivelMembro";
+import { AuthService } from "../services/auth/AuthService";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "./DateInput";
 
@@ -134,8 +135,16 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
   const [finalizarAberto, setFinalizarAberto] = useState(false);
   const [finalizando, setFinalizando] = useState(false);
 
-  const podeGerenciar = isAdmin || nivelEhCoordenadorOuAcima(nivel);
-  const podeRegistrarImpedimento = !!nivel || isAdmin;
+  // Líder deste projeto: participante com a flag liderProjeto e o mesmo e-mail do usuário logado
+  const emailLogado = useMemo(() => new AuthService().getEmail()?.toLowerCase() ?? null, []);
+  const isLiderDoProjeto = participantes.some(
+    (p) => p.liderProjeto && emailLogado !== null && p.email.toLowerCase() === emailLogado
+  );
+  // Gerenciar (criar/editar/excluir/aprovar): Líder do grupo ou Líder deste projeto
+  const podeGerenciar = isAdmin || nivelEhLider(nivel) || isLiderDoProjeto;
+  // Colaborador é somente leitura
+  const podeEscrever = isAdmin || nivelPodeEscrever(nivel);
+  const podeRegistrarImpedimento = podeEscrever;
 
   const atividadesEmAndamento = useMemo(
     () => atividades.filter((a) => a.status?.toUpperCase() === "EM_ANDAMENTO"),
@@ -431,7 +440,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                     const proximo = proximoStatusAtividade(atividade.status);
                     const exigeCoordenacao =
                       proximo === "CONCLUIDA" || proximo === "ENCERRADA";
-                    const podeAvancar = !!proximo && (!exigeCoordenacao || podeGerenciar);
+                    const podeAvancar = !!proximo && podeEscrever && (!exigeCoordenacao || podeGerenciar);
                     const pai = atividade.atividadePaiId
                       ? atividades.find((a) => a.id === atividade.atividadePaiId)
                       : null;

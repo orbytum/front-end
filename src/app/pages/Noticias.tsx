@@ -27,7 +27,7 @@ import {
   noticiaStatusSchema,
   type NoticiaStatus,
 } from "../models/dto/noticias/Noticia";
-import { nivelEhCoordenadorOuAcima } from "../models/dto/NivelMembro";
+import { nivelEhLider, nivelPodeEscrever } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "../components/DateInput";
 
@@ -45,7 +45,9 @@ export function Noticias() {
   const { grupoAtual, carregandoGrupos } = useGrupo();
   const noticiaService = useMemo(() => new NoticiaService(), []);
 
-  const isCoordenadorOuAcima = nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+  // Aprovam notícias: Líder do grupo ou Líder de algum projeto do grupo
+  const podeAprovar = nivelEhLider(grupoAtual?.nivel) || Boolean(grupoAtual?.isLiderDeProjeto);
+  const podeCriar = nivelPodeEscrever(grupoAtual?.nivel);
 
   const [aba, setAba] = useState<Aba>("publicadas");
 
@@ -334,7 +336,8 @@ export function Noticias() {
         </div>
         <button
           onClick={abrirModalCriacao}
-          disabled={!grupoAtual?.id}
+          disabled={!grupoAtual?.id || !podeCriar}
+          title={podeCriar ? undefined : "Colaboradores têm acesso somente de leitura"}
           className="px-5 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0"
         >
           <Plus className="w-5 h-5" />
@@ -357,7 +360,7 @@ export function Noticias() {
             Publicadas
           </span>
         </button>
-        {isCoordenadorOuAcima && (
+        {podeAprovar && (
           <button
             onClick={() => setAba("aprovacoes")}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer -mb-px ${
@@ -539,7 +542,7 @@ export function Noticias() {
                     )}
                   </div>
 
-                  {isCoordenadorOuAcima && (
+                  {podeAprovar && (
                     <div className="flex items-center gap-2">
                       {aba === "aprovacoes" && status === "PENDENTE" && (
                         <>

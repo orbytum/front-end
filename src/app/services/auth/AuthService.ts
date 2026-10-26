@@ -67,6 +67,14 @@ export class AuthService {
     }
 
     /**
+     * E-mail do usuário logado (subject do token JWT)
+     */
+    getEmail(): string | null {
+        const payload = this.getTokenPayload();
+        return payload && typeof payload.sub === "string" ? payload.sub : null;
+    }
+
+    /**
      * Extrai o accessLevel do payload do token JWT
      */
     getUserAccessLevel(): AccessLevelType {

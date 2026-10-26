@@ -14,7 +14,7 @@ export function CriarAdminInicial() {
     email: "",
     senha: "",
     telefone: "",
-    titulo: "",
+    titulo: "Administrador",
   });
 
   const enviarFormulario = async (e: React.FormEvent) => {
@@ -101,18 +101,6 @@ export function CriarAdminInicial() {
                 value={formulario.telefone}
                 onChange={(e) => setFormulario({ ...formulario, telefone: e.target.value })}
                 placeholder="(00) 00000-0000"
-                required
-                className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-muted-foreground mb-2 font-normal">Título acadêmico</label>
-              <input
-                type="text"
-                value={formulario.titulo}
-                onChange={(e) => setFormulario({ ...formulario, titulo: e.target.value })}
-                placeholder="Ex: Dr., Ms., Prof."
                 required
                 className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
