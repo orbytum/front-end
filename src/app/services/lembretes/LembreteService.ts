@@ -51,4 +51,9 @@ export class LembreteService extends BaseService {
         formData.append("arquivo", arquivo);
         return this.post(`/lembretes/${id}/ata`, formData, {}, lembreteResponseSchema);
     }
+
+    /** Baixa os lembretes do grupo em formato iCalendar (.ics). */
+    async exportarIcs(grupoId: number): Promise<Blob> {
+        return this.getBlob(`/lembretes/grupo/${grupoId}/ics`);
+    }
 }

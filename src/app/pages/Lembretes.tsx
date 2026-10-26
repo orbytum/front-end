@@ -3,7 +3,7 @@ import {
   Bell, Plus, Search, Calendar, Clock, MapPin, Link2, Users, X,
   FileText, Presentation, Coffee, PenBox, CheckCircle, Filter,
   Repeat, Upload, UserCheck, Pencil, Trash2, Loader2, AlertCircle, RefreshCw,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Download,
   Group
 } from "lucide-react";
 import { useGrupo } from "../contexts/GrupoContext";
@@ -95,6 +95,7 @@ export function Lembretes() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
+  const [exportando, setExportando] = useState(false);
   const [erroForm, setErroForm] = useState("");
   const [excluindo, setExcluindo] = useState<LembreteResponse | null>(null);
   const [formulario, setFormulario] = useState(FORMULARIO_VAZIO);
@@ -264,6 +265,27 @@ export function Lembretes() {
     }
   };
 
+  const exportarCalendario = async () => {
+    if (!grupoId) return;
+    setExportando(true);
+    setErro("");
+    try {
+      const blob = await lembreteService.exportarIcs(grupoId);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `lembretes-grupo-${grupoId}.ics`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      setErro(mensagemDeErro(err, "Erro ao exportar os lembretes para .ics."));
+    } finally {
+      setExportando(false);
+    }
+  };
+
   const agrupadosPorStatus = SECOES_DE_STATUS.map((secao) => {
     // A API já devolve em ordem cronológica (próxima ocorrência); mantém a ordem recebida
     const itens = filtrados.filter((l) => l.status === secao.chave);
@@ -324,6 +346,20 @@ export function Lembretes() {
             <option value="Workshop">Workshops</option>
           </select>
         </div>
+
+        <button
+          onClick={exportarCalendario}
+          disabled={!grupoId || exportando}
+          title="Baixar os lembretes do grupo em formato .ics"
+          className="px-5 py-3 disabled:opacity-50 bg-card border border-border/30 text-foreground rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap hover:border-[#ff8c42]/50"
+        >
+          {exportando ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <Download className="w-5 h-5" />
+          )}
+          Exportar .ics
+        </button>
 
         <button
           onClick={abrirModalCriar}
