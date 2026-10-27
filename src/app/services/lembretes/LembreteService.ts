@@ -30,6 +30,14 @@ export class LembreteService extends BaseService {
         );
     }
 
+    async listarTodosPorGrupo(grupoId: number): Promise<LembreteResponse[]> {
+        return this.get(
+            `/lembretes/grupo/${grupoId}/todos`,
+            {},
+            z.array(lembreteResponseSchema)
+        );
+    }
+
     async criar(data: CriarLembreteRequest): Promise<LembreteResponse> {
         return this.post("/lembretes", data, {}, lembreteResponseSchema);
     }

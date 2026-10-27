@@ -53,3 +53,96 @@ export function proximaOcorrencia(
             return dataBase;
     }
 }
+
+function ocorrenciaPorIndice(
+    dataBase: Date,
+    recorrencia: TipoRecorrencia,
+    indice: number
+): Date {
+    switch (recorrencia) {
+        case "Diária": {
+            const data = new Date(dataBase);
+            data.setDate(data.getDate() + indice);
+            return data;
+        }
+        case "Semanal": {
+            const data = new Date(dataBase);
+            data.setDate(data.getDate() + indice * 7);
+            return data;
+        }
+        case "Mensal":
+            return somarMeses(dataBase, indice);
+        case "Anual":
+            return somarMeses(dataBase, indice * 12);
+        default:
+            return new Date(dataBase);
+    }
+}
+
+function indiceInicial(
+    dataBase: Date,
+    recorrencia: TipoRecorrencia,
+    inicio: Date
+): number {
+    if (inicio.getTime() <= dataBase.getTime()) {
+        return 0;
+    }
+    const diffMs = inicio.getTime() - dataBase.getTime();
+    const diffDias = Math.floor(diffMs / MS_DIA);
+
+    switch (recorrencia) {
+        case "Diária":
+            return Math.max(0, diffDias - 1);
+        case "Semanal":
+            return Math.max(0, Math.floor(diffDias / 7) - 1);
+        case "Mensal": {
+            const diffMeses = (inicio.getFullYear() - dataBase.getFullYear()) * 12
+                + (inicio.getMonth() - dataBase.getMonth());
+            return Math.max(0, diffMeses - 1);
+        }
+        case "Anual": {
+            const diffAnos = inicio.getFullYear() - dataBase.getFullYear();
+            return Math.max(0, diffAnos - 1);
+        }
+        default:
+            return 0;
+    }
+}
+
+/**
+ * Expande as ocorrências de um lembrete dentro do intervalo informado.
+ * Útil para exibir eventos recorrentes no calendário.
+ */
+export function ocorrenciasNoIntervalo(
+    dataBase: Date,
+    recorrencia: TipoRecorrencia | null | undefined,
+    inicio: Date,
+    fim: Date
+): Date[] {
+    if (Number.isNaN(dataBase.getTime()) || inicio.getTime() > fim.getTime()) {
+        return [];
+    }
+
+    if (!recorrencia || recorrencia === "Nenhuma") {
+        return dataBase.getTime() >= inicio.getTime() && dataBase.getTime() <= fim.getTime()
+            ? [new Date(dataBase)]
+            : [];
+    }
+
+    const ocorrencias: Date[] = [];
+    let indice = indiceInicial(dataBase, recorrencia, inicio);
+
+    // Limite de segurança para recorrências muito antigas ou intervalos muito longos.
+    for (let iteracoes = 0; iteracoes < 1000; iteracoes += 1) {
+        const ocorrencia = ocorrenciaPorIndice(dataBase, recorrencia, indice);
+        if (ocorrencia.getTime() > fim.getTime()) {
+            break;
+        }
+        if (ocorrencia.getTime() >= inicio.getTime()) {
+            ocorrencias.push(ocorrencia);
+        }
+        indice += 1;
+    }
+
+    return ocorrencias;
+}
