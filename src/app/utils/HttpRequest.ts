@@ -7,15 +7,19 @@ export class HttpRequest {
         this.baseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
     }
 
+    private async criarHttpError(response: Response): Promise<HttpError> {
+        let data: ErroResponse | null = null;
+        try {
+            data = await response.json() as ErroResponse;
+        } catch {
+            data = null;
+        }
+        return new HttpError(response.status, data);
+    }
+
     private async validarResposta<T>(response: Response): Promise<T> {
         if (!response.ok) {
-            let data: ErroResponse | null = null;
-            try {
-                data = await response.json() as ErroResponse;
-            } catch {
-                data = null;
-            }
-            throw new HttpError(response.status, data);
+            throw await this.criarHttpError(response);
         }
         if (response.status === 204 || response.status === 205) {
             return undefined as T;
@@ -23,7 +27,14 @@ export class HttpRequest {
         return response.json() as Promise<T>;
     }
 
-    private async executar<T>(url: string, init: RequestInit): Promise<T> {
+    private async validarRespostaBlob(response: Response): Promise<Blob> {
+        if (!response.ok) {
+            throw await this.criarHttpError(response);
+        }
+        return response.blob();
+    }
+
+    private async executarRequisicao(url: string, init: RequestInit): Promise<Response> {
         const token = localStorage.getItem("token");
         const tokenTipo = localStorage.getItem("token_tipo") || "Bearer";
         const headers = new Headers(init.headers as HeadersInit || {});
@@ -33,7 +44,11 @@ export class HttpRequest {
         }
         init.headers = headers;
 
-        const response = await fetch(url, init);
+        return fetch(url, init);
+    }
+
+    private async executar<T>(url: string, init: RequestInit): Promise<T> {
+        const response = await this.executarRequisicao(url, init);
         return this.validarResposta<T>(response);
     }
 
@@ -42,6 +57,15 @@ export class HttpRequest {
             method: 'GET',
             headers: headers,
         });
+    }
+
+    /** Baixa o corpo da resposta como Blob (ex.: arquivos .ics, PDFs). */
+    public async getBlob(url: string, headers: Record<string, string> = {}, baseUrl: string = this.baseUrl): Promise<Blob> {
+        const response = await this.executarRequisicao(`${baseUrl}${url}`, {
+            method: 'GET',
+            headers: headers,
+        });
+        return this.validarRespostaBlob(response);
     }
 
     /**

@@ -30,6 +30,14 @@ export class LembreteService extends BaseService {
         );
     }
 
+    async listarTodosPorGrupo(grupoId: number): Promise<LembreteResponse[]> {
+        return this.get(
+            `/lembretes/grupo/${grupoId}/todos`,
+            {},
+            z.array(lembreteResponseSchema)
+        );
+    }
+
     async criar(data: CriarLembreteRequest): Promise<LembreteResponse> {
         return this.post("/lembretes", data, {}, lembreteResponseSchema);
     }
@@ -50,5 +58,10 @@ export class LembreteService extends BaseService {
         const formData = new FormData();
         formData.append("arquivo", arquivo);
         return this.post(`/lembretes/${id}/ata`, formData, {}, lembreteResponseSchema);
+    }
+
+    /** Baixa os lembretes do grupo em formato iCalendar (.ics). */
+    async exportarIcs(grupoId: number): Promise<Blob> {
+        return this.getBlob(`/lembretes/grupo/${grupoId}/ics`);
     }
 }

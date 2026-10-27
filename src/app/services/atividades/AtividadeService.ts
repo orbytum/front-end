@@ -29,6 +29,14 @@ export class AtividadeService extends BaseService {
     return response.items;
   }
 
+  async listarPorGrupo(grupoId: number): Promise<AtividadeResponse[]> {
+    return this.get(
+      `/atividades/grupo/${grupoId}`,
+      {},
+      z.array(atividadeResponseSchema)
+    );
+  }
+
   async listarAtrasadasPorProjeto(projetoId: number): Promise<AtividadeResponse[]> {
     return this.get(
       `/atividades/projeto/${projetoId}/atrasadas`,
