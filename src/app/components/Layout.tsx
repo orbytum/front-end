@@ -15,6 +15,7 @@ import {
   Loader2,
   BookOpen,
   Bell,
+  Telescope,
 } from "lucide-react";
 import { useState } from "react";
 import { AuthService } from "../services/auth/AuthService";
@@ -66,6 +67,7 @@ export function Layout() {
         { path: "/", label: "Dashboard", icon: LayoutDashboard },
         { path: "/projetos", label: "Painel de Projetos", icon: FolderKanban },
         { path: "/atividades", label: "Atividades", icon: ListTodo },
+        { path: "/editais", label: "Editais e Eventos", icon: Telescope },
         { path: "/noticias", label: "Notícias", icon: Newspaper },
         { path: "/calendario", label: "Calendário", icon: Calendar },
         { path: "/materiais", label: "Materiais", icon: Box },
