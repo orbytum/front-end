@@ -11,6 +11,5 @@ export const NivelMembroLabels: Record<NivelMembro, string> = {
 };
 
 export function nivelEhCoordenadorOuAcima(nivel?: NivelMembro | null): boolean {
-    debugger
     return nivel === "LIDER" || nivel === "COORDENADOR";
 }

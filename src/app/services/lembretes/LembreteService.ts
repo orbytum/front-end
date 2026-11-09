@@ -22,6 +22,12 @@ export class LembreteService extends BaseService {
         if (filtros.busca && filtros.busca.trim()) {
             params.append("busca", filtros.busca.trim());
         }
+        if (filtros.dataInicio) {
+            params.append("dataInicio", filtros.dataInicio);
+        }
+        if (filtros.dataFim) {
+            params.append("dataFim", filtros.dataFim);
+        }
         const query = params.toString();
         return this.get(
             `/lembretes/grupo/${grupoId}?${query}`,
