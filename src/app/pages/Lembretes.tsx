@@ -361,6 +361,17 @@ export function Lembretes() {
     }
   };
 
+  const abrirAta = async (lembrete: LembreteResponse) => {
+    try {
+      const blob = await lembreteService.baixarAta(lembrete.id);
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, "_blank", "noopener,noreferrer");
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } catch (err) {
+      setErro(mensagemDeErro(err, "Erro ao abrir ata."));
+    }
+  };
+
   const enviarAta = async (arquivo: File | undefined) => {
     const id = lembreteAtaRef.current;
     if (!arquivo || id === null) return;
@@ -585,16 +596,15 @@ export function Lembretes() {
                               </button>
                             )}
 
-                            {lembrete.tipo === "Reunião" && lembrete.temAta && lembrete.ataUrl && (
-                              <a
-                                href={lembrete.ataUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            {lembrete.tipo === "Reunião" && lembrete.temAta && (
+                              <button
+                                type="button"
+                                onClick={() => abrirAta(lembrete)}
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-border/20 text-muted-foreground hover:bg-border/30 text-xs font-medium transition-colors"
                               >
                                 <FileText className="w-3.5 h-3.5" />
                                 Ver Ata
-                              </a>
+                              </button>
                             )}
 
                             {podeCriar && lembrete.tipo === "Reunião" && chave === "Encerrado" && !lembrete.temAta && (

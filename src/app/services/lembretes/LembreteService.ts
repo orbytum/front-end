@@ -73,4 +73,9 @@ export class LembreteService extends BaseService {
     async exportarIcs(grupoId: number): Promise<Blob> {
         return this.getBlob(`/lembretes/grupo/${grupoId}/ics`);
     }
+
+    /** Baixa o arquivo de ata da reunião. */
+    async baixarAta(id: number): Promise<Blob> {
+        return this.getBlob(`/lembretes/${id}/ata`);
+    }
 }

@@ -317,6 +317,22 @@ export function Publicacoes({
     }
   };
 
+  const abrirPdfPublicacao = async (publicacao: PublicacaoResponse) => {
+    if (!publicacao.uuid) {
+      window.open(publicacao.url, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    try {
+      const blob = await publicacaoService.baixarArquivo(publicacao.uuid);
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, "_blank", "noopener,noreferrer");
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } catch {
+      // O erro já é tratado globalmente pelo BaseService / TratarExcecao
+    }
+  };
+
   const handleConfirmarInativacao = async () => {
     if (!publicacaoParaInativar) return;
 
@@ -581,15 +597,14 @@ export function Publicacoes({
                   <span>{formatarData(publicacao.dthRegistro)}</span>
                 </div>
 
-                <a
-                  href={publicacao.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={() => abrirPdfPublicacao(publicacao)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#ff8c42]/15 text-[#ff8c42] hover:bg-[#ff8c42]/25 font-medium transition-colors cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   Ver PDF
-                </a>
+                </button>
               </div>
             </div>
           ))}

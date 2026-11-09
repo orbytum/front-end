@@ -65,4 +65,8 @@ export class PublicacaoService extends BaseService {
   async buscarPorId(id: number): Promise<PublicacaoResponse> {
     return this.get(`/publicacoes/${id}`, {}, publicacaoResponseSchema);
   }
+
+  async baixarArquivo(uuid: string): Promise<Blob> {
+    return this.getBlob(`/publicacoes/uuid/${uuid}/arquivo`);
+  }
 }
