@@ -4,10 +4,18 @@ import {
   FileText, Presentation, Coffee, PenBox, CheckCircle, Filter,
   Repeat, Upload, UserCheck, Pencil, Trash2, Loader2, AlertCircle, RefreshCw,
   ChevronLeft, ChevronRight,
-  Group
+  FolderKanban
 } from "lucide-react";
 import { useGrupo } from "../contexts/GrupoContext";
 import { LembreteService } from "../services/lembretes/LembreteService";
+import { ProjetoService } from "../services/projetos/ProjetoService";
+import { GrupoService } from "../services/grupos/GrupoService";
+import { AuthService } from "../services/auth/AuthService";
+import { ProjetoResponse } from "../models/dto/projetos/Projeto";
+import {
+  nivelEhCoordenadorOuAcima,
+  nivelEhLider,
+} from "../models/dto/NivelMembro";
 import {
   LembreteResponse,
   TIPOS_LEMBRETE,
@@ -43,15 +51,35 @@ const SECOES_DE_STATUS: { chave: StatusLembrete; rotulo: string; cor: string }[]
   { chave: "Encerrado", rotulo: "Encerrados", cor: "text-muted-foreground" },
 ];
 
-const FORMULARIO_VAZIO = {
+interface FormularioLembrete {
+  titulo: string;
+  descricao: string;
+  tipo: TipoLembrete;
+  dataHora: string;
+  local: string;
+  link: string;
+  recorrencia: TipoRecorrencia;
+  projetoId: string;
+  paraGrupoInteiro: boolean;
+}
+
+const FORMULARIO_VAZIO: FormularioLembrete = {
   titulo: "",
   descricao: "",
-  tipo: "Reunião" as TipoLembrete,
+  tipo: "Reunião",
   dataHora: "",
   local: "",
   link: "",
-  recorrencia: "Nenhuma" as TipoRecorrencia,
+  recorrencia: "Nenhuma",
+  projetoId: "",
+  paraGrupoInteiro: false,
 };
+
+interface FiltrosAplicadosLembrete {
+  busca: string;
+  tipo: "all" | TipoLembrete;
+  projetoId: number | null;
+}
 
 /** Calcula a próxima ocorrência e o status com base nela (e não na data original). */
 function prepararParaExibicao(lembrete: LembreteResponse, agora: Date): LembreteExibicao {
@@ -74,6 +102,9 @@ function mensagemDeErro(err: unknown, padrao: string): string {
 export function Lembretes() {
   const { grupoAtual } = useGrupo();
   const lembreteService = useMemo(() => new LembreteService(), []);
+  const projetoService = useMemo(() => new ProjetoService(), []);
+  const grupoService = useMemo(() => new GrupoService(), []);
+  const authService = useMemo(() => new AuthService(), []);
   const inputAtaRef = useRef<HTMLInputElement>(null);
   const lembreteAtaRef = useRef<number | null>(null);
 
@@ -81,10 +112,14 @@ export function Lembretes() {
   const [termoBusca, setTermoBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState<"all" | TipoLembrete>("all");
   // Filtros efetivamente aplicados na última pesquisa
-  const [filtrosAplicados, setFiltrosAplicados] = useState<{ busca: string; tipo: "all" | TipoLembrete }>({
+  const [filtrosAplicados, setFiltrosAplicados] = useState<FiltrosAplicadosLembrete>({
     busca: "",
     tipo: "all",
+    projetoId: null,
   });
+  const [projetos, setProjetos] = useState<ProjetoResponse[]>([]);
+  const [meuUsuarioId, setMeuUsuarioId] = useState<number | null>(null);
+  const [filtroProjetoId, setFiltroProjetoId] = useState<number | "all">("all");
   const [mostrarModal, setMostrarModal] = useState(false);
   const [editando, setEditando] = useState<LembreteResponse | null>(null);
   const [lembretes, setLembretes] = useState<LembreteResponse[]>([]);
@@ -100,6 +135,47 @@ export function Lembretes() {
   const [formulario, setFormulario] = useState(FORMULARIO_VAZIO);
 
   const grupoId = grupoAtual?.id;
+  const isAdmin = authService.isAdminOrInitialAdmin();
+  const podeGerenciarGrupo = isAdmin || nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+  const podeEscolherGrupoInteiro = isAdmin || nivelEhLider(grupoAtual?.nivel);
+  const projetosLideradosIds = useMemo(() => {
+    if (!meuUsuarioId) return [];
+    return projetos
+      .filter((projeto) => projeto.liderProjetoId === meuUsuarioId)
+      .map((projeto) => projeto.id);
+  }, [projetos, meuUsuarioId]);
+  const podeCriar = podeGerenciarGrupo || projetosLideradosIds.length > 0;
+  const projetosCriaveis = podeGerenciarGrupo
+    ? projetos
+    : projetos.filter((projeto) => projetosLideradosIds.includes(projeto.id));
+
+  const carregarProjetos = useCallback(async () => {
+    if (!grupoId) {
+      setProjetos([]);
+      setMeuUsuarioId(null);
+      return;
+    }
+    try {
+      const [listaProjetos, membros] = await Promise.all([
+        projetoService.listarProjetosPorGrupo(grupoId),
+        grupoService.listarPesquisadores(grupoId, { size: 500 }),
+      ]);
+      setProjetos(listaProjetos);
+
+      const email = (authService.getUserEmail() || "").toLowerCase();
+      const eu = (membros.items || []).find(
+        (membro) => (membro.email || "").toLowerCase() === email
+      );
+      setMeuUsuarioId(eu?.usuarioId ?? eu?.id ?? null);
+    } catch {
+      setProjetos([]);
+      setMeuUsuarioId(null);
+    }
+  }, [grupoId, projetoService, grupoService, authService]);
+
+  useEffect(() => {
+    carregarProjetos();
+  }, [carregarProjetos]);
 
   const carregarLembretes = useCallback(async () => {
     if (!grupoId) {
@@ -113,6 +189,7 @@ export function Lembretes() {
       const resposta = await lembreteService.listarPorGrupo(grupoId, {
         busca: filtrosAplicados.busca,
         tipo: filtrosAplicados.tipo === "all" ? undefined : filtrosAplicados.tipo,
+        projetoId: filtrosAplicados.projetoId ?? undefined,
         page: paginaAtual,
         size: TAMANHO_PAGINA,
       });
@@ -169,11 +246,24 @@ export function Lembretes() {
     setPaginaAtual(1);
     setFiltrosAplicados((atual) => ({ ...atual, tipo }));
   };
+
+  const alterarProjeto = (projetoId: number | "all") => {
+    setFiltroProjetoId(projetoId);
+    setPaginaAtual(1);
+    setFiltrosAplicados((atual) => ({
+      ...atual,
+      projetoId: projetoId === "all" ? null : projetoId,
+    }));
+  };
+
   const filtrados = exibicao;
 
   const abrirModalCriar = () => {
     setEditando(null);
-    setFormulario(FORMULARIO_VAZIO);
+    setFormulario({
+      ...FORMULARIO_VAZIO,
+      paraGrupoInteiro: podeEscolherGrupoInteiro,
+    });
     setErroForm("");
     setMostrarModal(true);
   };
@@ -188,6 +278,8 @@ export function Lembretes() {
       local: l.localizacao ?? "",
       link: l.link ?? "",
       recorrencia: l.recorrencia ?? "Nenhuma",
+      projetoId: l.projetoId ? String(l.projetoId) : "",
+      paraGrupoInteiro: l.paraGrupoInteiro || !l.projetoId,
     });
     setErroForm("");
     setMostrarModal(true);
@@ -202,6 +294,18 @@ export function Lembretes() {
       setErroForm("Selecione um grupo de pesquisa para criar o lembrete.");
       return;
     }
+
+    const paraGrupoInteiro = podeEscolherGrupoInteiro && formulario.paraGrupoInteiro;
+    const manterEscopoAtual = !!editando
+      && !podeEscolherGrupoInteiro
+      && !formulario.projetoId
+      && !!editando.paraGrupoInteiro;
+
+    if (!paraGrupoInteiro && !formulario.projetoId && !manterEscopoAtual) {
+      setErroForm("Selecione o projeto do lembrete ou marque para o grupo inteiro.");
+      return;
+    }
+
     setSalvando(true);
     setErroForm("");
     const dados = {
@@ -212,6 +316,12 @@ export function Lembretes() {
       localizacao: formulario.local.trim() || undefined,
       link: formulario.link.trim() || undefined,
       recorrencia: formulario.recorrencia,
+      paraGrupoInteiro: manterEscopoAtual ? undefined : paraGrupoInteiro,
+      projetoId: manterEscopoAtual
+        ? undefined
+        : paraGrupoInteiro
+          ? null
+          : Number(formulario.projetoId),
     };
     try {
       if (editando) {
@@ -325,14 +435,32 @@ export function Lembretes() {
           </select>
         </div>
 
-        <button
-          onClick={abrirModalCriar}
-          disabled={!grupoId}
-          className="px-6 py-3 disabled:opacity-50 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
-        >
-          <Plus className="w-5 h-5" />
-          Novo Lembrete
-        </button>
+        <div className="flex items-center gap-2 px-4 py-3 bg-card rounded-xl border border-border/30">
+          <FolderKanban className="w-4 h-4 text-muted-foreground" />
+          <select
+            value={filtroProjetoId}
+            onChange={(e) => alterarProjeto(e.target.value === "all" ? "all" : Number(e.target.value))}
+            className="bg-transparent text-foreground focus:outline-none text-sm max-w-[180px]"
+          >
+            <option value="all">Todos os projetos</option>
+            {projetos.map((projeto) => (
+              <option key={projeto.id} value={projeto.id}>
+                {projeto.titulo}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {podeCriar && (
+          <button
+            onClick={abrirModalCriar}
+            disabled={!grupoId}
+            className="px-6 py-3 disabled:opacity-50 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
+          >
+            <Plus className="w-5 h-5" />
+            Novo Lembrete
+          </button>
+        )}
       </div>
 
       {erro && (
@@ -394,6 +522,10 @@ export function Lembretes() {
                               )}
                               <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${config.fundo} ${config.cor}`}>
                                 {lembrete.tipo}
+                              </span>
+                              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-border/30 text-muted-foreground">
+                                <FolderKanban className="w-3 h-3" />
+                                {lembrete.projetoNome || "Grupo inteiro"}
                               </span>
                             </div>
                           </div>
@@ -465,7 +597,7 @@ export function Lembretes() {
                               </a>
                             )}
 
-                            {lembrete.tipo === "Reunião" && chave === "Encerrado" && !lembrete.temAta && (
+                            {podeCriar && lembrete.tipo === "Reunião" && chave === "Encerrado" && !lembrete.temAta && (
                               <button
                                 onClick={() => { lembreteAtaRef.current = lembrete.id; inputAtaRef.current?.click(); }}
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-border/20 text-muted-foreground hover:bg-border/30 text-xs font-medium transition-colors"
@@ -478,20 +610,24 @@ export function Lembretes() {
                             <div className="flex items-center gap-1.5 ml-auto">
                               <UserCheck className="w-3.5 h-3.5 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground">por {lembrete.organizador || lembrete.criadorNome}</span>
-                              <button
-                                onClick={() => abrirModalEditar(lembrete)}
-                                title="Editar"
-                                className="ml-2 p-1.5 rounded-lg hover:bg-border/30 text-muted-foreground"
-                              >
-                                <Pencil className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => setExcluindo(lembrete)}
-                                title="Excluir"
-                                className="p-1.5 rounded-lg hover:bg-[#ef4444]/10 text-[#ef4444]"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              {podeCriar && (
+                                <>
+                                  <button
+                                    onClick={() => abrirModalEditar(lembrete)}
+                                    title="Editar"
+                                    className="ml-2 p-1.5 rounded-lg hover:bg-border/30 text-muted-foreground"
+                                  >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => setExcluindo(lembrete)}
+                                    title="Excluir"
+                                    className="p-1.5 rounded-lg hover:bg-[#ef4444]/10 text-[#ef4444]"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -608,6 +744,61 @@ export function Lembretes() {
                   rows={3}
                   className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50 resize-none"
                 />
+              </div>
+
+              <div className="space-y-3 p-3.5 bg-background rounded-xl border border-border/30">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <FolderKanban className="w-4 h-4 text-[#ff8c42]" />
+                  Escopo do lembrete
+                </div>
+
+                {podeEscolherGrupoInteiro ? (
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formulario.paraGrupoInteiro}
+                      onChange={(e) =>
+                        setFormulario({
+                          ...formulario,
+                          paraGrupoInteiro: e.target.checked,
+                          projetoId: e.target.checked ? "" : formulario.projetoId,
+                        })
+                      }
+                      className="w-4 h-4 accent-[#ff8c42]"
+                    />
+                    <span className="text-sm text-foreground">Para o grupo inteiro</span>
+                  </label>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Apenas o líder do grupo pode criar lembretes para o grupo inteiro.
+                  </p>
+                )}
+
+                {(!podeEscolherGrupoInteiro || !formulario.paraGrupoInteiro) && (
+                  <div>
+                    <label className="block text-xs text-muted-foreground mb-1.5">
+                      Projeto *
+                    </label>
+                    <select
+                      value={formulario.projetoId}
+                      onChange={(e) => setFormulario({ ...formulario, projetoId: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50 text-sm"
+                    >
+                      <option value="">Selecione o projeto</option>
+                      {projetosCriaveis.map((projeto) => (
+                        <option key={projeto.id} value={projeto.id}>
+                          {projeto.titulo}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {editando?.paraGrupoInteiro && !podeEscolherGrupoInteiro && !formulario.projetoId && (
+                  <p className="text-xs text-muted-foreground">
+                    Este lembrete continuará vinculado ao grupo inteiro.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

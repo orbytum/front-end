@@ -25,6 +25,9 @@ export class NoticiaService extends BaseService {
     searchParams.append("page", String(params.page ?? 1));
     searchParams.append("size", String(params.size ?? 10));
 
+    if (params.projetoId) {
+      searchParams.append("projetoId", String(params.projetoId));
+    }
     if (params.assunto && params.assunto.trim()) {
       searchParams.append("assunto", params.assunto.trim());
     }
@@ -43,6 +46,9 @@ export class NoticiaService extends BaseService {
     searchParams.append("grupoId", String(params.grupoId));
     searchParams.append("page", String(params.page ?? 1));
     searchParams.append("size", String(params.size ?? 10));
+    if (params.projetoId) {
+      searchParams.append("projetoId", String(params.projetoId));
+    }
 
     return this.get(`/noticias/pendentes?${searchParams.toString()}`, {}, noticiaPaginadaResponseSchema);
   }

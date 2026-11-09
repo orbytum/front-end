@@ -16,9 +16,18 @@ import {
   UploadCloud,
   CheckCircle2,
   FolderKanban,
+  Pencil,
 } from "lucide-react";
 import { PublicacaoService } from "../services/publicacoes/PublicacaoService";
+import { ProjetoService } from "../services/projetos/ProjetoService";
+import { AuthService } from "../services/auth/AuthService";
+import { useGrupo } from "../contexts/GrupoContext";
 import { PublicacaoResponse } from "../models/dto/publicacoes/Publicacao";
+import { ParticipanteProjetoResponse } from "../models/dto/projetos/ParticipanteProjeto";
+import {
+  nivelEhColaborador,
+  nivelEhCoordenadorOuAcima,
+} from "../models/dto/NivelMembro";
 import { DateInput } from "../components/DateInput";
 
 export interface PublicacoesProps {
@@ -33,6 +42,31 @@ export function Publicacoes({
   ocultarCabecalho = false,
 }: PublicacoesProps = {}) {
   const publicacaoService = useMemo(() => new PublicacaoService(), []);
+  const projetoService = useMemo(() => new ProjetoService(), []);
+  const authService = useMemo(() => new AuthService(), []);
+  const { grupoAtual } = useGrupo();
+
+  const [participantesProjeto, setParticipantesProjeto] = useState<ParticipanteProjetoResponse[]>([]);
+  const usuarioEmail = (authService.getUserEmail() || "").toLowerCase();
+  const isAdmin = authService.isAdminOrInitialAdmin();
+  const isColaborador = nivelEhColaborador(grupoAtual?.nivel);
+  const isLiderProjeto = participantesProjeto.some(
+    (participante) => participante.nivel === "LIDER"
+      && (participante.email || "").toLowerCase() === usuarioEmail
+  );
+  const podeGerenciar = !isColaborador
+    && (isAdmin || nivelEhCoordenadorOuAcima(grupoAtual?.nivel) || isLiderProjeto);
+
+  useEffect(() => {
+    if (!projetoId) {
+      setParticipantesProjeto([]);
+      return;
+    }
+    projetoService
+      .listarParticipantes(projetoId)
+      .then(setParticipantesProjeto)
+      .catch(() => setParticipantesProjeto([]));
+  }, [projetoId, projetoService]);
 
   // Estados de listagem e filtros
   const [publicacoes, setPublicacoes] = useState<PublicacaoResponse[]>([]);
@@ -58,6 +92,15 @@ export function Publicacoes({
   );
   const [arquivoPdf, setArquivoPdf] = useState<File | null>(null);
 
+  // Modal de Edição
+  const [publicacaoParaEditar, setPublicacaoParaEditar] =
+    useState<PublicacaoResponse | null>(null);
+  const [editTitulo, setEditTitulo] = useState("");
+  const [editDescricao, setEditDescricao] = useState("");
+  const [editArquivoPdf, setEditArquivoPdf] = useState<File | null>(null);
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false);
+  const [erroEdicao, setErroEdicao] = useState<string | null>(null);
+
   // Modal de Confirmação de Inativação
   const [publicacaoParaInativar, setPublicacaoParaInativar] =
     useState<PublicacaoResponse | null>(null);
@@ -74,15 +117,24 @@ export function Publicacoes({
   }, [projetoId]);
 
   const carregarPublicacoes = useCallback(async () => {
+    if (!projetoId && !novoProjetoId && !grupoAtual?.id) {
+      setPublicacoes([]);
+      setTotalElementos(0);
+      setTotalPaginas(1);
+      setCarregando(false);
+      return;
+    }
     setCarregando(true);
     try {
+      const targetProjetoId = projetoId ?? (novoProjetoId ? Number(novoProjetoId) : undefined);
       const response = await publicacaoService.listarPublicacoes({
         page: paginaAtual,
         size: tamanhoPagina,
         titulo: termoBusca.trim() || undefined,
         dataInicio: filtroDataInicio || undefined,
         dataFim: filtroDataFim || undefined,
-        projetoId: projetoId ?? (novoProjetoId ? Number(novoProjetoId) : undefined),
+        projetoId: targetProjetoId,
+        grupoId: targetProjetoId ? undefined : grupoAtual?.id,
       });
 
       setPublicacoes(response.items);
@@ -101,6 +153,7 @@ export function Publicacoes({
     filtroDataFim,
     projetoId,
     novoProjetoId,
+    grupoAtual?.id,
   ]);
 
   useEffect(() => {
@@ -202,6 +255,68 @@ export function Publicacoes({
     }
   };
 
+  const abrirEdicaoPublicacao = (publicacao: PublicacaoResponse) => {
+    setPublicacaoParaEditar(publicacao);
+    setEditTitulo(publicacao.titulo);
+    setEditDescricao(publicacao.descricao);
+    setEditArquivoPdf(null);
+    setErroEdicao(null);
+  };
+
+  const handleEditArquivoChange = (file: File | null) => {
+    setErroEdicao(null);
+    if (!file) {
+      setEditArquivoPdf(null);
+      return;
+    }
+    const isPdf =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      setErroEdicao("A publicação deve ser exclusivamente no formato PDF.");
+      setEditArquivoPdf(null);
+      return;
+    }
+    setEditArquivoPdf(file);
+  };
+
+  const handleAtualizarPublicacao = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!publicacaoParaEditar) return;
+
+    setErroEdicao(null);
+    if (!editTitulo.trim()) {
+      setErroEdicao("O título da publicação é obrigatório.");
+      return;
+    }
+    if (!editDescricao.trim()) {
+      setErroEdicao("A descrição da publicação é obrigatória.");
+      return;
+    }
+
+    setSalvandoEdicao(true);
+    try {
+      await publicacaoService.atualizarPublicacao(publicacaoParaEditar.id, {
+        titulo: editTitulo.trim(),
+        descricao: editDescricao.trim(),
+        projetoId: publicacaoParaEditar.projetoId ?? undefined,
+        arquivo: editArquivoPdf,
+      });
+      setMensagemSucesso("Publicação atualizada com sucesso!");
+      setTimeout(() => setMensagemSucesso(null), 4000);
+      setPublicacaoParaEditar(null);
+      carregarPublicacoes();
+    } catch (err: any) {
+      setErroEdicao(
+        err?.response?.mensagem ||
+        err?.message ||
+        "Erro ao atualizar publicação."
+      );
+    } finally {
+      setSalvandoEdicao(false);
+    }
+  };
+
   const handleConfirmarInativacao = async () => {
     if (!publicacaoParaInativar) return;
 
@@ -262,16 +377,18 @@ export function Publicacoes({
               Repositório de publicações
             </p>
           </div>
-          <button
-            onClick={() => {
-              setErroCriacao(null);
-              setMostrarModalCriacao(true);
-            }}
-            className="px-5 py-2.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm"
-          >
-            <Plus className="w-5 h-5" />
-            Nova Publicação
-          </button>
+          {podeGerenciar && (
+            <button
+              onClick={() => {
+                setErroCriacao(null);
+                setMostrarModalCriacao(true);
+              }}
+              className="px-5 py-2.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm"
+            >
+              <Plus className="w-5 h-5" />
+              Nova Publicação
+            </button>
+          )}
         </div>
       )}
 
@@ -289,16 +406,18 @@ export function Publicacoes({
               </span>
             )}
           </div>
-          <button
-            onClick={() => {
-              setErroCriacao(null);
-              setMostrarModalCriacao(true);
-            }}
-            className="px-4 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Nova Publicação
-          </button>
+          {podeGerenciar && (
+            <button
+              onClick={() => {
+                setErroCriacao(null);
+                setMostrarModalCriacao(true);
+              }}
+              className="px-4 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Nova Publicação
+            </button>
+          )}
         </div>
       )}
 
@@ -426,13 +545,24 @@ export function Publicacoes({
                       </span>
                     )}
                   </div>
-                  <button
-                    onClick={() => setPublicacaoParaInativar(publicacao)}
-                    className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
-                    title="Inativar publicação"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {podeGerenciar && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => abrirEdicaoPublicacao(publicacao)}
+                        className="p-1.5 text-muted-foreground hover:text-[#ff8c42] hover:bg-[#ff8c42]/10 rounded-lg transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
+                        title="Editar publicação"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setPublicacaoParaInativar(publicacao)}
+                        className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
+                        title="Inativar publicação"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Título & Descrição */}
@@ -652,6 +782,99 @@ export function Publicacoes({
                   ) : (
                     "Cadastrar Publicação"
                   )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Edição de Publicação */}
+      {publicacaoParaEditar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="w-full max-w-lg bg-card rounded-2xl border border-border/30 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-foreground">Editar Publicação</h2>
+              <button
+                onClick={() => setPublicacaoParaEditar(null)}
+                disabled={salvandoEdicao}
+                className="p-2 hover:bg-border/20 rounded-lg transition-colors cursor-pointer text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {erroEdicao && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{erroEdicao}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleAtualizarPublicacao} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Título da Publicação *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editTitulo}
+                  onChange={(e) => setEditTitulo(e.target.value)}
+                  disabled={salvandoEdicao}
+                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Descrição / Resumo *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={editDescricao}
+                  onChange={(e) => setEditDescricao(e.target.value)}
+                  disabled={salvandoEdicao}
+                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60 resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Substituir PDF{" "}
+                  <span className="text-muted-foreground font-normal">(opcional)</span>
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  disabled={salvandoEdicao}
+                  onChange={(e) => handleEditArquivoChange(e.target.files?.[0] || null)}
+                  className="w-full text-sm text-muted-foreground file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-[#ff8c42]/15 file:text-[#ff8c42] file:font-medium hover:file:bg-[#ff8c42]/25"
+                />
+                {editArquivoPdf && (
+                  <p className="text-xs text-muted-foreground mt-1 truncate">
+                    Novo arquivo: {editArquivoPdf.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/20">
+                <button
+                  type="button"
+                  onClick={() => setPublicacaoParaEditar(null)}
+                  disabled={salvandoEdicao}
+                  className="px-4 py-2 rounded-xl border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={salvandoEdicao}
+                  className="px-5 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  {salvandoEdicao ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
+                  Salvar alterações
                 </button>
               </div>
             </form>

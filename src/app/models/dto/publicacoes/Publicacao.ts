@@ -29,6 +29,7 @@ export interface ListarPublicacoesParams {
   dataInicio?: string;
   dataFim?: string;
   projetoId?: number;
+  grupoId?: number;
   page?: number;
   size?: number;
 }
@@ -38,4 +39,11 @@ export interface CreatePublicacaoData {
   descricao: string;
   projetoId: number;
   arquivo: File;
+}
+
+export interface EditarPublicacaoData {
+  titulo: string;
+  descricao: string;
+  projetoId?: number | null;
+  arquivo?: File | null;
 }

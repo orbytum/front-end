@@ -1,6 +1,7 @@
 import { BaseService } from "../BaseService";
 import {
   CreatePublicacaoData,
+  EditarPublicacaoData,
   ListarPublicacoesParams,
   PublicacaoPaginadaResponse,
   PublicacaoResponse,
@@ -26,6 +27,9 @@ export class PublicacaoService extends BaseService {
     if (params.projetoId) {
       searchParams.append("projetoId", String(params.projetoId));
     }
+    if (params.grupoId) {
+      searchParams.append("grupoId", String(params.grupoId));
+    }
 
     return this.get(`/publicacoes?${searchParams.toString()}`, {}, publicacaoPaginadaResponseSchema);
   }
@@ -38,6 +42,20 @@ export class PublicacaoService extends BaseService {
     formData.append("arquivo", data.arquivo);
 
     return this.post("/publicacoes", formData, {}, publicacaoResponseSchema);
+  }
+
+  async atualizarPublicacao(id: number, data: EditarPublicacaoData): Promise<PublicacaoResponse> {
+    const formData = new FormData();
+    formData.append("titulo", data.titulo);
+    formData.append("descricao", data.descricao);
+    if (data.projetoId) {
+      formData.append("projetoId", String(data.projetoId));
+    }
+    if (data.arquivo) {
+      formData.append("arquivo", data.arquivo);
+    }
+
+    return this.put(`/publicacoes/${id}`, formData, {}, publicacaoResponseSchema);
   }
 
   async inativarPublicacao(id: number): Promise<void> {

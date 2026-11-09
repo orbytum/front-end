@@ -23,6 +23,11 @@ import { AuthService } from "../services/auth/AuthService";
 import { GrupoService } from "../services/grupos/GrupoService";
 import { GrupoDetalhe } from "../models/dto/grupos/GrupoDetalhe";
 import { ParticipanteResponse } from "../models/dto/grupos/Participante";
+import {
+  NivelMembroLabels,
+  nivelEhCoordenadorOuAcima,
+  nivelEhLider,
+} from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { ModalConvidarMembro } from "../components/ModalConvidarMembro";
 
@@ -52,9 +57,10 @@ export function ParticipantesDoGrupo() {
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const isAdmin = authService.isAdmin();
+  const isAdmin = authService.isAdminOrInitialAdmin();
   const numericGroupId = Number(groupId) || grupoAtual?.id || 0;
-  const podeConvidar = isAdmin || (grupoAtual?.id === numericGroupId && Boolean(grupoAtual?.isLider));
+  const podeConvidar = isAdmin
+    || (grupoAtual?.id === numericGroupId && nivelEhCoordenadorOuAcima(grupoAtual?.nivel));
 
   const carregarDados = useCallback(async () => {
     if (!numericGroupId) {
@@ -159,18 +165,29 @@ export function ParticipantesDoGrupo() {
       (p.cargo && p.cargo.toLowerCase().includes(termo)) ||
       (p.titulo && p.titulo.toLowerCase().includes(termo));
 
+    const nivel = p.nivel ?? (p.isLider ? "LIDER" : "PESQUISADOR");
     if (filtroFuncao === "Líder") {
-      return correspondeBusca && p.isLider;
+      return correspondeBusca && nivel === "LIDER";
+    }
+    if (filtroFuncao === "Coordenador") {
+      return correspondeBusca && nivel === "COORDENADOR";
+    }
+    if (filtroFuncao === "Colaborador") {
+      return correspondeBusca && nivel === "COLABORADOR";
     }
     if (filtroFuncao === "Pesquisador") {
-      return correspondeBusca && !p.isLider;
+      return correspondeBusca && nivel === "PESQUISADOR";
     }
     return correspondeBusca;
   });
 
   const totalParticipantes = participantes.length;
-  const totalLideres = participantes.filter((p) => p.isLider).length;
-  const totalPesquisadores = participantes.filter((p) => !p.isLider).length;
+  const totalLideres = participantes.filter(
+    (p) => (p.nivel ?? (p.isLider ? "LIDER" : "PESQUISADOR")) === "LIDER"
+  ).length;
+  const totalPesquisadores = participantes.filter(
+    (p) => (p.nivel ?? (p.isLider ? "LIDER" : "PESQUISADOR")) === "PESQUISADOR"
+  ).length;
 
   const getAvatarText = (nome: string) => {
     if (!nome) return "U";
@@ -297,8 +314,10 @@ export function ParticipantesDoGrupo() {
           className="px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground text-sm focus:outline-none focus:border-primary/50 cursor-pointer"
         >
           <option value="all">Todos os Membros</option>
-          <option value="Líder">Apenas Líderes</option>
-          <option value="Pesquisador">Apenas Pesquisadores</option>
+          <option value="Líder">Líderes</option>
+          <option value="Coordenador">Coordenadores</option>
+          <option value="Pesquisador">Pesquisadores</option>
+          <option value="Colaborador">Colaboradores</option>
         </select>
 
         {/* Botão Convidar Membro */}
@@ -320,7 +339,7 @@ export function ParticipantesDoGrupo() {
               <span>Convidar Membro</span>
             </button>
             <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-card text-muted-foreground text-xs px-3 py-1.5 rounded-lg border border-border/40 whitespace-nowrap shadow-xl z-10">
-              Apenas o líder do grupo pode convidar participantes
+              Apenas líderes e coordenadores do grupo podem convidar participantes
             </div>
           </div>
         )}
@@ -386,15 +405,21 @@ export function ParticipantesDoGrupo() {
                   <div className="flex-1 space-y-2">
                     <div className="flex flex-wrap items-center gap-2.5">
                       <h3 className="text-foreground font-semibold text-base">{participante.nome}</h3>
-                      {participante.isLider ? (
+                      {nivelEhLider(participante.nivel ?? (participante.isLider ? "LIDER" : null)) ? (
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 bg-primary/15 text-primary border border-primary/30">
                           <Crown className="w-3.5 h-3.5" />
                           Líder
                         </span>
                       ) : (
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 bg-[#4a9eff]/15 text-[#4a9eff] border border-[#4a9eff]/30">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 border ${
+                          (participante.nivel === "COLABORADOR")
+                            ? "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/30"
+                            : "bg-[#4a9eff]/15 text-[#4a9eff] border-[#4a9eff]/30"
+                        }`}>
                           <UserCheck className="w-3.5 h-3.5" />
-                          {participante.cargo || "Pesquisador"}
+                          {participante.nivel
+                            ? NivelMembroLabels[participante.nivel]
+                            : participante.cargo || "Pesquisador"}
                         </span>
                       )}
                     </div>

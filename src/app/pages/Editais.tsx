@@ -23,17 +23,21 @@ import {
   Users,
   MapPin,
   Link2,
+  FolderKanban,
 } from "lucide-react";
 import { useGrupo } from "../contexts/GrupoContext";
 import { EditalService } from "../services/editais/EditalService";
+import { ProjetoService } from "../services/projetos/ProjetoService";
+import { AuthService } from "../services/auth/AuthService";
 import { EditalResponse } from "../models/dto/editais/Edital";
+import { ProjetoResponse } from "../models/dto/projetos/Projeto";
 import { LembreteService } from "../services/lembretes/LembreteService";
 import {
   LembreteResponse,
   TIPOS_LEMBRETE,
   type TipoLembrete,
 } from "../models/dto/lembretes/Lembrete";
-import { nivelEhCoordenadorOuAcima } from "../models/dto/NivelMembro";
+import { nivelEhLider } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "../components/DateInput";
 
@@ -41,9 +45,16 @@ type Aba = "editais" | "eventos";
 
 const TAMANHO_PAGINA = 9;
 
-const FILTROS_EDITAIS_VAZIOS = {
+const FILTROS_EDITAIS_VAZIOS: {
+  palavraChave: string;
+  organizacao: string;
+  projetoId: number | null;
+  dataInicio: string;
+  dataFim: string;
+} = {
   palavraChave: "",
   organizacao: "",
+  projetoId: null,
   dataInicio: "",
   dataFim: "",
 };
@@ -164,10 +175,13 @@ function Paginacao({ pagina, totalPaginas, totalElementos, rotulo, onChange }: P
 export function Editais() {
   const { grupoAtual, carregandoGrupos } = useGrupo();
   const editalService = useMemo(() => new EditalService(), []);
+  const projetoService = useMemo(() => new ProjetoService(), []);
   const lembreteService = useMemo(() => new LembreteService(), []);
+  const authService = useMemo(() => new AuthService(), []);
 
   const grupoId = grupoAtual?.id;
-  const podeGerenciar = nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+  const podeGerenciar = authService.isAdminOrInitialAdmin() || nivelEhLider(grupoAtual?.nivel);
+  const [projetos, setProjetos] = useState<ProjetoResponse[]>([]);
 
   const [aba, setAba] = useState<Aba>("editais");
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
@@ -181,6 +195,7 @@ export function Editais() {
 
   const [palavraChave, setPalavraChave] = useState("");
   const [organizacao, setOrganizacao] = useState("");
+  const [projetoIdEdital, setProjetoIdEdital] = useState<number | "all">("all");
   const [dataInicioEdital, setDataInicioEdital] = useState("");
   const [dataFimEdital, setDataFimEdital] = useState("");
   const [filtrosEditais, setFiltrosEditais] = useState(FILTROS_EDITAIS_VAZIOS);
@@ -206,11 +221,28 @@ export function Editais() {
   const [formUri, setFormUri] = useState("");
   const [formAbertura, setFormAbertura] = useState("");
   const [formEncerramento, setFormEncerramento] = useState("");
+  const [formProjetoIds, setFormProjetoIds] = useState<number[]>([]);
   const [salvando, setSalvando] = useState(false);
   const [erroForm, setErroForm] = useState("");
 
   const [editalParaRemover, setEditalParaRemover] = useState<EditalResponse | null>(null);
   const [removendo, setRemovendo] = useState(false);
+
+  const carregarProjetos = useCallback(async () => {
+    if (!grupoId) {
+      setProjetos([]);
+      return;
+    }
+    try {
+      setProjetos(await projetoService.listarProjetosPorGrupo(grupoId));
+    } catch {
+      setProjetos([]);
+    }
+  }, [grupoId, projetoService]);
+
+  useEffect(() => {
+    carregarProjetos();
+  }, [carregarProjetos]);
 
   const carregarEditais = useCallback(async () => {
     if (!grupoId) {
@@ -225,6 +257,7 @@ export function Editais() {
     try {
       const resposta = await editalService.listar({
         grupoId,
+        projetoId: filtrosEditais.projetoId ?? undefined,
         palavraChave: filtrosEditais.palavraChave,
         organizacao: filtrosEditais.organizacao,
         dataInicio: filtrosEditais.dataInicio,
@@ -308,6 +341,7 @@ export function Editais() {
     setFiltrosEditais({
       palavraChave,
       organizacao,
+      projetoId: projetoIdEdital === "all" ? null : projetoIdEdital,
       dataInicio: dataInicioEdital,
       dataFim: dataFimEdital,
     });
@@ -316,6 +350,7 @@ export function Editais() {
   const limparFiltrosEditais = () => {
     setPalavraChave("");
     setOrganizacao("");
+    setProjetoIdEdital("all");
     setDataInicioEdital("");
     setDataFimEdital("");
     setPaginaEditais(1);
@@ -350,6 +385,7 @@ export function Editais() {
     setFormUri("");
     setFormAbertura("");
     setFormEncerramento("");
+    setFormProjetoIds([]);
     setErroForm("");
     setModalAberto(true);
   };
@@ -364,6 +400,7 @@ export function Editais() {
     setFormEncerramento(
       edital.dthEncerramento ? edital.dthEncerramento.substring(0, 16) : ""
     );
+    setFormProjetoIds((edital.projetos || []).map((projeto) => projeto.id));
     setErroForm("");
     setModalAberto(true);
   };
@@ -413,6 +450,7 @@ export function Editais() {
         uri: formUri.trim(),
         dthAbertura: normalizarDataHora(formAbertura),
         dthEncerramento: normalizarDataHora(formEncerramento),
+        projetoIds: formProjetoIds,
       };
 
       if (editando) {
@@ -451,6 +489,7 @@ export function Editais() {
   const filtrosEditaisAtivos =
     !!filtrosEditais.palavraChave ||
     !!filtrosEditais.organizacao ||
+    !!filtrosEditais.projetoId ||
     !!filtrosEditais.dataInicio ||
     !!filtrosEditais.dataFim;
 
@@ -527,6 +566,22 @@ export function Editais() {
             onSubmit={aplicarFiltrosEditais}
             className="bg-card rounded-2xl p-4 border border-border/30 space-y-4"
           >
+            <div className="flex items-center gap-2">
+              <FolderKanban className="w-4 h-4 text-muted-foreground shrink-0" />
+              <select
+                value={projetoIdEdital}
+                onChange={(e) => setProjetoIdEdital(e.target.value === "all" ? "all" : Number(e.target.value))}
+                className="px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60 min-w-[200px]"
+              >
+                <option value="all">Todos os projetos</option>
+                {projetos.map((projeto) => (
+                  <option key={projeto.id} value={projeto.id}>
+                    {projeto.titulo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
               <div className="md:col-span-4">
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">
@@ -703,6 +758,20 @@ export function Editais() {
                         <h3 className="text-foreground font-semibold text-base mb-2 line-clamp-3 leading-snug">
                           {edital.descricao}
                         </h3>
+
+                        {(edital.projetos || []).length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-3">
+                            {edital.projetos.map((projeto) => (
+                              <span
+                                key={projeto.id}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#4a9eff]/10 text-[#4a9eff] border border-[#4a9eff]/25 max-w-full"
+                              >
+                                <FolderKanban className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{projeto.titulo}</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
 
                         <div className="space-y-1.5 text-xs text-muted-foreground">
                           <div className="flex items-center gap-1.5">
@@ -1102,6 +1171,41 @@ export function Editais() {
                     onChange={setFormEncerramento}
                     className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Projetos relacionados (rótulos)
+                </label>
+                <div className="max-h-36 overflow-y-auto rounded-xl border border-border/40 bg-background p-2 space-y-1">
+                  {projetos.length === 0 && (
+                    <p className="text-xs text-muted-foreground px-2 py-1">
+                      Nenhum projeto disponível neste grupo.
+                    </p>
+                  )}
+                  {projetos.map((projeto) => (
+                    <label
+                      key={projeto.id}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-border/20 cursor-pointer text-sm text-foreground"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formProjetoIds.includes(projeto.id)}
+                        onChange={(e) =>
+                          setFormProjetoIds((atual) =>
+                            e.target.checked
+                              ? [...atual, projeto.id]
+                              : atual.filter((id) => id !== projeto.id)
+                          )
+                        }
+                        disabled={salvando}
+                        className="w-4 h-4 accent-[#ff8c42]"
+                      />
+                      <FolderKanban className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="truncate">{projeto.titulo}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
