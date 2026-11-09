@@ -74,6 +74,8 @@ export interface CriarLembreteRequest extends SalvarLembreteData {
 export interface FiltrosLembrete {
     tipo?: TipoLembrete;
     busca?: string;
+    dataInicio?: string;
+    dataFim?: string;
     page?: number;
     size?: number;
 }
