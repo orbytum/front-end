@@ -3,6 +3,10 @@ import { X, Link2, Mail, Copy, Check, Loader2, Users, Send, ShieldCheck } from "
 import { ConviteService } from "../services/convites/ConviteService";
 import { RoleService } from "../services/roles/RoleService";
 import { RoleResponse } from "../models/dto/roles/Role";
+import {
+  NivelMembro,
+  NivelMembroLabels,
+} from "../models/dto/NivelMembro";
 
 interface ModalConvidarMembroProps {
   isOpen: boolean;
@@ -27,6 +31,7 @@ export function ModalConvidarMembro({
   // Roles do sistema
   const [roles, setRoles] = useState<RoleResponse[]>([]);
   const [idRoleSelecionada, setIdRoleSelecionada] = useState<number | null>(null);
+  const [nivelConvidado, setNivelConvidado] = useState<NivelMembro>("PESQUISADOR");
 
   // Estado para Link
   const [linkGerado, setLinkGerado] = useState("");
@@ -76,6 +81,7 @@ export function ModalConvidarMembro({
         diasValidade: diasValidadeLink || 7,
         limiteUso: limiteUsoLink || 5,
         idRole: idRoleSelecionada,
+        nivel: nivelConvidado,
       });
 
       const fullUrl = `${window.location.origin}/convites/aceitar/grupo/${res.token}`;
@@ -137,6 +143,7 @@ export function ModalConvidarMembro({
           email,
           diasValidade: diasValidadeEmail || 7,
           idRole: idRoleSelecionada,
+          nivel: nivelConvidado,
         });
         enviados.push(email);
       } catch (err: any) {
@@ -248,6 +255,26 @@ export function ModalConvidarMembro({
               {sucessoMsg}
             </div>
           )}
+
+          {/* Seleção de Perfil de acesso */}
+          <div>
+            <label className="block text-xs text-[#9e9e9e] mb-1.5 font-medium">
+              Perfil de acesso do convidado *
+            </label>
+            <select
+              value={nivelConvidado}
+              onChange={(e) => setNivelConvidado(e.target.value as NivelMembro)}
+              className="w-full px-4 py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/40 text-white text-sm focus:outline-none focus:border-[#ff8c42]/60 cursor-pointer"
+            >
+              <option value="PESQUISADOR">{NivelMembroLabels.PESQUISADOR}</option>
+              <option value="COLABORADOR">{NivelMembroLabels.COLABORADOR}</option>
+              <option value="COORDENADOR">{NivelMembroLabels.COORDENADOR}</option>
+              <option value="LIDER">{NivelMembroLabels.LIDER}</option>
+            </select>
+            <p className="text-[10px] text-[#9e9e9e] mt-1">
+              Colaboradores possuem acesso somente leitura ao grupo.
+            </p>
+          </div>
 
           {/* Seleção de Cargo/Role */}
           {roles.length > 0 && (

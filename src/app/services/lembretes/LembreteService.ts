@@ -28,6 +28,9 @@ export class LembreteService extends BaseService {
         if (filtros.dataFim) {
             params.append("dataFim", filtros.dataFim);
         }
+        if (filtros.projetoId) {
+            params.append("projetoId", String(filtros.projetoId));
+        }
         const query = params.toString();
         return this.get(
             `/lembretes/grupo/${grupoId}?${query}`,
@@ -69,5 +72,10 @@ export class LembreteService extends BaseService {
     /** Baixa os lembretes do grupo em formato iCalendar (.ics). */
     async exportarIcs(grupoId: number): Promise<Blob> {
         return this.getBlob(`/lembretes/grupo/${grupoId}/ics`);
+    }
+
+    /** Baixa o arquivo de ata da reunião. */
+    async baixarAta(id: number): Promise<Blob> {
+        return this.getBlob(`/lembretes/${id}/ata`);
     }
 }

@@ -14,6 +14,9 @@ export class EditalService extends BaseService {
         searchParams.append("page", String(params.page ?? 1));
         searchParams.append("size", String(params.size ?? 10));
 
+        if (params.projetoId) {
+            searchParams.append("projetoId", String(params.projetoId));
+        }
         if (params.palavraChave && params.palavraChave.trim()) {
             searchParams.append("palavraChave", params.palavraChave.trim());
         }

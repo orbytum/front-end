@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { nivelMembroSchema } from "../NivelMembro";
 
 export const pesquisadorResponseSchema = z.object({
   usuarioId: z.number().optional().nullable(),
@@ -10,6 +11,7 @@ export const pesquisadorResponseSchema = z.object({
   grupoId: z.number().optional().nullable(),
   cargo: z.string().optional().nullable(),
   role: z.string().optional().nullable(),
+  nivel: nivelMembroSchema.optional().nullable(),
   isLider: z.boolean().optional().nullable(),
 });
 

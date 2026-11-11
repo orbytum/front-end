@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { projetoRotuloSchema } from "../projetos/ProjetoRotulo";
 
 export const noticiaStatusSchema = z.enum(["PENDENTE", "APROVADA", "REJEITADA"]);
 
@@ -30,6 +31,7 @@ export const noticiaResponseSchema = z.object({
   dthAprovacao: z.string().nullable().optional(),
   isAtivo: z.boolean(),
   isExpirada: z.boolean().optional().default(false),
+  projetos: z.array(projetoRotuloSchema).default([]),
 });
 
 export type NoticiaResponse = z.infer<typeof noticiaResponseSchema>;
@@ -54,6 +56,7 @@ export type LinkPreview = z.infer<typeof linkPreviewSchema>;
 
 export interface ListarNoticiasParams {
   grupoId: number;
+  projetoId?: number;
   assunto?: string;
   dataInicio?: string;
   dataFim?: string;
@@ -63,6 +66,7 @@ export interface ListarNoticiasParams {
 
 export interface ListarNoticiasPendentesParams {
   grupoId: number;
+  projetoId?: number;
   page?: number;
   size?: number;
 }
@@ -75,6 +79,7 @@ export interface CriarNoticiaData {
   assunto: string;
   dataInicioExibicao?: string | null;
   dataFimExibicao?: string | null;
+  projetoIds?: number[];
 }
 
 export interface EditarNoticiaData {
@@ -84,4 +89,5 @@ export interface EditarNoticiaData {
   assunto: string;
   dataInicioExibicao?: string | null;
   dataFimExibicao?: string | null;
+  projetoIds?: number[];
 }
