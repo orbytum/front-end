@@ -10,13 +10,12 @@ export function GlobalErrorAlert() {
   const [erro, setErro] = useState<ErroAlerta | null>(null);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
 
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<ErroAlerta>).detail;
       setErro(detail);
-
-      // Reinicia o timer para ocultar o toast automaticamente após 5 segundos
+      
       clearTimeout(timer);
       timer = setTimeout(() => {
         setErro(null);

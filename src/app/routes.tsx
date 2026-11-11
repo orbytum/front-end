@@ -9,25 +9,26 @@ import { ParticipantesDoGrupo } from "./pages/ParticipantesDoGrupo";
 import { Recursos } from "./pages/Recursos";
 import { Solicitacoes } from "./pages/Solicitacoes";
 import { Materiais } from "./pages/Materiais";
-import { Projetos } from "./pages/Projetos";
+import { PainelDeProjetos } from "./pages/PainelDeProjetos";
 import { Atividades } from "./pages/Atividades";
-import { Editais } from "./pages/Editais";
-import { Eventos } from "./pages/Eventos";
 import { Calendario } from "./pages/Calendario";
 import { Login } from "./pages/Login";
 import { Publicacoes } from "./pages/Publicacoes";
 import { Lembretes } from "./pages/Lembretes";
+import { Noticias } from "./pages/Noticias";
+import { Editais } from "./pages/Editais";
 import { AceitarConviteCadastro } from "./pages/AceitarConviteCadastro";
 import { AceitarConviteGrupo } from "./pages/AceitarConviteGrupo";
 import { GestaoConvitesCadastro } from "./pages/GestaoConvitesCadastro";
 import { CriarAdminInicial } from "./pages/CriarAdminInicial";
+import { UserOnlyRoute } from "./components/UserOnlyRoute";
+import { AdminOnlyRoute } from "./components/AdminOnlyRoute";
 
 export const router = createBrowserRouter([
   {
     path: "/login",
     Component: Login,
   },
-  // TODO: /criar-admin-inicial não segue os padrões de design da tela /convites/aceitar/cadastro/:token corrigir isso
   {
     path: "/criar-admin-inicial",
     Component: CriarAdminInicial,
@@ -62,21 +63,129 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, Component: Dashboard },
-      { path: "grupos", Component: Grupos },
-      { path: "grupos/:groupId/participantes", Component: ParticipantesDoGrupo },
-      { path: "participantes", element: <Navigate to="/grupos" replace /> },
-      { path: "recursos", Component: Recursos },
-      { path: "solicitacoes", Component: Solicitacoes },
-      { path: "materiais", Component: Materiais },
-      { path: "projetos", Component: Projetos },
-      { path: "atividades", Component: Atividades },
-      { path: "editais", Component: Editais },
-      { path: "eventos", Component: Eventos },
-      { path: "calendario", Component: Calendario },
-      { path: "publicacoes", Component: Publicacoes },
-      { path: "lembretes", Component: Lembretes },
-      { path: "gestao-convites", Component: GestaoConvitesCadastro },
+      // Rotas exclusivas de Usuários Comuns (USER)
+      {
+        index: true,
+        element: (
+          <UserOnlyRoute>
+            <Dashboard />
+          </UserOnlyRoute>
+        ),
+      },
+      {
+        path: "publicacoes",
+        element: (
+          <UserOnlyRoute>
+            <Navigate to="/projetos" replace />
+          </UserOnlyRoute>
+        ),
+      },
+      {
+        path: "materiais",
+        element: (
+          <UserOnlyRoute>
+            <Materiais />
+          </UserOnlyRoute>
+        ),
+      },
+      {
+        path: "projetos",
+        element: (
+          <UserOnlyRoute>
+            <PainelDeProjetos />
+          </UserOnlyRoute>
+        ),
+      },
+      {
+        path: "atividades",
+        element: (
+          <UserOnlyRoute>
+            <Atividades />
+          </UserOnlyRoute>
+        ),
+      },
+      {
+        path: "noticias",
+        element: (
+          <UserOnlyRoute>
+            <Noticias />
+          </UserOnlyRoute>
+        ),
+      },
+      {
+        path: "editais",
+        element: (
+          <UserOnlyRoute>
+            <Editais />
+          </UserOnlyRoute>
+        ),
+      },
+      {
+        path: "calendario",
+        element: (
+          <UserOnlyRoute>
+            <Calendario />
+          </UserOnlyRoute>
+        ),
+      },
+      {
+        path: "lembretes",
+        element: (
+          <UserOnlyRoute>
+            <Lembretes />
+          </UserOnlyRoute>
+        ),
+      },
+
+      // Rotas exclusivas de Administradores (ADMIN / INITIAL_ADMIN)
+      {
+        path: "grupos",
+        element: (
+          <AdminOnlyRoute>
+            <Grupos />
+          </AdminOnlyRoute>
+        ),
+      },
+      {
+        path: "grupos/:groupId/participantes",
+        element: (
+          <AdminOnlyRoute>
+            <ParticipantesDoGrupo />
+          </AdminOnlyRoute>
+        ),
+      },
+      {
+        path: "participantes",
+        element: (
+          <AdminOnlyRoute>
+            <Navigate to="/grupos" replace />
+          </AdminOnlyRoute>
+        ),
+      },
+      {
+        path: "gestao-convites",
+        element: (
+          <AdminOnlyRoute>
+            <GestaoConvitesCadastro />
+          </AdminOnlyRoute>
+        ),
+      },
+      {
+        path: "recursos",
+        element: (
+          <AdminOnlyRoute>
+            <Recursos />
+          </AdminOnlyRoute>
+        ),
+      },
+      {
+        path: "solicitacoes",
+        element: (
+          <AdminOnlyRoute>
+            <Solicitacoes />
+          </AdminOnlyRoute>
+        ),
+      },
     ],
   },
 ]);

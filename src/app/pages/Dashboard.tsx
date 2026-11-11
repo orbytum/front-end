@@ -1,43 +1,48 @@
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { SolarSystem } from "../components/SolarSystem";
-import { Users, UserCheck, Hexagon, Box, FolderKanban, TrendingUp } from "lucide-react";
+import { useGrupo } from "../contexts/GrupoContext";
+import { ProjetoService } from "../services/projetos/ProjetoService";
+import { ProjetoResponse } from "../models/dto/projetos/Projeto";
 
 export function Dashboard() {
-  const stats = [
-    { label: "Grupos Ativos", value: "12", icon: Users, color: "bg-[#ff8c42]" },
-    { label: "Participantes", value: "48", icon: UserCheck, color: "bg-[#4a9eff]" },
-    { label: "Recursos Alocados", value: "R$ 284k", icon: Hexagon, color: "bg-[#7c3aed]" },
-    { label: "Projetos Ativos", value: "23", icon: FolderKanban, color: "bg-[#10b981]" },
-  ];
+  const { grupoAtual, carregandoGrupos } = useGrupo();
+  const projetoService = useMemo(() => new ProjetoService(), []);
+
+  const [projetos, setProjetos] = useState<ProjetoResponse[]>([]);
+  const [carregandoProjetos, setCarregandoProjetos] = useState(false);
+
+  const carregarProjetos = useCallback(async () => {
+    if (!grupoAtual?.id) {
+      setProjetos([]);
+      return;
+    }
+
+    setCarregandoProjetos(true);
+    try {
+      const lista = await projetoService.listarProjetosPorGrupo(grupoAtual.id);
+      setProjetos(lista);
+    } catch {
+      setProjetos([]);
+    } finally {
+      setCarregandoProjetos(false);
+    }
+  }, [grupoAtual?.id, projetoService]);
+
+  useEffect(() => {
+    carregarProjetos();
+  }, [carregarProjetos]);
+
+  const favoritos = useMemo(() => projetos.filter((p) => p.isFavorito), [projetos]);
 
   return (
     <div className="h-full flex flex-col">
-      {/* Stats Grid
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="bg-card rounded-2xl p-6 border border-border/30 transition-all duration-300 group"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm mb-2">{stat.label}</p>
-                <h3 className="text-foreground text-2xl font-bold">{stat.value}</h3>
-              </div>
-              <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                <stat.icon className="w-6 h-6 text-foreground" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center gap-1 text-xs text-[#10b981]">
-              <TrendingUp className="w-3 h-3" />
-              <span>+12% este mês</span>
-            </div>
-          </div>
-        ))}
-      </div> */}
-
-      {/* Solar System Visualization */}
+      {/* Visualização em sistema solar dos projetos favoritos */}
       <div className="flex-1 min-h-0">
-        <SolarSystem />
+        <SolarSystem
+          projetos={favoritos}
+          carregando={carregandoGrupos || carregandoProjetos}
+          nomeGrupo={grupoAtual?.nome ?? null}
+        />
       </div>
     </div>
   );

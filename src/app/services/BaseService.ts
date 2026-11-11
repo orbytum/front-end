@@ -22,6 +22,9 @@ export class BaseService {
     public get<T>(path: string, headers: Record<string, string> = {}, schema?: ZodType<T>): Promise<T> {
         return this.requisitar(() => this.httpRequest.get<unknown>(path, headers), schema);
     }
+    public getBlob(path: string, headers: Record<string, string> = {}): Promise<Blob> {
+        return this.requisitar<Blob>(() => this.httpRequest.getBlob(path, headers));
+    }
     public post<T>(path: string, data: any, headers: Record<string, string> = {}, schema?: ZodType<T>): Promise<T> {
         return this.requisitar(() => this.httpRequest.post<unknown>(path, data, headers), schema);
     }

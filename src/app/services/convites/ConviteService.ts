@@ -21,6 +21,15 @@ import {
     aceitarConviteGrupoResponseSchema,
 } from "../../models/dto/convites/ConviteGrupoDetalhe";
 
+import {
+    GerarConviteGrupoRequest,
+    ConviteGrupoResponse,
+    conviteGrupoResponseSchema,
+    EnviarConviteGrupoRequest,
+    ConviteGrupoEnviadoResponse,
+    conviteGrupoEnviadoResponseSchema,
+} from "../../models/dto/convites/GerarConviteGrupo";
+
 export class ConviteService extends BaseService {
     async aceitarCadastro(token: string, data: AceitarConviteCadastroRequest): Promise<AceitarConviteCadastroResponse> {
         return this.post(
@@ -65,5 +74,13 @@ export class ConviteService extends BaseService {
             {},
             aceitarConviteGrupoResponseSchema
         );
+    }
+
+    async gerarConviteGrupo(data: GerarConviteGrupoRequest): Promise<ConviteGrupoResponse> {
+        return this.post("/convites/grupo", data, {}, conviteGrupoResponseSchema);
+    }
+
+    async enviarConviteGrupo(data: EnviarConviteGrupoRequest): Promise<ConviteGrupoEnviadoResponse> {
+        return this.post("/convites", data, {}, conviteGrupoEnviadoResponseSchema);
     }
 }

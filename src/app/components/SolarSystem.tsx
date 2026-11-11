@@ -1,153 +1,119 @@
 import { motion } from 'motion/react';
-import { Shield, Hexagon, Box, FolderKanban, Calendar } from 'lucide-react';
+import { FolderKanban, Star, Loader2, Telescope } from 'lucide-react';
+import { ProjetoResponse } from '../models/dto/projetos/Projeto';
 
-export function SolarSystem() {
+interface SolarSystemProps {
+  projetos: ProjetoResponse[];
+  carregando?: boolean;
+  nomeGrupo?: string | null;
+}
+
+const ORBITAS = [
+  { raio: 165, duracao: 55, direcao: 1 },
+  { raio: 300, duracao: 80, direcao: -1 },
+];
+
+const MAX_POR_ORBITA = 5;
+
+function PlanetaProjeto({ projeto }: { projeto: ProjetoResponse }) {
+  return (
+    <div className="relative flex flex-col items-center">
+      <motion.div
+        whileHover={{ scale: 1.2 }}
+        transition={{ type: 'spring', stiffness: 300 }}
+        className="relative w-16 h-16 bg-background rounded-2xl border border-border/40 flex items-center justify-center"
+        title={projeto.titulo}
+      >
+        <FolderKanban className="w-8 h-8 text-primary" />
+        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+          <Star className="w-3 h-3 text-primary-foreground" fill="currentColor" />
+        </span>
+      </motion.div>
+      <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 max-w-[130px] truncate text-xs text-muted-foreground font-medium">
+        {projeto.titulo}
+      </span>
+    </div>
+  );
+}
+
+export function SolarSystem({ projetos, carregando = false, nomeGrupo }: SolarSystemProps) {
+  const orbitas = ORBITAS.map((orbita, indice) => ({
+    ...orbita,
+    projetos: projetos.slice(
+      indice * MAX_POR_ORBITA,
+      indice * MAX_POR_ORBITA + MAX_POR_ORBITA
+    ),
+  }));
+
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-background">
-      <div className="absolute inset-0 bg-gradient-radial from-card via-background to-background" />
-      <div className="relative w-[800px] h-[800px] flex items-center justify-center">
-        <motion.div
-          className="absolute w-[680px] h-[680px] rounded-full border border-border/30"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-        >
-          {/* Recursos Financeiros - Hexágono */}
-          <motion.div
-            className="absolute -top-6 left-1/2 -translate-x-1/2"
-            whileHover={{ scale: 1.2 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center group transition-duration-300">
-              <Hexagon className="w-6 h-6 text-[#ff8c42]" />
-            </div>
-            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">Recursos</span>
-          </motion.div>
-          
-          {/* Materiais - Cubo */}
-          <motion.div
-            className="absolute top-1/2 -right-6 -translate-y-1/2"
-            whileHover={{ scale: 1.2 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center group transition-duration-300">
-              <Box className="w-6 h-6 text-[#ff8c42]" />
-            </div>
-            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">Materiais</span>
-          </motion.div>
-          
-          {/* Projetos */}
-          <motion.div
-            className="absolute -bottom-6 left-1/2 -translate-x-1/2"
-            whileHover={{ scale: 1.2 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center group transition-duration-300">
-              <FolderKanban className="w-6 h-6 text-[#ff8c42]" />
-            </div>
-            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">Projetos</span>
-          </motion.div>
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(circle at center, var(--card) 0%, var(--background) 70%)',
+        }}
+      />
 
-          {/* Calendário com arco pontilhado */}
-          <motion.div
-            className="absolute top-1/2 -left-6 -translate-y-1/2"
-            whileHover={{ scale: 1.2 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center group transition-duration-300">
-              <Calendar className="w-6 h-6 text-[#ff8c42]" />
-            </div>
-            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">Calendário</span>
-
-            {/* Arco pontilhado conectando projetos ao calendário */}
-            <svg className="absolute -right-[280px] -top-[140px] w-[300px] h-[300px] pointer-events-none">
-              <path
-                d="M 10 150 Q 80 60, 150 10"
-                stroke="#2e2e2e"
-                strokeWidth="2"
-                strokeDasharray="8,8"
-                fill="none"
-                opacity="0.5"
-              />
-            </svg>
-          </motion.div>
-        </motion.div>
-        
-        {/* Segunda órbita */}
-        <motion.div
-          className="absolute w-[480px] h-[480px] rounded-full border border-border/40"
-          animate={{ rotate: -360 }}
-          transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
-        >
-          {/* Participantes - Pontos conectados */}
-          {[0, 72, 144, 216, 288].map((angle, i) => {
-            const radian = (angle * Math.PI) / 180;
-            const x = Math.cos(radian) * 240;
-            const y = Math.sin(radian) * 240;
-            
-            return (
+      <div className="relative w-[820px] h-[820px] flex items-center justify-center">
+        {/* Órbitas com os projetos favoritos */}
+        {orbitas.map((orbita, oi) =>
+          orbita.projetos.length === 0 ? null : (
+            <div
+              key={oi}
+              className="absolute rounded-full border border-border/30"
+              style={{ width: orbita.raio * 2, height: orbita.raio * 2 }}
+            >
               <motion.div
-                key={i}
-                className="absolute w-3 h-3 bg-[#ff8c42] rounded-full"
-                style={{
-                  left: '50%',
-                  top: '50%',
-                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
-                }}
-                whileHover={{ scale: 1.5 }}
+                className="absolute inset-0"
+                animate={{ rotate: 360 * orbita.direcao }}
+                transition={{ duration: orbita.duracao, repeat: Infinity, ease: 'linear' }}
               >
-                {/* Linha conectando ao supervisor */}
-                <div 
-                  className="absolute w-[1px] bg-border/40 origin-center"
-                  style={{
-                    height: `${Math.sqrt(x * x + y * y) - 110}px`,
-                    transform: `rotate(${angle + 180}deg) translateY(-100%)`
-                  }}
-                />
+                {orbita.projetos.map((projeto, pi) => {
+                  const angulo = (pi / orbita.projetos.length) * 360;
+                  return (
+                    <div
+                      key={projeto.id}
+                      className="absolute left-1/2 top-1/2"
+                      style={{
+                        transform: `translate(-50%, -50%) rotate(${angulo}deg) translateY(-${orbita.raio}px)`,
+                      }}
+                    >
+                      <motion.div
+                        initial={{ rotate: -angulo }}
+                        animate={{ rotate: -angulo - 360 * orbita.direcao }}
+                        transition={{ duration: orbita.duracao, repeat: Infinity, ease: 'linear' }}
+                      >
+                        <PlanetaProjeto projeto={projeto} />
+                      </motion.div>
+                    </div>
+                  );
+                })}
               </motion.div>
-            );
-          })}
-          
-          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">Participantes</div>
-        </motion.div>
-        
-        {/* Primeira órbita */}
-        <motion.div
-          className="absolute w-[280px] h-[280px] rounded-full border border-border/50"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-        >
-          {/* Supervisor - Escudo */}
-          <motion.div
-            className="absolute -top-8 left-1/2 -translate-x-1/2"
-            whileHover={{ scale: 1.15 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center transition-duration-300">
-              <Shield className="w-8 h-8 text-[#ff8c42] fill-[#ff8c42]/20" />
             </div>
-            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-sm text-muted-foreground whitespace-nowrap font-medium">Supervisor</span>
-          </motion.div>
-        </motion.div>
-        
-        {/* Centro - Grupo de Pesquisa */}
+          )
+        )}
+
+        {/* Núcleo Central - Grupo de Pesquisa */}
         <motion.div
           className="relative"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 15 }}
         >
-          <motion.div
-            className="w-32 h-32 rounded-full bg-[#ff8c42] flex items-center justify-center relative"
-          >
-            <div className="relative text-center z-10">
-              <div className="text-white font-bold">GRUPO</div>
-              <div className="text-white/90 text-sm">Pesquisa</div>
+          <div className="w-32 h-32 rounded-full bg-primary flex items-center justify-center">
+            <div className="text-center px-3">
+              <div className="text-primary-foreground font-bold leading-tight truncate max-w-[100px] mx-auto">
+                {nomeGrupo || 'GRUPO'}
+              </div>
+              <div className="text-primary-foreground/90 text-sm">Pesquisa</div>
             </div>
-          </motion.div>
-          
-          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-sm text-[#ff8c42] whitespace-nowrap font-medium">Núcleo Central</div>
+          </div>
+          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-sm text-primary whitespace-nowrap font-medium">
+            Núcleo Central
+          </div>
         </motion.div>
-        
+
         {/* Partículas de fundo para efeito espacial */}
         {Array.from({ length: 40 }).map((_, i) => (
           <motion.div
@@ -159,43 +125,56 @@ export function SolarSystem() {
             }}
             animate={{
               opacity: [0.2, 0.8, 0.2],
-              scale: [1, 1.5, 1]
+              scale: [1, 1.5, 1],
             }}
             transition={{
               duration: 2 + Math.random() * 3,
               repeat: Infinity,
-              delay: Math.random() * 2
+              delay: Math.random() * 2,
             }}
           />
         ))}
       </div>
-      
+
+      {/* Carregando */}
+      {carregando && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <span className="text-sm text-muted-foreground">Carregando projetos favoritos...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Estado vazio */}
+      {!carregando && projetos.length === 0 && (
+        <div className="absolute bottom-8 right-8 max-w-xs bg-card/80 backdrop-blur-sm p-6 rounded-2xl border border-border/30 text-center">
+          <Telescope className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+          <h3 className="text-foreground font-semibold mb-1">Nenhum projeto favorito</h3>
+          <p className="text-sm text-muted-foreground">
+            Favorite um projeto no Painel de Projetos para vê-lo orbitando aqui.
+          </p>
+        </div>
+      )}
+
       {/* Legenda informativa */}
-      <div className="absolute bottom-8 left-8 bg-background/80 backdrop-blur-sm p-6 rounded-2xl border border-border/30">
-        <h3 className="text-[#ff8c42] mb-4">Sistema Solar Acadêmico</h3>
+      <div className="absolute bottom-8 left-8 bg-card/80 backdrop-blur-sm p-6 rounded-2xl border border-border/30">
+        <h3 className="text-primary mb-4">Projetos Favoritos</h3>
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[#ff8c42]" />
+            <div className="w-3 h-3 rounded-full bg-primary" />
             <span>Centro: Grupo de Pesquisa</span>
           </div>
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-[#ff8c42]" />
-            <span>1ª Órbita: Supervisor</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[#ff8c42]" />
-            <span>2ª Órbita: Participantes</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Hexagon className="w-4 h-4 text-[#ff8c42]" />
-            <span>3ª Órbita: Recursos e Materiais</span>
+            <Star className="w-4 h-4 text-primary" fill="currentColor" />
+            <span>Planetas: projetos favoritos do grupo</span>
           </div>
         </div>
       </div>
-      
-      {/* Logo/Título no topo */}
+
+      {/* Título no topo */}
       <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center">
-        <motion.h1 
+        <motion.h1
           className="text-foreground mb-2"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

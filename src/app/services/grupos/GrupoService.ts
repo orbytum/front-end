@@ -20,6 +20,12 @@ import {
 } from "../../models/dto/grupos/MeuGrupo";
 
 import {
+    PesquisadorPaginadoResponse,
+    ListarPesquisadoresParams,
+    pesquisadorPaginadoResponseSchema,
+} from "../../models/dto/grupos/PesquisadorPaginado";
+
+import {
     CreateLeaderRequest,
     LiderResponse,
     liderResponseSchema
@@ -28,7 +34,8 @@ import {
 import {
     ParticipanteResponse,
     EditParticipanteRequest,
-    participanteResponseSchema
+    participanteResponseSchema,
+    participantePaginadoResponseSchema
 } from "../../models/dto/grupos/Participante"
 export class GrupoService extends BaseService {
     async listarGrupos(params: ListarGruposParams = {}): Promise<GrupoPaginadoResponse> {
@@ -56,6 +63,16 @@ export class GrupoService extends BaseService {
         return this.delete(`/grupos/${id}`);
     }
 
+    async listarPesquisadores(grupoId: number, params: ListarPesquisadoresParams = {}): Promise<PesquisadorPaginadoResponse> {
+        const searchParams = new URLSearchParams();
+        searchParams.append("page", String(params.page ?? 1));
+        searchParams.append("size", String(params.size ?? 10));
+        if (params.nome && params.nome.trim()) {
+            searchParams.append("nome", params.nome.trim());
+        }
+        return this.get(`/grupos/${grupoId}/pesquisadores?${searchParams.toString()}`, {}, pesquisadorPaginadoResponseSchema);
+    }
+  
     async atualizarGrupo(id: number, data: EditGroupRequest): Promise<GrupoDetalhe> {
         return this.put(`/grupos/${id}`, data, {}, grupoDetalheSchema);
     }
@@ -69,7 +86,12 @@ export class GrupoService extends BaseService {
     }
 
     async listarParticipantes(grupoId: number): Promise<ParticipanteResponse[]> {
-        return this.get(`/grupos/${grupoId}/pesquisadores`, {}, z.array(participanteResponseSchema));
+        const response = await this.get(
+            `/grupos/${grupoId}/pesquisadores`,
+            {},
+            participantePaginadoResponseSchema
+        );
+        return response.items;
     }
 
     async atualizarParticipante(

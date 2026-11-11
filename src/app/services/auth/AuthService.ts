@@ -80,6 +80,14 @@ export class AuthService {
     }
 
     /**
+     * Retorna o e-mail (subject) do usuário autenticado no JWT.
+     */
+    getUserEmail(): string | null {
+        const payload = this.getTokenPayload();
+        return typeof payload?.sub === "string" ? payload.sub : null;
+    }
+
+    /**
      * Verifica se o usuário logado possui perfil de administrador
      */
     isAdmin(): boolean {
@@ -93,5 +101,13 @@ export class AuthService {
     isAdminOrInitialAdmin(): boolean {
         const level = this.getUserAccessLevel();
         return level === "admin" || level === "initial_admin";
+    }
+
+    /**
+     * Verifica se o usuário logado possui perfil de usuário comum (user)
+     */
+    isUser(): boolean {
+        const level = this.getUserAccessLevel();
+        return level === "user";
     }
 }

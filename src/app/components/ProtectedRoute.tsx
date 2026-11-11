@@ -15,5 +15,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  if (authService.getUserAccessLevel() === "initial_admin") {
+    return <Navigate to="/cadastrar-admin-inicial" replace />;
+  }
+
   return <>{children}</>;
 }
