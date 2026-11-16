@@ -6,6 +6,7 @@ interface SolarSystemProps {
   projetos: ProjetoResponse[];
   carregando?: boolean;
   nomeGrupo?: string | null;
+  onProjetoClick?: (projeto: ProjetoResponse) => void;
 }
 
 const ORBITAS = [
@@ -15,20 +16,29 @@ const ORBITAS = [
 
 const MAX_POR_ORBITA = 5;
 
-function PlanetaProjeto({ projeto }: { projeto: ProjetoResponse }) {
+function PlanetaProjeto({
+  projeto,
+  onClick,
+}: {
+  projeto: ProjetoResponse;
+  onClick?: (projeto: ProjetoResponse) => void;
+}) {
   return (
     <div className="relative flex flex-col items-center">
-      <motion.div
+      <motion.button
+        type="button"
+        onClick={() => onClick?.(projeto)}
         whileHover={{ scale: 1.2 }}
         transition={{ type: 'spring', stiffness: 300 }}
-        className="relative w-16 h-16 bg-background rounded-2xl border border-border/40 flex items-center justify-center"
-        title={projeto.titulo}
+        className="relative w-16 h-16 bg-background rounded-2xl border border-border/40 flex items-center justify-center cursor-pointer"
+        title={`Abrir projeto: ${projeto.titulo}`}
+        aria-label={`Abrir projeto ${projeto.titulo}`}
       >
         <FolderKanban className="w-8 h-8 text-primary" />
         <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
           <Star className="w-3 h-3 text-primary-foreground" fill="currentColor" />
         </span>
-      </motion.div>
+      </motion.button>
       <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 max-w-[130px] truncate text-xs text-muted-foreground font-medium">
         {projeto.titulo}
       </span>
@@ -36,7 +46,12 @@ function PlanetaProjeto({ projeto }: { projeto: ProjetoResponse }) {
   );
 }
 
-export function SolarSystem({ projetos, carregando = false, nomeGrupo }: SolarSystemProps) {
+export function SolarSystem({
+  projetos,
+  carregando = false,
+  nomeGrupo,
+  onProjetoClick,
+}: SolarSystemProps) {
   const orbitas = ORBITAS.map((orbita, indice) => ({
     ...orbita,
     projetos: projetos.slice(
@@ -84,7 +99,7 @@ export function SolarSystem({ projetos, carregando = false, nomeGrupo }: SolarSy
                         animate={{ rotate: -angulo - 360 * orbita.direcao }}
                         transition={{ duration: orbita.duracao, repeat: Infinity, ease: 'linear' }}
                       >
-                        <PlanetaProjeto projeto={projeto} />
+                        <PlanetaProjeto projeto={projeto} onClick={onProjetoClick} />
                       </motion.div>
                     </div>
                   );

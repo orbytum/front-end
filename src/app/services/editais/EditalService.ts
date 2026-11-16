@@ -8,6 +8,10 @@ import {
     editalResponseSchema,
     palavrasChaveSchema,
 } from "../../models/dto/editais/Edital";
+import {
+    DocumentoResponse,
+    documentoResponseSchema,
+} from "../../models/dto/editais/Documento";
 
 export class EditalService extends BaseService {
     async listar(params: ListarEditaisParams): Promise<EditalPaginadoResponse> {
@@ -63,5 +67,62 @@ export class EditalService extends BaseService {
 
     async atualizarPalavrasChave(grupoId: number, palavras: string[]): Promise<string[]> {
         return this.put(`/grupos/${grupoId}/editais/palavras-chave`, palavras, {}, palavrasChaveSchema);
+    }
+
+    async listarDocumentos(grupoId: number, editalId: number): Promise<DocumentoResponse[]> {
+        return this.get(
+            `/grupos/${grupoId}/editais/${editalId}/documentos`,
+            {},
+            documentoResponseSchema.array()
+        );
+    }
+
+    async anexarDocumento(
+        grupoId: number,
+        editalId: number,
+        arquivo: File
+    ): Promise<DocumentoResponse> {
+        const formData = new FormData();
+        formData.append("arquivo", arquivo);
+
+        return this.post(
+            `/grupos/${grupoId}/editais/${editalId}/documentos`,
+            formData,
+            {},
+            documentoResponseSchema
+        );
+    }
+
+    async vincularDocumento(
+        grupoId: number,
+        editalId: number,
+        documentoId: number
+    ): Promise<DocumentoResponse> {
+        return this.put(
+            `/grupos/${grupoId}/editais/${editalId}/documentos/${documentoId}`,
+            {},
+            {},
+            documentoResponseSchema
+        );
+    }
+
+    async removerDocumento(
+        grupoId: number,
+        editalId: number,
+        documentoId: number
+    ): Promise<void> {
+        return this.delete(
+            `/grupos/${grupoId}/editais/${editalId}/documentos/${documentoId}`
+        );
+    }
+
+    async baixarDocumento(
+        grupoId: number,
+        editalId: number,
+        documentoId: number
+    ): Promise<Blob> {
+        return this.getBlob(
+            `/grupos/${grupoId}/editais/${editalId}/documentos/${documentoId}/arquivo`
+        );
     }
 }

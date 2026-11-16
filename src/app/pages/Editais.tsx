@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { ElementType, FormEvent } from "react";
+import type { ChangeEvent, ElementType, FormEvent } from "react";
 import {
   Telescope,
   Plus,
@@ -25,12 +25,16 @@ import {
   Link2,
   FolderKanban,
   Tags,
+  Paperclip,
+  Download,
+  Upload,
 } from "lucide-react";
 import { useGrupo } from "../contexts/GrupoContext";
 import { EditalService } from "../services/editais/EditalService";
 import { ProjetoService } from "../services/projetos/ProjetoService";
 import { AuthService } from "../services/auth/AuthService";
 import { EditalResponse } from "../models/dto/editais/Edital";
+import { DocumentoResponse } from "../models/dto/editais/Documento";
 import { ProjetoResponse } from "../models/dto/projetos/Projeto";
 import { LembreteService } from "../services/lembretes/LembreteService";
 import {
@@ -105,6 +109,13 @@ function formatarDataHora(valor?: string | null): string {
 function formatarValor(valor?: number | null): string | null {
   if (valor === null || valor === undefined) return null;
   return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function formatarTamanho(bytes?: number | null): string {
+  if (bytes === null || bytes === undefined || bytes <= 0) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function statusDoEdital(edital: EditalResponse): { rotulo: string; classe: string } {
@@ -240,6 +251,12 @@ export function Editais() {
 
   const [editalParaRemover, setEditalParaRemover] = useState<EditalResponse | null>(null);
   const [removendo, setRemovendo] = useState(false);
+
+  const [documentosModal, setDocumentosModal] = useState<DocumentoResponse[]>([]);
+  const [enviandoDocumento, setEnviandoDocumento] = useState(false);
+  const [baixandoDocumentoId, setBaixandoDocumentoId] = useState<number | null>(null);
+  const [documentoParaRemover, setDocumentoParaRemover] = useState<DocumentoResponse | null>(null);
+  const [erroDocumentos, setErroDocumentos] = useState("");
 
   const carregarProjetos = useCallback(async () => {
     if (!grupoId) {
@@ -388,6 +405,9 @@ export function Editais() {
     setModalAberto(false);
     setEditando(null);
     setEditalParaRemover(null);
+    setDocumentosModal([]);
+    setErroDocumentos("");
+    setDocumentoParaRemover(null);
   }, [grupoId]);
 
   useEffect(() => {
@@ -456,6 +476,9 @@ export function Editais() {
     setFormAbertura("");
     setFormEncerramento("");
     setFormProjetoIds([]);
+    setDocumentosModal([]);
+    setErroDocumentos("");
+    setDocumentoParaRemover(null);
     setErroForm("");
     setModalAberto(true);
   };
@@ -471,6 +494,9 @@ export function Editais() {
       edital.dthEncerramento ? edital.dthEncerramento.substring(0, 16) : ""
     );
     setFormProjetoIds((edital.projetos || []).map((projeto) => projeto.id));
+    setDocumentosModal(edital.documentos || []);
+    setErroDocumentos("");
+    setDocumentoParaRemover(null);
     setErroForm("");
     setModalAberto(true);
   };
@@ -537,6 +563,75 @@ export function Editais() {
       setErroForm(mensagemDeErro(err, "Não foi possível salvar o edital."));
     } finally {
       setSalvando(false);
+    }
+  };
+
+  const anexarDocumento = async (event: ChangeEvent<HTMLInputElement>) => {
+    const arquivo = event.target.files?.[0];
+    event.target.value = "";
+    if (!arquivo || !grupoId || !editando) return;
+
+    if (arquivo.size > 20 * 1024 * 1024) {
+      setErroDocumentos("O arquivo excede o limite de 20 MB.");
+      return;
+    }
+
+    setEnviandoDocumento(true);
+    setErroDocumentos("");
+    try {
+      const documento = await editalService.anexarDocumento(grupoId, editando.id, arquivo);
+      setDocumentosModal((atual) => [documento, ...atual]);
+      notificarSucesso("Documento anexado ao edital.");
+      await carregarEditais();
+    } catch (err) {
+      setErroDocumentos(mensagemDeErro(err, "Não foi possível anexar o documento."));
+    } finally {
+      setEnviandoDocumento(false);
+    }
+  };
+
+  const baixarDocumento = async (editalId: number, documento: DocumentoResponse) => {
+    if (!grupoId) return;
+
+    setBaixandoDocumentoId(documento.id);
+    setErroDocumentos("");
+    try {
+      const blob = await editalService.baixarDocumento(grupoId, editalId, documento.id);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = documento.nome || "documento";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      const mensagem = mensagemDeErro(err, "Não foi possível baixar o documento.");
+      if (modalAberto) {
+        setErroDocumentos(mensagem);
+      } else {
+        setErroEditais(mensagem);
+      }
+    } finally {
+      setBaixandoDocumentoId(null);
+    }
+  };
+
+  const removerDocumento = async (documento: DocumentoResponse) => {
+    if (!grupoId || !editando) return;
+
+    setEnviandoDocumento(true);
+    setErroDocumentos("");
+    try {
+      await editalService.removerDocumento(grupoId, editando.id, documento.id);
+      setDocumentosModal((atual) => atual.filter((item) => item.id !== documento.id));
+      setDocumentoParaRemover(null);
+      notificarSucesso("Documento removido do edital.");
+      await carregarEditais();
+    } catch (err) {
+      setErroDocumentos(mensagemDeErro(err, "Não foi possível remover o documento."));
+    } finally {
+      setEnviandoDocumento(false);
     }
   };
 
@@ -962,6 +1057,34 @@ export function Editais() {
                                 <span className="truncate">{projeto.titulo}</span>
                               </span>
                             ))}
+                          </div>
+                        )}
+
+                        {(edital.documentos || []).length > 0 && (
+                          <div className="mb-3 space-y-1">
+                            {edital.documentos.slice(0, 3).map((documento) => (
+                              <button
+                                key={documento.id}
+                                type="button"
+                                onClick={() => baixarDocumento(edital.id, documento)}
+                                disabled={baixandoDocumentoId === documento.id}
+                                title={documento.nome}
+                                className="w-full inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-border/20 text-muted-foreground hover:bg-border/30 hover:text-foreground text-[11px] transition-colors cursor-pointer disabled:opacity-50"
+                              >
+                                <Paperclip className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{documento.nome}</span>
+                                {baixandoDocumentoId === documento.id ? (
+                                  <Loader2 className="w-3 h-3 shrink-0 ml-auto animate-spin" />
+                                ) : (
+                                  <Download className="w-3 h-3 shrink-0 ml-auto" />
+                                )}
+                              </button>
+                            ))}
+                            {edital.documentos.length > 3 && (
+                              <span className="block text-[11px] text-muted-foreground pl-2">
+                                +{edital.documentos.length - 3} documento(s)
+                              </span>
+                            )}
                           </div>
                         )}
 
@@ -1403,6 +1526,123 @@ export function Editais() {
                     </label>
                   ))}
                 </div>
+              </div>
+
+              <div className="pt-2 border-t border-border/20">
+                <div className="flex items-center justify-between gap-3 mb-1.5">
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    Documentos anexados
+                  </label>
+                  {editando && (
+                    <label
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        enviandoDocumento
+                          ? "bg-border/20 text-muted-foreground cursor-not-allowed"
+                          : "bg-primary/15 text-primary hover:bg-primary/25 cursor-pointer"
+                      }`}
+                    >
+                      {enviandoDocumento ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Upload className="w-3.5 h-3.5" />
+                      )}
+                      {enviandoDocumento ? "Enviando..." : "Anexar documento"}
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={anexarDocumento}
+                        disabled={enviandoDocumento}
+                      />
+                    </label>
+                  )}
+                </div>
+
+                {erroDocumentos && (
+                  <div className="mb-2 p-2.5 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center gap-2 text-xs text-[#ef4444]">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{erroDocumentos}</span>
+                  </div>
+                )}
+
+                {!editando ? (
+                  <p className="text-xs text-muted-foreground">
+                    Salve o edital para poder anexar documentos.
+                  </p>
+                ) : documentosModal.length === 0 ? (
+                  <p className="text-xs text-muted-foreground px-2 py-3 rounded-xl border border-dashed border-border/40 text-center">
+                    Nenhum documento anexado. Use "Anexar documento" para enviar o primeiro arquivo.
+                  </p>
+                ) : (
+                  <div className="max-h-44 overflow-y-auto rounded-xl border border-border/40 bg-background divide-y divide-border/20">
+                    {documentosModal.map((documento) => (
+                      <div key={documento.id} className="flex items-center gap-2 px-3 py-2">
+                        <Paperclip className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className="text-foreground text-xs font-medium truncate"
+                            title={documento.nome}
+                          >
+                            {documento.nome}
+                          </p>
+                          <p className="text-muted-foreground text-[11px]">
+                            {[
+                              documento.extensao ? documento.extensao.toUpperCase() : null,
+                              formatarTamanho(documento.tamanho),
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </p>
+                        </div>
+
+                        {documentoParaRemover?.id === documento.id ? (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => removerDocumento(documento)}
+                              disabled={enviandoDocumento}
+                              className="px-2 py-1 rounded-lg bg-[#ef4444]/15 text-[#ef4444] hover:bg-[#ef4444]/25 text-[11px] font-medium transition-colors cursor-pointer disabled:opacity-50"
+                            >
+                              Remover
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDocumentoParaRemover(null)}
+                              className="px-2 py-1 rounded-lg bg-border/20 text-foreground hover:bg-border/30 text-[11px] font-medium transition-colors cursor-pointer"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => baixarDocumento(editando.id, documento)}
+                              disabled={baixandoDocumentoId === documento.id}
+                              title="Baixar documento"
+                              aria-label={`Baixar ${documento.nome}`}
+                              className="p-1.5 rounded-lg bg-border/20 text-foreground hover:bg-border/30 transition-colors cursor-pointer disabled:opacity-50"
+                            >
+                              {baixandoDocumentoId === documento.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Download className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDocumentoParaRemover(documento)}
+                              title="Remover documento"
+                              aria-label={`Remover ${documento.nome}`}
+                              className="p-1.5 rounded-lg bg-[#ef4444]/10 text-[#ef4444] hover:bg-[#ef4444]/20 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-2 border-t border-border/30">

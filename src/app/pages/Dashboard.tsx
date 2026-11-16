@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router";
 import { SolarSystem } from "../components/SolarSystem";
 import { useGrupo } from "../contexts/GrupoContext";
 import { ProjetoService } from "../services/projetos/ProjetoService";
@@ -10,6 +11,7 @@ export function Dashboard() {
   const { grupoAtual, carregandoGrupos } = useGrupo();
   const projetoService = useMemo(() => new ProjetoService(), []);
   const authService = useMemo(() => new AuthService(), []);
+  const navigate = useNavigate();
 
   const [favoritos, setFavoritos] = useState<ProjetoResponse[]>([]);
   const [carregandoProjetos, setCarregandoProjetos] = useState(false);
@@ -57,6 +59,10 @@ export function Dashboard() {
     carregarProjetos();
   }, [carregarProjetos]);
 
+  const abrirProjeto = (projeto: ProjetoResponse) => {
+    navigate(`/projetos?projetoId=${projeto.id}`);
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* Visualização em sistema solar dos projetos favoritos */}
@@ -65,6 +71,7 @@ export function Dashboard() {
           projetos={favoritos}
           carregando={carregandoGrupos || carregandoProjetos}
           nomeGrupo={grupoAtual?.nome ?? null}
+          onProjetoClick={abrirProjeto}
         />
       </div>
     </div>
