@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router";
 import {
   FolderKanban,
   BookOpen,
@@ -59,6 +60,8 @@ export function PainelDeProjetos() {
   const projetoService = useMemo(() => new ProjetoService(), []);
   const grupoService = useMemo(() => new GrupoService(), []);
   const authService = useMemo(() => new AuthService(), []);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const projetoIdParam = searchParams.get("projetoId");
 
   const [projetos, setProjetos] = useState<ProjetoResponse[]>([]);
   const [carregandoProjetos, setCarregandoProjetos] = useState(false);
@@ -149,6 +152,25 @@ export function PainelDeProjetos() {
   useEffect(() => {
     carregarMembrosGrupo();
   }, [carregarMembrosGrupo]);
+
+  // Abre o projeto indicado na URL (ex.: clique em um projeto no Dashboard)
+  useEffect(() => {
+    if (!projetoIdParam || projetos.length === 0) return;
+
+    const projetoEncontrado = projetos.find((p) => String(p.id) === projetoIdParam);
+    if (projetoEncontrado) {
+      setProjetoSelecionado(projetoEncontrado);
+    }
+
+    setSearchParams(
+      (params) => {
+        const proximos = new URLSearchParams(params);
+        proximos.delete("projetoId");
+        return proximos;
+      },
+      { replace: true }
+    );
+  }, [projetoIdParam, projetos, setSearchParams]);
 
   const obterIconeStatus = (status: string) => {
     switch (status?.toUpperCase()) {
