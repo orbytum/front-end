@@ -36,7 +36,7 @@ import { ParticipanteProjetoResponse } from "../models/dto/projetos/Participante
 import {
   NivelMembro,
   NivelMembroLabels,
-  nivelEhCoordenadorOuAcima,
+  nivelEhLider,
 } from "../models/dto/NivelMembro";
 import { Publicacoes } from "./Publicacoes";
 import { ProjetoCombobox } from "../components/ProjetoCombobox";
@@ -87,7 +87,7 @@ export function PainelDeProjetos() {
   const [erroParticipantes, setErroParticipantes] = useState("");
 
   const isAdmin = authService.isAdminOrInitialAdmin();
-  const podeGerenciar = isAdmin || nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+  const podeGerenciar = isAdmin || nivelEhLider(grupoAtual?.nivel);
   const podeDefinirLider = isAdmin || grupoAtual?.nivel === "LIDER";
 
   const carregarProjetos = useCallback(async () => {
@@ -122,7 +122,7 @@ export function PainelDeProjetos() {
   }, [grupoAtual?.id, projetoService]);
 
   const carregarMembrosGrupo = useCallback(async () => {
-    if (!grupoAtual?.id) {
+    if (!grupoAtual?.id || !podeGerenciar) {
       setMembrosGrupo([]);
       return;
     }
@@ -140,7 +140,7 @@ export function PainelDeProjetos() {
     } catch {
       setMembrosGrupo([]);
     }
-  }, [grupoAtual?.id, grupoService]);
+  }, [grupoAtual?.id, grupoService, podeGerenciar]);
 
   useEffect(() => {
     carregarProjetos();
@@ -903,7 +903,7 @@ export function PainelDeProjetos() {
                     disabled={adicionandoParticipante}
                     className={`${inputClass} sm:w-44`}
                   >
-                    {(["PESQUISADOR", "COLABORADOR", "COORDENADOR", ...(podeDefinirLider ? ["LIDER"] : [])] as NivelMembro[]).map((n) => (
+                    {(["PESQUISADOR", "COLABORADOR", ...(podeDefinirLider ? ["LIDER"] : [])] as NivelMembro[]).map((n) => (
                       <option key={n} value={n}>
                         {NivelMembroLabels[n]}
                       </option>

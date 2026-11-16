@@ -38,7 +38,7 @@ import { ProjetoResponse } from "../models/dto/projetos/Projeto";
 import { ParticipanteProjetoResponse } from "../models/dto/projetos/ParticipanteProjeto";
 import {
   NivelMembro,
-  nivelEhCoordenadorOuAcima,
+  nivelEhLider,
   nivelPodeEscrever,
 } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
@@ -175,10 +175,10 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
   );
   const isColaboradorProjeto = euNoProjeto?.nivel === "COLABORADOR";
 
-  const podeGerenciar = isAdmin || nivelEhCoordenadorOuAcima(nivel) || isLiderProjeto;
-  const podeFinalizarProjeto = isAdmin || nivelEhCoordenadorOuAcima(nivel);
+  const podeGerenciar = isAdmin || nivelEhLider(nivel) || isLiderProjeto;
+  const podeFinalizarProjeto = isAdmin || nivelEhLider(nivel);
   const podeCriarAtividade = isAdmin
-    || nivelEhCoordenadorOuAcima(nivel)
+    || nivelEhLider(nivel)
     || (nivelPodeEscrever(nivel) && !isColaboradorProjeto && !!euNoProjeto);
   const podeMoverStatus = podeCriarAtividade;
   const podeRegistrarImpedimento = podeCriarAtividade;
@@ -205,7 +205,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
       setAtividades(atividadesRes);
       setParticipantes(participantesRes);
 
-      if (projeto.grupoId) {
+      if (projeto.grupoId && (isAdmin || nivelEhLider(nivel))) {
         try {
           const membros = await grupoService.listarPesquisadores(projeto.grupoId, { size: 200 });
           setMembrosGrupo(
@@ -316,8 +316,8 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     }
   };
 
-  const handleAvancarStatus = async (atividade: AtividadeResponse) => {
-    const proximo = proximoStatusAtividade(atividade.status);
+  const handleAvancarStatus = async (atividade: AtividadeResponse, destino?: AtividadeStatus) => {
+    const proximo = destino ?? proximoStatusAtividade(atividade.status);
     if (!proximo) return;
 
     setActionError("");
@@ -431,7 +431,9 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
   const atrasadas = atividades.filter((a) => a.isAtrasada).length;
   const abertas = atividades.filter((a) => atividadeEstaAberta(a.status)).length;
 
-  const responsaveis = editando?.atividadePaiId || modoImpedimento ? membrosGrupo : participantes;
+  // impedimentos podem ir para qualquer membro do grupo, mas só o líder do grupo enxerga essa lista
+  const responsaveis =
+    (editando?.atividadePaiId || modoImpedimento) && membrosGrupo.length > 0 ? membrosGrupo : participantes;
 
   return (
     <div className="space-y-5">
@@ -517,8 +519,8 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                 <div className="p-2.5 space-y-2.5 flex-1">
                   {itens.map((atividade) => {
                     const proximo = proximoStatusAtividade(atividade.status);
-                    const exigeCoordenacao =
-                      proximo === "CONCLUIDA" || proximo === "ENCERRADA";
+                    // o pesquisador conclui sozinho; só encerrar exige o líder do grupo ou do projeto
+                    const exigeCoordenacao = proximo === "ENCERRADA";
                     const podeAvancar = !!proximo && podeMoverStatus && (!exigeCoordenacao || podeGerenciar);
                     const emAprovacao =
                       atividade.status?.toUpperCase() === "AGUARDANDO_APROVACAO";
@@ -628,6 +630,19 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                                   <span>{AtividadeStatusLabels[proximo!]}</span>
                                 </>
                               )}
+                            </button>
+                          )}
+
+                          {podeMoverStatus && atividade.status?.toUpperCase() === "EM_ANDAMENTO" && (
+                            <button
+                              type="button"
+                              onClick={() => handleAvancarStatus(atividade, "CONCLUIDA")}
+                              disabled={avancandoId === atividade.id}
+                              className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-[#10b981]/10 hover:bg-[#10b981]/20 text-[#10b981] text-[11px] font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                              title="Concluir sem pedir confirmação"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Concluir</span>
                             </button>
                           )}
 

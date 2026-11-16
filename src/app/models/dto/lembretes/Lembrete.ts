@@ -85,3 +85,10 @@ export interface FiltrosLembrete {
     page?: number;
     size?: number;
 }
+
+/** REQ-069: link de assinatura da agenda do grupo (feed iCalendar). */
+export const assinaturaCalendarioSchema = z.object({
+    url: z.string(),
+});
+
+export type AssinaturaCalendario = z.infer<typeof assinaturaCalendarioSchema>;

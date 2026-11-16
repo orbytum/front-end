@@ -24,6 +24,7 @@ import {
   MapPin,
   Link2,
   FolderKanban,
+  Tags,
 } from "lucide-react";
 import { useGrupo } from "../contexts/GrupoContext";
 import { EditalService } from "../services/editais/EditalService";
@@ -51,12 +52,14 @@ const FILTROS_EDITAIS_VAZIOS: {
   projetoId: number | null;
   dataInicio: string;
   dataFim: string;
+  somenteRelevantes: boolean;
 } = {
   palavraChave: "",
   organizacao: "",
   projetoId: null,
   dataInicio: "",
   dataFim: "",
+  somenteRelevantes: false,
 };
 
 const FILTROS_EVENTOS_VAZIOS: {
@@ -181,6 +184,8 @@ export function Editais() {
 
   const grupoId = grupoAtual?.id;
   const podeGerenciar = authService.isAdminOrInitialAdmin() || nivelEhLider(grupoAtual?.nivel);
+  const podeGerenciarPalavras =
+    authService.isAdminOrInitialAdmin() || nivelEhLider(grupoAtual?.nivel);
   const [projetos, setProjetos] = useState<ProjetoResponse[]>([]);
 
   const [aba, setAba] = useState<Aba>("editais");
@@ -198,7 +203,15 @@ export function Editais() {
   const [projetoIdEdital, setProjetoIdEdital] = useState<number | "all">("all");
   const [dataInicioEdital, setDataInicioEdital] = useState("");
   const [dataFimEdital, setDataFimEdital] = useState("");
+  const [somenteRelevantes, setSomenteRelevantes] = useState(false);
   const [filtrosEditais, setFiltrosEditais] = useState(FILTROS_EDITAIS_VAZIOS);
+
+  const [palavrasGrupo, setPalavrasGrupo] = useState<string[]>([]);
+  const [editandoPalavras, setEditandoPalavras] = useState(false);
+  const [rascunhoPalavras, setRascunhoPalavras] = useState<string[]>([]);
+  const [novaPalavra, setNovaPalavra] = useState("");
+  const [salvandoPalavras, setSalvandoPalavras] = useState(false);
+  const [erroPalavras, setErroPalavras] = useState("");
 
   const [eventos, setEventos] = useState<LembreteResponse[]>([]);
   const [carregandoEventos, setCarregandoEventos] = useState(false);
@@ -244,6 +257,60 @@ export function Editais() {
     carregarProjetos();
   }, [carregarProjetos]);
 
+  const carregarPalavrasGrupo = useCallback(async () => {
+    if (!grupoId) {
+      setPalavrasGrupo([]);
+      return;
+    }
+    try {
+      setPalavrasGrupo(await editalService.listarPalavrasChave(grupoId));
+    } catch {
+      setPalavrasGrupo([]);
+    }
+  }, [grupoId, editalService]);
+
+  useEffect(() => {
+    carregarPalavrasGrupo();
+    setEditandoPalavras(false);
+  }, [carregarPalavrasGrupo]);
+
+  const iniciarEdicaoPalavras = () => {
+    setRascunhoPalavras(palavrasGrupo);
+    setNovaPalavra("");
+    setErroPalavras("");
+    setEditandoPalavras(true);
+  };
+
+  const adicionarPalavra = () => {
+    const valor = novaPalavra.trim();
+    if (!valor) return;
+    if (valor.length > 60) {
+      setErroPalavras("Cada palavra-chave deve ter no máximo 60 caracteres.");
+      return;
+    }
+    if (!rascunhoPalavras.some((p) => p.toLowerCase() === valor.toLowerCase())) {
+      setRascunhoPalavras([...rascunhoPalavras, valor]);
+    }
+    setNovaPalavra("");
+    setErroPalavras("");
+  };
+
+  const salvarPalavras = async () => {
+    if (!grupoId) return;
+    setSalvandoPalavras(true);
+    setErroPalavras("");
+    try {
+      setPalavrasGrupo(await editalService.atualizarPalavrasChave(grupoId, rascunhoPalavras));
+      setEditandoPalavras(false);
+      if (filtrosEditais.somenteRelevantes) await carregarEditais();
+      notificarSucesso("Palavras-chave do grupo atualizadas.");
+    } catch (err) {
+      setErroPalavras(mensagemDeErro(err, "Erro ao salvar as palavras-chave."));
+    } finally {
+      setSalvandoPalavras(false);
+    }
+  };
+
   const carregarEditais = useCallback(async () => {
     if (!grupoId) {
       setEditais([]);
@@ -262,6 +329,7 @@ export function Editais() {
         organizacao: filtrosEditais.organizacao,
         dataInicio: filtrosEditais.dataInicio,
         dataFim: filtrosEditais.dataFim,
+        somenteRelevantes: filtrosEditais.somenteRelevantes,
         page: paginaEditais,
         size: TAMANHO_PAGINA,
       });
@@ -344,10 +412,12 @@ export function Editais() {
       projetoId: projetoIdEdital === "all" ? null : projetoIdEdital,
       dataInicio: dataInicioEdital,
       dataFim: dataFimEdital,
+      somenteRelevantes,
     });
   };
 
   const limparFiltrosEditais = () => {
+    setSomenteRelevantes(false);
     setPalavraChave("");
     setOrganizacao("");
     setProjetoIdEdital("all");
@@ -491,7 +561,8 @@ export function Editais() {
     !!filtrosEditais.organizacao ||
     !!filtrosEditais.projetoId ||
     !!filtrosEditais.dataInicio ||
-    !!filtrosEditais.dataFim;
+    !!filtrosEditais.dataFim ||
+    filtrosEditais.somenteRelevantes;
 
   const filtrosEventosAtivos =
     !!filtrosEventos.busca ||
@@ -646,6 +717,127 @@ export function Editais() {
                   <Filter className="w-4 h-4" />
                 </button>
               </div>
+            </div>
+
+            <div className="pt-3 border-t border-border/20 space-y-3">
+              <div className="flex flex-col md:flex-row md:items-center gap-3 justify-between">
+                <label
+                  className={`inline-flex items-center gap-2 text-sm ${
+                    palavrasGrupo.length === 0 ? "text-muted-foreground/60" : "text-foreground cursor-pointer"
+                  }`}
+                  title={
+                    palavrasGrupo.length === 0
+                      ? "Cadastre palavras-chave do grupo para usar este filtro"
+                      : "Mostra só editais cuja descrição ou organização cita uma palavra-chave do grupo"
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    checked={somenteRelevantes}
+                    disabled={palavrasGrupo.length === 0}
+                    onChange={(e) => setSomenteRelevantes(e.target.checked)}
+                    className="w-4 h-4 accent-primary"
+                  />
+                  Somente editais relevantes ao grupo
+                </label>
+                {podeGerenciarPalavras && !editandoPalavras && (
+                  <button
+                    type="button"
+                    onClick={iniciarEdicaoPalavras}
+                    className="text-sm text-primary hover:underline cursor-pointer inline-flex items-center gap-1.5 self-start md:self-auto"
+                  >
+                    <Tags className="w-4 h-4" />
+                    Gerenciar palavras-chave
+                  </button>
+                )}
+              </div>
+
+              {!editandoPalavras && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Palavras-chave do grupo:</span>
+                  {palavrasGrupo.length === 0 ? (
+                    <span className="text-xs text-muted-foreground/70">nenhuma cadastrada</span>
+                  ) : (
+                    palavrasGrupo.map((palavra) => (
+                      <span
+                        key={palavra}
+                        className="px-2.5 py-0.5 rounded-full text-xs bg-primary/10 text-primary border border-primary/20"
+                      >
+                        {palavra}
+                      </span>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {editandoPalavras && (
+                <div className="rounded-xl border border-border/40 bg-background/50 p-3 space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={novaPalavra}
+                      maxLength={60}
+                      placeholder="Ex.: visão computacional, agricultura..."
+                      onChange={(e) => setNovaPalavra(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          adicionarPalavra();
+                        }
+                      }}
+                      className="flex-1 px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={adicionarPalavra}
+                      className="px-3 py-2 bg-primary/15 text-primary hover:bg-primary/25 rounded-xl text-sm cursor-pointer inline-flex items-center gap-1"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Adicionar
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {rascunhoPalavras.length === 0 && (
+                      <span className="text-xs text-muted-foreground">Nenhuma palavra-chave adicionada.</span>
+                    )}
+                    {rascunhoPalavras.map((palavra) => (
+                      <span
+                        key={palavra}
+                        className="pl-2.5 pr-1 py-0.5 rounded-full text-xs bg-primary/10 text-primary border border-primary/20 inline-flex items-center gap-1"
+                      >
+                        {palavra}
+                        <button
+                          type="button"
+                          aria-label={`Remover ${palavra}`}
+                          onClick={() => setRascunhoPalavras(rascunhoPalavras.filter((p) => p !== palavra))}
+                          className="p-0.5 rounded-full hover:bg-primary/20 cursor-pointer"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  {erroPalavras && <p className="text-xs text-destructive">{erroPalavras}</p>}
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditandoPalavras(false)}
+                      className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-xl cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={salvarPalavras}
+                      disabled={salvandoPalavras}
+                      className="px-4 py-1.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-xl text-sm cursor-pointer inline-flex items-center gap-2"
+                    >
+                      {salvandoPalavras && <Loader2 className="w-4 h-4 animate-spin" />}
+                      Salvar palavras-chave
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {filtrosEditaisAtivos && (
@@ -1176,8 +1368,12 @@ export function Editais() {
 
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Projetos relacionados (rótulos)
+                  Compartilhar com projetos
                 </label>
+                <p className="text-xs text-muted-foreground mb-1.5">
+                  Sem projetos marcados, o edital é público e todo o grupo o vê. Com projetos marcados, só os
+                  participantes desses projetos e o líder do grupo o veem.
+                </p>
                 <div className="max-h-36 overflow-y-auto rounded-xl border border-border/40 bg-background p-2 space-y-1">
                   {projetos.length === 0 && (
                     <p className="text-xs text-muted-foreground px-2 py-1">

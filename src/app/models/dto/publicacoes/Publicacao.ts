@@ -10,7 +10,24 @@ export const publicacaoResponseSchema = z.object({
   url: z.string(),
   dthRegistro: z.string(),
   isAtivo: z.boolean(),
+  tipo: z.string().nullable().optional(),
+  dataPublicacao: z.string().nullable().optional(),
+  link: z.string().nullable().optional(),
 });
+
+/** REQ-088: tipos sugeridos de publicação (o back-end aceita até 20 caracteres). */
+export const TIPOS_PUBLICACAO = [
+  "Artigo",
+  "Artigo de evento",
+  "Livro",
+  "Capítulo de livro",
+  "Tese",
+  "Dissertação",
+  "TCC",
+  "Relatório técnico",
+  "Resumo",
+  "Outro",
+] as const;
 
 export type PublicacaoResponse = z.infer<typeof publicacaoResponseSchema>;
 
@@ -39,6 +56,9 @@ export interface CreatePublicacaoData {
   descricao: string;
   projetoId: number;
   arquivo: File;
+  tipo: string;
+  dataPublicacao: string;
+  link?: string;
 }
 
 export interface EditarPublicacaoData {
@@ -46,4 +66,7 @@ export interface EditarPublicacaoData {
   descricao: string;
   projetoId?: number | null;
   arquivo?: File | null;
+  tipo?: string;
+  dataPublicacao?: string;
+  link?: string;
 }

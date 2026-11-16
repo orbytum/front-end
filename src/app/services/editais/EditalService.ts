@@ -6,6 +6,7 @@ import {
     SalvarEditalData,
     editalPaginadoResponseSchema,
     editalResponseSchema,
+    palavrasChaveSchema,
 } from "../../models/dto/editais/Edital";
 
 export class EditalService extends BaseService {
@@ -29,6 +30,9 @@ export class EditalService extends BaseService {
         if (params.dataFim) {
             searchParams.append("dataFim", params.dataFim);
         }
+        if (params.somenteRelevantes) {
+            searchParams.append("somenteRelevantes", "true");
+        }
 
         return this.get(
             `/grupos/${params.grupoId}/editais?${searchParams.toString()}`,
@@ -51,5 +55,13 @@ export class EditalService extends BaseService {
 
     async remover(grupoId: number, id: number): Promise<void> {
         return this.delete(`/grupos/${grupoId}/editais/${id}`);
+    }
+
+    async listarPalavrasChave(grupoId: number): Promise<string[]> {
+        return this.get(`/grupos/${grupoId}/editais/palavras-chave`, {}, palavrasChaveSchema);
+    }
+
+    async atualizarPalavrasChave(grupoId: number, palavras: string[]): Promise<string[]> {
+        return this.put(`/grupos/${grupoId}/editais/palavras-chave`, palavras, {}, palavrasChaveSchema);
     }
 }

@@ -7,6 +7,8 @@ export const meuGrupoResponseSchema = z.object({
   role: z.string().optional().nullable(),
   nivel: nivelMembroSchema.optional().nullable(),
   isLider: z.boolean().optional().nullable(),
+  /** Id do usuário logado (a lista de membros do grupo é restrita ao líder). */
+  usuarioId: z.number().optional().nullable(),
 });
 
 export type MeuGrupoResponse = z.infer<typeof meuGrupoResponseSchema>;
