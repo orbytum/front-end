@@ -142,6 +142,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
   const [atividades, setAtividades] = useState<AtividadeResponse[]>([]);
   const [participantes, setParticipantes] = useState<ParticipanteProjetoResponse[]>([]);
   const [membrosGrupo, setMembrosGrupo] = useState<MembroGrupo[]>([]);
+  const [carregandoResponsaveis, setCarregandoResponsaveis] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
@@ -188,6 +189,46 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     [atividades]
   );
 
+  const carregarParticipantes = useCallback(async () => {
+    if (!projeto?.id) {
+      setParticipantes([]);
+      return;
+    }
+
+    setCarregandoResponsaveis(true);
+    try {
+      const lista = await projetoService.listarParticipantes(projeto.id);
+      setParticipantes(lista);
+    } catch {
+      // Mantém a lista atual para não bloquear o preenchimento do formulário.
+    } finally {
+      setCarregandoResponsaveis(false);
+    }
+  }, [projeto?.id, projetoService]);
+
+  const carregarMembrosGrupo = useCallback(async () => {
+    if (!projeto?.grupoId) {
+      setMembrosGrupo([]);
+      return;
+    }
+
+    try {
+      const membros = await grupoService.listarPesquisadores(projeto.grupoId, { size: 200 });
+      setMembrosGrupo(
+        (membros.items || [])
+          .map((m) => ({
+            usuarioId: m.usuarioId ?? m.id ?? 0,
+            nome: m.nome,
+            email: m.email,
+            nivel: m.nivel,
+          }))
+          .filter((m) => m.usuarioId > 0)
+      );
+    } catch {
+      setMembrosGrupo([]);
+    }
+  }, [projeto?.grupoId, grupoService]);
+
   const carregar = useCallback(async () => {
     if (!projeto?.id) {
       setAtividades([]);
@@ -198,30 +239,12 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     setError("");
     setActionError("");
     try {
-      const [atividadesRes, participantesRes] = await Promise.all([
+      const [atividadesRes] = await Promise.all([
         atividadeService.listarPorProjeto(projeto.id),
-        projetoService.listarParticipantes(projeto.id),
+        carregarParticipantes(),
+        carregarMembrosGrupo(),
       ]);
       setAtividades(atividadesRes);
-      setParticipantes(participantesRes);
-
-      if (projeto.grupoId) {
-        try {
-          const membros = await grupoService.listarPesquisadores(projeto.grupoId, { size: 200 });
-          setMembrosGrupo(
-            (membros.items || [])
-              .map((m) => ({
-                usuarioId: m.usuarioId ?? m.id ?? 0,
-                nome: m.nome,
-                email: m.email,
-                nivel: m.nivel,
-              }))
-              .filter((m) => m.usuarioId > 0)
-          );
-        } catch {
-          setMembrosGrupo([]);
-        }
-      }
     } catch (err) {
       if (err instanceof HttpError) {
         setError(err.response?.mensagem || err.message);
@@ -231,7 +254,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     } finally {
       setLoading(false);
     }
-  }, [projeto?.id, projeto?.grupoId, atividadeService, projetoService, grupoService]);
+  }, [projeto?.id, atividadeService, carregarParticipantes, carregarMembrosGrupo]);
 
   useEffect(() => {
     carregar();
@@ -247,6 +270,10 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     setFormAtividadePaiId(paiId ? String(paiId) : "");
     setFormError("");
     setModalAberto(true);
+
+    // Recarrega as listas para refletir participantes/membros alterados recentemente.
+    void carregarParticipantes();
+    void carregarMembrosGrupo();
   };
 
   const abrirEdicao = (atividade: AtividadeResponse) => {
@@ -259,6 +286,10 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     setFormAtividadePaiId(atividade.atividadePaiId ? String(atividade.atividadePaiId) : "");
     setFormError("");
     setModalAberto(true);
+
+    // Recarrega as listas para refletir participantes/membros alterados recentemente.
+    void carregarParticipantes();
+    void carregarMembrosGrupo();
   };
 
   const handleSalvar = async (e: React.FormEvent) => {
@@ -781,19 +812,32 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                   <select
                     value={formResponsavelId}
                     onChange={(e) => setFormResponsavelId(e.target.value)}
-                    disabled={salvando}
+                    disabled={salvando || carregandoResponsaveis}
                     className={inputClass}
                   >
-                    <option value="">Selecione o responsável</option>
+                    <option value="">
+                      {carregandoResponsaveis ? "Carregando responsáveis..." : "Selecione o responsável"}
+                    </option>
                     {responsaveis.map((r) => (
                       <option key={r.usuarioId} value={r.usuarioId}>
                         {r.nome}
                       </option>
                     ))}
                   </select>
-                  {modoImpedimento && (
+                  {modoImpedimento ? (
                     <p className="text-[11px] text-muted-foreground mt-1">
                       Impedimentos podem ser atribuídos a qualquer membro do grupo.
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Apenas participantes do projeto podem ser responsáveis. Adicione o membro em
+                      "Gerenciar participantes" do projeto.
+                    </p>
+                  )}
+                  {!modoImpedimento && !carregandoResponsaveis && responsaveis.length === 0 && (
+                    <p className="text-[11px] text-[#f59e0b] mt-1">
+                      Este projeto ainda não possui participantes. Adicione um participante para
+                      poder atribuir a atividade.
                     </p>
                   )}
                 </div>
