@@ -10,6 +10,8 @@ export const projetoResponseSchema = z.object({
   isAtivo: z.boolean().nullable().optional(),
   isInicial: z.boolean().nullable().optional(),
   isFavorito: z.boolean().nullable().optional(),
+  liderProjetoId: z.number().nullable().optional(),
+  liderProjetoNome: z.string().nullable().optional(),
 });
 
 export type ProjetoResponse = z.infer<typeof projetoResponseSchema>;
@@ -19,6 +21,7 @@ export const criarProjetoRequestSchema = z.object({
   status: z.string(),
   titulo: z.string(),
   assunto: z.string(),
+  liderProjetoId: z.number().nullable().optional(),
 });
 
 export type CriarProjetoRequest = z.infer<typeof criarProjetoRequestSchema>;

@@ -6,6 +6,7 @@ import {
   atividadePaginadoResponseSchema,
   CriarAtividadeRequest,
   EditarAtividadeRequest,
+  RejeitarAtividadeRequest,
 } from "../../models/dto/atividades/Atividade";
 
 export interface ListarAtividadesParams {
@@ -59,6 +60,14 @@ export class AtividadeService extends BaseService {
 
   async atualizarStatus(id: number, status: string): Promise<AtividadeResponse> {
     return this.patch(`/atividades/${id}/status`, { status }, {}, atividadeResponseSchema);
+  }
+
+  async aprovar(id: number): Promise<AtividadeResponse> {
+    return this.patch(`/atividades/${id}/aprovar`, {}, {}, atividadeResponseSchema);
+  }
+
+  async rejeitar(id: number, data: RejeitarAtividadeRequest = {}): Promise<AtividadeResponse> {
+    return this.patch(`/atividades/${id}/rejeitar`, data, {}, atividadeResponseSchema);
   }
 
   async remover(id: number): Promise<void> {

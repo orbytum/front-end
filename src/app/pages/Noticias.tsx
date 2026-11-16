@@ -18,16 +18,24 @@ import {
   Link2,
   ExternalLink,
   ShieldCheck,
+  FolderKanban,
 } from "lucide-react";
 import { useGrupo } from "../contexts/GrupoContext";
 import { NoticiaService } from "../services/noticias/NoticiaService";
+import { ProjetoService } from "../services/projetos/ProjetoService";
+import { GrupoService } from "../services/grupos/GrupoService";
+import { AuthService } from "../services/auth/AuthService";
 import {
   NoticiaResponse,
   NoticiaStatusLabels,
   noticiaStatusSchema,
   type NoticiaStatus,
 } from "../models/dto/noticias/Noticia";
-import { nivelEhCoordenadorOuAcima } from "../models/dto/NivelMembro";
+import { ProjetoResponse } from "../models/dto/projetos/Projeto";
+import {
+  nivelEhColaborador,
+  nivelEhCoordenadorOuAcima,
+} from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "../components/DateInput";
 
@@ -44,8 +52,17 @@ const STATUS_BADGE: Record<NoticiaStatus, string> = {
 export function Noticias() {
   const { grupoAtual, carregandoGrupos } = useGrupo();
   const noticiaService = useMemo(() => new NoticiaService(), []);
+  const projetoService = useMemo(() => new ProjetoService(), []);
+  const grupoService = useMemo(() => new GrupoService(), []);
+  const authService = useMemo(() => new AuthService(), []);
 
+  const isAdmin = authService.isAdminOrInitialAdmin();
   const isCoordenadorOuAcima = nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+  const isColaborador = nivelEhColaborador(grupoAtual?.nivel);
+
+  const [projetos, setProjetos] = useState<ProjetoResponse[]>([]);
+  const [meuUsuarioId, setMeuUsuarioId] = useState<number | null>(null);
+  const [filtroProjetoId, setFiltroProjetoId] = useState<number | "all">("all");
 
   const [aba, setAba] = useState<Aba>("publicadas");
 
@@ -69,6 +86,7 @@ export function Noticias() {
   const [formAssunto, setFormAssunto] = useState("");
   const [formDataInicio, setFormDataInicio] = useState("");
   const [formDataFim, setFormDataFim] = useState("");
+  const [formProjetoIds, setFormProjetoIds] = useState<number[]>([]);
   const [salvando, setSalvando] = useState(false);
   const [erroForm, setErroForm] = useState<string | null>(null);
   const [buscandoLink, setBuscandoLink] = useState(false);
@@ -81,6 +99,56 @@ export function Noticias() {
   const [removendo, setRemovendo] = useState(false);
 
   const [processandoId, setProcessandoId] = useState<number | null>(null);
+
+  const projetosLideradosIds = useMemo(() => {
+    if (!meuUsuarioId) return [];
+    return projetos
+      .filter((projeto) => projeto.liderProjetoId === meuUsuarioId)
+      .map((projeto) => projeto.id);
+  }, [projetos, meuUsuarioId]);
+
+  const isLiderProjeto = projetosLideradosIds.length > 0;
+  const podeCriarNoticia = isAdmin || !isColaborador;
+  const podeVerAprovacoes = isAdmin || isCoordenadorOuAcima || isLiderProjeto;
+
+  const podeAprovarNoticia = (noticia: NoticiaResponse) =>
+    isAdmin
+    || isCoordenadorOuAcima
+    || (noticia.projetos || []).some((projeto) => projetosLideradosIds.includes(projeto.id));
+
+  const podeEditarNoticia = (noticia: NoticiaResponse) =>
+    isAdmin
+    || isCoordenadorOuAcima
+    || (noticia.projetos || []).some((projeto) => projetosLideradosIds.includes(projeto.id));
+
+  const carregarContextoProjetos = useCallback(async () => {
+    if (!grupoAtual?.id) {
+      setProjetos([]);
+      setMeuUsuarioId(null);
+      return;
+    }
+
+    try {
+      const [listaProjetos, membros] = await Promise.all([
+        projetoService.listarProjetosPorGrupo(grupoAtual.id),
+        grupoService.listarPesquisadores(grupoAtual.id, { size: 500 }),
+      ]);
+      setProjetos(listaProjetos);
+
+      const email = (authService.getUserEmail() || "").toLowerCase();
+      const eu = (membros.items || []).find(
+        (membro) => (membro.email || "").toLowerCase() === email
+      );
+      setMeuUsuarioId(eu?.usuarioId ?? eu?.id ?? null);
+    } catch {
+      setProjetos([]);
+      setMeuUsuarioId(null);
+    }
+  }, [grupoAtual?.id, projetoService, grupoService, authService]);
+
+  useEffect(() => {
+    carregarContextoProjetos();
+  }, [carregarContextoProjetos]);
 
   const carregar = useCallback(async () => {
     if (!grupoAtual?.id) {
@@ -96,11 +164,13 @@ export function Noticias() {
         aba === "aprovacoes"
           ? await noticiaService.listarPendentes({
               grupoId: grupoAtual.id,
+              projetoId: filtroProjetoId === "all" ? undefined : filtroProjetoId,
               page: paginaAtual,
               size: TAMANHO_PAGINA,
             })
           : await noticiaService.listar({
               grupoId: grupoAtual.id,
+              projetoId: filtroProjetoId === "all" ? undefined : filtroProjetoId,
               assunto: termoAssunto.trim() || undefined,
               dataInicio: filtroDataInicio || undefined,
               dataFim: filtroDataFim || undefined,
@@ -123,12 +193,13 @@ export function Noticias() {
     termoAssunto,
     filtroDataInicio,
     filtroDataFim,
+    filtroProjetoId,
     noticiaService,
   ]);
 
   useEffect(() => {
     setPaginaAtual(1);
-  }, [grupoAtual?.id, aba]);
+  }, [grupoAtual?.id, aba, filtroProjetoId]);
 
   useEffect(() => {
     carregar();
@@ -143,6 +214,7 @@ export function Noticias() {
     setTermoAssunto("");
     setFiltroDataInicio("");
     setFiltroDataFim("");
+    setFiltroProjetoId("all");
     setPaginaAtual(1);
   };
 
@@ -154,6 +226,7 @@ export function Noticias() {
     setFormAssunto("");
     setFormDataInicio("");
     setFormDataFim("");
+    setFormProjetoIds([]);
     setErroForm(null);
     setModalAberto(true);
   };
@@ -166,6 +239,7 @@ export function Noticias() {
     setFormAssunto(noticia.assunto);
     setFormDataInicio(noticia.dataInicioExibicao ? noticia.dataInicioExibicao.substring(0, 10) : "");
     setFormDataFim(noticia.dataFimExibicao ? noticia.dataFimExibicao.substring(0, 10) : "");
+    setFormProjetoIds((noticia.projetos || []).map((projeto) => projeto.id));
     setErroForm(null);
     setModalAberto(true);
   };
@@ -222,6 +296,7 @@ export function Noticias() {
       assunto: formAssunto.trim(),
       dataInicioExibicao: formDataInicio ? `${formDataInicio}T00:00:00` : null,
       dataFimExibicao: formDataFim ? `${formDataFim}T23:59:59` : null,
+      projetoIds: formProjetoIds,
     };
 
     setSalvando(true);
@@ -332,14 +407,16 @@ export function Noticias() {
             {grupoAtual ? ` "${grupoAtual.nome}"` : ""}
           </p>
         </div>
-        <button
-          onClick={abrirModalCriacao}
-          disabled={!grupoAtual?.id}
-          className="px-5 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0"
-        >
-          <Plus className="w-5 h-5" />
-          Nova Notícia
-        </button>
+        {podeCriarNoticia && (
+          <button
+            onClick={abrirModalCriacao}
+            disabled={!grupoAtual?.id}
+            className="px-5 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0"
+          >
+            <Plus className="w-5 h-5" />
+            Nova Notícia
+          </button>
+        )}
       </div>
 
       {/* Abas */}
@@ -357,7 +434,7 @@ export function Noticias() {
             Publicadas
           </span>
         </button>
-        {isCoordenadorOuAcima && (
+        {podeVerAprovacoes && (
           <button
             onClick={() => setAba("aprovacoes")}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer -mb-px ${
@@ -385,7 +462,7 @@ export function Noticias() {
           className="bg-card rounded-2xl p-4 border border-border/30 space-y-4"
         >
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-            <div className="md:col-span-5 relative">
+            <div className="md:col-span-4 relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
@@ -396,7 +473,22 @@ export function Noticias() {
               />
             </div>
 
-            <div className="md:col-span-3 flex items-center gap-2">
+            <div className="md:col-span-3">
+              <select
+                value={filtroProjetoId}
+                onChange={(e) => setFiltroProjetoId(e.target.value === "all" ? "all" : Number(e.target.value))}
+                className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+              >
+                <option value="all">Todos os projetos</option>
+                {projetos.map((projeto) => (
+                  <option key={projeto.id} value={projeto.id}>
+                    {projeto.titulo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="md:col-span-2 flex items-center gap-2">
               <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">De:</span>
               <DateInput
                 type="date"
@@ -406,7 +498,7 @@ export function Noticias() {
               />
             </div>
 
-            <div className="md:col-span-3 flex items-center gap-2">
+            <div className="md:col-span-2 flex items-center gap-2">
               <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">Até:</span>
               <DateInput
                 type="date"
@@ -427,15 +519,46 @@ export function Noticias() {
             </div>
           </div>
 
-          {(termoAssunto || filtroDataInicio || filtroDataFim) && (
+          {(termoAssunto || filtroDataInicio || filtroDataFim || filtroProjetoId !== "all") && (
             <div className="flex items-center justify-between pt-2 border-t border-border/20 text-xs text-muted-foreground">
               <span>Filtros ativos aplicados</span>
-              <button type="button" onClick={limparFiltros} className="text-primary hover:underline cursor-pointer">
+              <button
+                type="button"
+                onClick={() => {
+                  limparFiltros();
+                  setFiltroProjetoId("all");
+                }}
+                className="text-primary hover:underline cursor-pointer"
+              >
                 Limpar filtros
               </button>
             </div>
           )}
         </form>
+      )}
+
+      {aba === "aprovacoes" && (
+        <div className="bg-card rounded-2xl p-4 border border-border/30 flex items-center gap-2">
+          <FolderKanban className="w-4 h-4 text-muted-foreground" />
+          <select
+            value={filtroProjetoId}
+            onChange={(e) => setFiltroProjetoId(e.target.value === "all" ? "all" : Number(e.target.value))}
+            className="bg-transparent text-foreground focus:outline-none text-sm"
+          >
+            <option value="all">
+              {isLiderProjeto && !isAdmin && !isCoordenadorOuAcima
+                ? "Todos os projetos que lidero"
+                : "Todos os projetos"}
+            </option>
+            {projetos
+              .filter((projeto) => isAdmin || isCoordenadorOuAcima || projetosLideradosIds.includes(projeto.id))
+              .map((projeto) => (
+                <option key={projeto.id} value={projeto.id}>
+                  {projeto.titulo}
+                </option>
+              ))}
+          </select>
+        </div>
       )}
 
       {/* Lista */}
@@ -494,6 +617,15 @@ export function Noticias() {
                       <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-border/30 text-muted-foreground truncate max-w-[150px]">
                         {noticia.assunto}
                       </span>
+                      {(noticia.projetos || []).map((projeto) => (
+                        <span
+                          key={projeto.id}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#4a9eff]/10 text-[#4a9eff] border border-[#4a9eff]/25 truncate max-w-[160px]"
+                        >
+                          <FolderKanban className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{projeto.titulo}</span>
+                        </span>
+                      ))}
                     </div>
                     {noticia.isExpirada && (
                       <span className="text-[10px] font-medium text-muted-foreground uppercase">Expirada</span>
@@ -539,9 +671,9 @@ export function Noticias() {
                     )}
                   </div>
 
-                  {isCoordenadorOuAcima && (
+                  {podeEditarNoticia(noticia) && (
                     <div className="flex items-center gap-2">
-                      {aba === "aprovacoes" && status === "PENDENTE" && (
+                      {aba === "aprovacoes" && status === "PENDENTE" && podeAprovarNoticia(noticia) && (
                         <>
                           <button
                             onClick={() => aprovar(noticia)}
@@ -712,6 +844,44 @@ export function Noticias() {
                   disabled={salvando}
                   className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Projetos relacionados (rótulos)
+                </label>
+                <div className="max-h-36 overflow-y-auto rounded-xl border border-border/40 bg-background p-2 space-y-1">
+                  {projetos.length === 0 && (
+                    <p className="text-xs text-muted-foreground px-2 py-1">
+                      Nenhum projeto disponível neste grupo.
+                    </p>
+                  )}
+                  {projetos.map((projeto) => (
+                    <label
+                      key={projeto.id}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-border/20 cursor-pointer text-sm text-foreground"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formProjetoIds.includes(projeto.id)}
+                        onChange={(e) =>
+                          setFormProjetoIds((atual) =>
+                            e.target.checked
+                              ? [...atual, projeto.id]
+                              : atual.filter((id) => id !== projeto.id)
+                          )
+                        }
+                        disabled={salvando}
+                        className="w-4 h-4 accent-[#ff8c42]"
+                      />
+                      <FolderKanban className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="truncate">{projeto.titulo}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  O líder de qualquer projeto rotulado poderá aprovar ou rejeitar esta notícia.
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

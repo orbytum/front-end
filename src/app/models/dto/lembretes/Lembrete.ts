@@ -41,6 +41,9 @@ export const lembreteResponseSchema = z.object({
     ataNomeArquivo: z.string().nullable().optional(),
     dthRegistro: z.string().nullable().optional(),
     isAtivo: z.boolean().optional(),
+    projetoId: z.number().nullable().optional(),
+    projetoNome: z.string().nullable().optional(),
+    paraGrupoInteiro: z.boolean().optional().default(false),
 });
 
 export type LembreteResponse = z.infer<typeof lembreteResponseSchema>;
@@ -65,6 +68,8 @@ export interface SalvarLembreteData {
     localizacao?: string;
     link?: string;
     recorrencia: TipoRecorrencia;
+    projetoId?: number | null;
+    paraGrupoInteiro?: boolean;
 }
 
 export interface CriarLembreteRequest extends SalvarLembreteData {
@@ -76,6 +81,7 @@ export interface FiltrosLembrete {
     busca?: string;
     dataInicio?: string;
     dataFim?: string;
+    projetoId?: number;
     page?: number;
     size?: number;
 }

@@ -28,6 +28,7 @@ export type EditalPaginadoResponse = z.infer<typeof editalPaginadoResponseSchema
 
 export interface ListarEditaisParams {
     grupoId: number;
+    projetoId?: number;
     palavraChave?: string;
     organizacao?: string;
     dataInicio?: string;
@@ -43,4 +44,5 @@ export interface SalvarEditalData {
     uri: string;
     dthAbertura: string;
     dthEncerramento: string;
+    projetoIds?: number[];
 }

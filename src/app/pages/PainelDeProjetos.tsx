@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router";
 import {
   FolderKanban,
   BookOpen,
@@ -48,6 +49,7 @@ type TabId = "publicacoes" | "visao-geral" | "atividades";
 interface MembroGrupo {
   usuarioId: number;
   nome: string;
+  nivel?: NivelMembro | null;
 }
 
 const inputClass =
@@ -58,6 +60,8 @@ export function PainelDeProjetos() {
   const projetoService = useMemo(() => new ProjetoService(), []);
   const grupoService = useMemo(() => new GrupoService(), []);
   const authService = useMemo(() => new AuthService(), []);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const projetoIdParam = searchParams.get("projetoId");
 
   const [projetos, setProjetos] = useState<ProjetoResponse[]>([]);
   const [carregandoProjetos, setCarregandoProjetos] = useState(false);
@@ -73,6 +77,7 @@ export function PainelDeProjetos() {
   const [formAssunto, setFormAssunto] = useState("");
   const [formStatus, setFormStatus] = useState<string>("PLANEJADO");
   const [formIsAtivo, setFormIsAtivo] = useState(true);
+  const [formLiderProjetoId, setFormLiderProjetoId] = useState("");
   const [salvandoProjeto, setSalvandoProjeto] = useState(false);
   const [erroProjeto, setErroProjeto] = useState("");
 
@@ -86,6 +91,7 @@ export function PainelDeProjetos() {
 
   const isAdmin = authService.isAdminOrInitialAdmin();
   const podeGerenciar = isAdmin || nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+  const podeDefinirLider = isAdmin || grupoAtual?.nivel === "LIDER";
 
   const carregarProjetos = useCallback(async () => {
     if (!grupoAtual?.id) {
@@ -127,7 +133,11 @@ export function PainelDeProjetos() {
       const resposta = await grupoService.listarPesquisadores(grupoAtual.id, { size: 200 });
       setMembrosGrupo(
         (resposta.items || [])
-          .map((m) => ({ usuarioId: m.usuarioId ?? m.id ?? 0, nome: m.nome }))
+          .map((m) => ({
+            usuarioId: m.usuarioId ?? m.id ?? 0,
+            nome: m.nome,
+            nivel: m.nivel,
+          }))
           .filter((m) => m.usuarioId > 0)
       );
     } catch {
@@ -142,6 +152,25 @@ export function PainelDeProjetos() {
   useEffect(() => {
     carregarMembrosGrupo();
   }, [carregarMembrosGrupo]);
+
+  // Abre o projeto indicado na URL (ex.: clique em um projeto no Dashboard)
+  useEffect(() => {
+    if (!projetoIdParam || projetos.length === 0) return;
+
+    const projetoEncontrado = projetos.find((p) => String(p.id) === projetoIdParam);
+    if (projetoEncontrado) {
+      setProjetoSelecionado(projetoEncontrado);
+    }
+
+    setSearchParams(
+      (params) => {
+        const proximos = new URLSearchParams(params);
+        proximos.delete("projetoId");
+        return proximos;
+      },
+      { replace: true }
+    );
+  }, [projetoIdParam, projetos, setSearchParams]);
 
   const obterIconeStatus = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -190,6 +219,7 @@ export function PainelDeProjetos() {
     setFormAssunto("");
     setFormStatus("PLANEJADO");
     setFormIsAtivo(true);
+    setFormLiderProjetoId("");
     setErroProjeto("");
     setProjetoModalAberto(true);
   };
@@ -200,6 +230,7 @@ export function PainelDeProjetos() {
     setFormAssunto(projeto.assunto || "");
     setFormStatus(projeto.status || "PLANEJADO");
     setFormIsAtivo(projeto.isAtivo ?? true);
+    setFormLiderProjetoId(projeto.liderProjetoId ? String(projeto.liderProjetoId) : "");
     setErroProjeto("");
     setProjetoModalAberto(true);
   };
@@ -231,6 +262,7 @@ export function PainelDeProjetos() {
           status: formStatus,
           titulo: formTitulo.trim(),
           assunto: formAssunto.trim(),
+          liderProjetoId: formLiderProjetoId ? Number(formLiderProjetoId) : null,
         });
         setProjetos((prev) => [...prev, criado]);
         setProjetoSelecionado(criado);
@@ -434,6 +466,12 @@ export function PainelDeProjetos() {
                   <strong>Assunto:</strong> {projetoSelecionado.assunto}
                 </span>
               )}
+              {projetoSelecionado.liderProjetoNome && (
+                <span className="flex items-center gap-1">
+                  <Crown className="w-3.5 h-3.5 text-muted-foreground/70" />
+                  <strong>Líder:</strong> {projetoSelecionado.liderProjetoNome}
+                </span>
+              )}
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground/70" />
                 Criado em: {formatarData(projetoSelecionado.dthRegistro)}
@@ -591,6 +629,14 @@ export function PainelDeProjetos() {
                     <span className="text-foreground font-semibold">
                       {ProjetoStatusLabels[projetoSelecionado.status as ProjetoStatus] ||
                         projetoSelecionado.status}
+                    </span>
+                  </div>
+                  <div className="bg-background rounded-xl p-4 border border-border/30">
+                    <span className="text-xs text-muted-foreground block mb-1">
+                      Líder do Projeto
+                    </span>
+                    <span className="text-foreground font-semibold">
+                      {projetoSelecionado.liderProjetoNome || "Não definido"}
                     </span>
                   </div>
                   <div className="bg-background rounded-xl p-4 border border-border/30">
@@ -754,6 +800,32 @@ export function PainelDeProjetos() {
                   )}
                 </div>
 
+                {!editandoProjeto && podeDefinirLider && (
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-1.5">
+                      Líder do projeto
+                    </label>
+                    <select
+                      value={formLiderProjetoId}
+                      onChange={(e) => setFormLiderProjetoId(e.target.value)}
+                      disabled={salvandoProjeto}
+                      className={inputClass}
+                    >
+                      <option value="">Eu (criador do projeto)</option>
+                      {membrosGrupo
+                        .filter((m) => m.nivel !== "COLABORADOR")
+                        .map((m) => (
+                          <option key={m.usuarioId} value={m.usuarioId}>
+                            {m.nome}
+                          </option>
+                        ))}
+                    </select>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      O líder do projeto gerencia atividades, publicações e aprovações do projeto.
+                    </p>
+                  </div>
+                )}
+
                 {editandoProjeto && (
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
@@ -853,7 +925,7 @@ export function PainelDeProjetos() {
                     disabled={adicionandoParticipante}
                     className={`${inputClass} sm:w-44`}
                   >
-                    {(["PESQUISADOR", "COORDENADOR", "LIDER"] as NivelMembro[]).map((n) => (
+                    {(["PESQUISADOR", "COLABORADOR", "COORDENADOR", ...(podeDefinirLider ? ["LIDER"] : [])] as NivelMembro[]).map((n) => (
                       <option key={n} value={n}>
                         {NivelMembroLabels[n]}
                       </option>

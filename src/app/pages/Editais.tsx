@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import { useGrupo } from "../contexts/GrupoContext";
 import { EditalService } from "../services/editais/EditalService";
+import { ProjetoService } from "../services/projetos/ProjetoService";
+import { AuthService } from "../services/auth/AuthService";
 import { EditalResponse } from "../models/dto/editais/Edital";
 import { DocumentoResponse } from "../models/dto/editais/Documento";
 import { ProjetoResponse } from "../models/dto/projetos/Projeto";
@@ -39,7 +41,7 @@ import {
   TIPOS_LEMBRETE,
   type TipoLembrete,
 } from "../models/dto/lembretes/Lembrete";
-import { nivelEhCoordenadorOuAcima } from "../models/dto/NivelMembro";
+import { nivelEhLider } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "../components/DateInput";
 
@@ -47,9 +49,16 @@ type Aba = "editais" | "eventos";
 
 const TAMANHO_PAGINA = 9;
 
-const FILTROS_EDITAIS_VAZIOS = {
+const FILTROS_EDITAIS_VAZIOS: {
+  palavraChave: string;
+  organizacao: string;
+  projetoId: number | null;
+  dataInicio: string;
+  dataFim: string;
+} = {
   palavraChave: "",
   organizacao: "",
+  projetoId: null,
   dataInicio: "",
   dataFim: "",
 };
@@ -177,10 +186,13 @@ function Paginacao({ pagina, totalPaginas, totalElementos, rotulo, onChange }: P
 export function Editais() {
   const { grupoAtual, carregandoGrupos } = useGrupo();
   const editalService = useMemo(() => new EditalService(), []);
+  const projetoService = useMemo(() => new ProjetoService(), []);
   const lembreteService = useMemo(() => new LembreteService(), []);
+  const authService = useMemo(() => new AuthService(), []);
 
   const grupoId = grupoAtual?.id;
-  const podeGerenciar = nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+  const podeGerenciar = authService.isAdminOrInitialAdmin() || nivelEhLider(grupoAtual?.nivel);
+  const [projetos, setProjetos] = useState<ProjetoResponse[]>([]);
 
   const [aba, setAba] = useState<Aba>("editais");
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
@@ -194,6 +206,7 @@ export function Editais() {
 
   const [palavraChave, setPalavraChave] = useState("");
   const [organizacao, setOrganizacao] = useState("");
+  const [projetoIdEdital, setProjetoIdEdital] = useState<number | "all">("all");
   const [dataInicioEdital, setDataInicioEdital] = useState("");
   const [dataFimEdital, setDataFimEdital] = useState("");
   const [filtrosEditais, setFiltrosEditais] = useState(FILTROS_EDITAIS_VAZIOS);
@@ -219,6 +232,7 @@ export function Editais() {
   const [formUri, setFormUri] = useState("");
   const [formAbertura, setFormAbertura] = useState("");
   const [formEncerramento, setFormEncerramento] = useState("");
+  const [formProjetoIds, setFormProjetoIds] = useState<number[]>([]);
   const [salvando, setSalvando] = useState(false);
   const [erroForm, setErroForm] = useState("");
 
@@ -260,6 +274,7 @@ export function Editais() {
     try {
       const resposta = await editalService.listar({
         grupoId,
+        projetoId: filtrosEditais.projetoId ?? undefined,
         palavraChave: filtrosEditais.palavraChave,
         organizacao: filtrosEditais.organizacao,
         dataInicio: filtrosEditais.dataInicio,
@@ -346,6 +361,7 @@ export function Editais() {
     setFiltrosEditais({
       palavraChave,
       organizacao,
+      projetoId: projetoIdEdital === "all" ? null : projetoIdEdital,
       dataInicio: dataInicioEdital,
       dataFim: dataFimEdital,
     });
@@ -354,6 +370,7 @@ export function Editais() {
   const limparFiltrosEditais = () => {
     setPalavraChave("");
     setOrganizacao("");
+    setProjetoIdEdital("all");
     setDataInicioEdital("");
     setDataFimEdital("");
     setPaginaEditais(1);
@@ -459,6 +476,7 @@ export function Editais() {
         uri: formUri.trim(),
         dthAbertura: normalizarDataHora(formAbertura),
         dthEncerramento: normalizarDataHora(formEncerramento),
+        projetoIds: formProjetoIds,
       };
 
       if (editando) {
@@ -566,6 +584,7 @@ export function Editais() {
   const filtrosEditaisAtivos =
     !!filtrosEditais.palavraChave ||
     !!filtrosEditais.organizacao ||
+    !!filtrosEditais.projetoId ||
     !!filtrosEditais.dataInicio ||
     !!filtrosEditais.dataFim;
 
@@ -642,6 +661,22 @@ export function Editais() {
             onSubmit={aplicarFiltrosEditais}
             className="bg-card rounded-2xl p-4 border border-border/30 space-y-4"
           >
+            <div className="flex items-center gap-2">
+              <FolderKanban className="w-4 h-4 text-muted-foreground shrink-0" />
+              <select
+                value={projetoIdEdital}
+                onChange={(e) => setProjetoIdEdital(e.target.value === "all" ? "all" : Number(e.target.value))}
+                className="px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60 min-w-[200px]"
+              >
+                <option value="all">Todos os projetos</option>
+                {projetos.map((projeto) => (
+                  <option key={projeto.id} value={projeto.id}>
+                    {projeto.titulo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
               <div className="md:col-span-4">
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">

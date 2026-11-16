@@ -15,6 +15,8 @@ export const atividadeResponseSchema = z.object({
   isAtrasada: z.boolean().optional().default(false),
   isAtivo: z.boolean().optional().default(true),
   projetoPodeSerFinalizado: z.boolean().optional().default(false),
+  motivoRejeicao: z.string().nullable().optional(),
+  podeSerAprovada: z.boolean().optional().default(false),
 });
 
 export type AtividadeResponse = z.infer<typeof atividadeResponseSchema>;
@@ -50,29 +52,35 @@ export const editarAtividadeRequestSchema = z.object({
 export type EditarAtividadeRequest = z.infer<typeof editarAtividadeRequestSchema>;
 
 export const ATIVIDADE_STATUS = [
+  "AGUARDANDO_APROVACAO",
   "PENDENTE",
   "EM_ANDAMENTO",
   "AGUARDANDO_CONFIRMACAO",
   "CONCLUIDA",
   "ENCERRADA",
+  "REJEITADA",
 ] as const;
 
 export type AtividadeStatus = (typeof ATIVIDADE_STATUS)[number];
 
 export const AtividadeStatusLabels: Record<AtividadeStatus, string> = {
+  AGUARDANDO_APROVACAO: "Aguardando Aprovação",
   PENDENTE: "Pendente",
   EM_ANDAMENTO: "Em Andamento",
   AGUARDANDO_CONFIRMACAO: "Aguardando Confirmação",
   CONCLUIDA: "Concluída",
   ENCERRADA: "Encerrada",
+  REJEITADA: "Rejeitada",
 };
 
 const PROXIMO_STATUS: Record<AtividadeStatus, AtividadeStatus | null> = {
+  AGUARDANDO_APROVACAO: null,
   PENDENTE: "EM_ANDAMENTO",
   EM_ANDAMENTO: "AGUARDANDO_CONFIRMACAO",
   AGUARDANDO_CONFIRMACAO: "CONCLUIDA",
   CONCLUIDA: "ENCERRADA",
   ENCERRADA: null,
+  REJEITADA: null,
 };
 
 export function proximoStatusAtividade(status: string): AtividadeStatus | null {
@@ -81,5 +89,9 @@ export function proximoStatusAtividade(status: string): AtividadeStatus | null {
 
 export function atividadeEstaAberta(status?: string | null): boolean {
   const normalizado = (status || "").toUpperCase();
-  return normalizado !== "CONCLUIDA" && normalizado !== "ENCERRADA";
+  return normalizado !== "CONCLUIDA" && normalizado !== "ENCERRADA" && normalizado !== "REJEITADA";
+}
+
+export interface RejeitarAtividadeRequest {
+  motivo?: string | null;
 }

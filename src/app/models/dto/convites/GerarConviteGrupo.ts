@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { nivelMembroSchema } from "../NivelMembro";
 
 export const gerarConviteGrupoRequestSchema = z.object({
   idGrupo: z.number(),
@@ -6,6 +7,7 @@ export const gerarConviteGrupoRequestSchema = z.object({
   diasValidade: z.number().optional(),
   limiteUso: z.number().optional().nullable(),
   idRole: z.number().optional().nullable(),
+  nivel: nivelMembroSchema.optional(),
 });
 
 export type GerarConviteGrupoRequest = z.infer<typeof gerarConviteGrupoRequestSchema>;
@@ -33,6 +35,7 @@ export const enviarConviteGrupoRequestSchema = z.object({
   idsProjeto: z.array(z.number()).optional(),
   diasValidade: z.number().optional(),
   idRole: z.number().optional().nullable(),
+  nivel: nivelMembroSchema.optional(),
 });
 
 export type EnviarConviteGrupoRequest = z.infer<typeof enviarConviteGrupoRequestSchema>;

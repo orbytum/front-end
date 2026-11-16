@@ -18,19 +18,29 @@ import {
   User,
   GitBranch,
   RefreshCw,
+  ShieldCheck,
+  XCircle,
+  Check,
+  ThumbsDown,
 } from "lucide-react";
 import { AtividadeService } from "../services/atividades/AtividadeService";
 import { ProjetoService } from "../services/projetos/ProjetoService";
 import { GrupoService } from "../services/grupos/GrupoService";
+import { AuthService } from "../services/auth/AuthService";
 import {
   AtividadeResponse,
   AtividadeStatus,
   AtividadeStatusLabels,
+  atividadeEstaAberta,
   proximoStatusAtividade,
 } from "../models/dto/atividades/Atividade";
 import { ProjetoResponse } from "../models/dto/projetos/Projeto";
 import { ParticipanteProjetoResponse } from "../models/dto/projetos/ParticipanteProjeto";
-import { NivelMembro, nivelEhCoordenadorOuAcima } from "../models/dto/NivelMembro";
+import {
+  NivelMembro,
+  nivelEhCoordenadorOuAcima,
+  nivelPodeEscrever,
+} from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "./DateInput";
 
@@ -44,6 +54,8 @@ interface AtividadesBoardProps {
 interface MembroGrupo {
   usuarioId: number;
   nome: string;
+  email?: string;
+  nivel?: NivelMembro | null;
 }
 
 interface ColunaConfig {
@@ -55,6 +67,13 @@ interface ColunaConfig {
 }
 
 const COLUNAS: ColunaConfig[] = [
+  {
+    status: "AGUARDANDO_APROVACAO",
+    label: "Aguardando Aprovação",
+    icon: ShieldCheck,
+    badge: "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/30",
+    header: "text-[#f59e0b]",
+  },
   {
     status: "PENDENTE",
     label: "Pendente",
@@ -90,6 +109,13 @@ const COLUNAS: ColunaConfig[] = [
     badge: "bg-[#7c3aed]/15 text-[#7c3aed] border-[#7c3aed]/30",
     header: "text-[#7c3aed]",
   },
+  {
+    status: "REJEITADA",
+    label: "Rejeitada",
+    icon: XCircle,
+    badge: "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/30",
+    header: "text-[#ef4444]",
+  },
 ];
 
 const inputClass =
@@ -111,10 +137,12 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
   const atividadeService = useMemo(() => new AtividadeService(), []);
   const projetoService = useMemo(() => new ProjetoService(), []);
   const grupoService = useMemo(() => new GrupoService(), []);
+  const authService = useMemo(() => new AuthService(), []);
 
   const [atividades, setAtividades] = useState<AtividadeResponse[]>([]);
   const [participantes, setParticipantes] = useState<ParticipanteProjetoResponse[]>([]);
   const [membrosGrupo, setMembrosGrupo] = useState<MembroGrupo[]>([]);
+  const [carregandoResponsaveis, setCarregandoResponsaveis] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
@@ -134,13 +162,72 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
   const [finalizarAberto, setFinalizarAberto] = useState(false);
   const [finalizando, setFinalizando] = useState(false);
 
-  const podeGerenciar = isAdmin || nivelEhCoordenadorOuAcima(nivel);
-  const podeRegistrarImpedimento = !!nivel || isAdmin;
+  const [atividadeParaRejeitar, setAtividadeParaRejeitar] = useState<AtividadeResponse | null>(null);
+  const [motivoRejeicao, setMotivoRejeicao] = useState("");
+  const [rejeitando, setRejeitando] = useState(false);
+
+  const usuarioEmail = (authService.getUserEmail() || "").toLowerCase();
+  const isLiderProjeto = !!projeto?.liderProjetoId && participantes.some(
+    (p) => p.usuarioId === projeto.liderProjetoId
+      && (p.email || "").toLowerCase() === usuarioEmail
+  );
+  const euNoProjeto = participantes.find(
+    (p) => (p.email || "").toLowerCase() === usuarioEmail
+  );
+  const isColaboradorProjeto = euNoProjeto?.nivel === "COLABORADOR";
+
+  const podeGerenciar = isAdmin || nivelEhCoordenadorOuAcima(nivel) || isLiderProjeto;
+  const podeFinalizarProjeto = isAdmin || nivelEhCoordenadorOuAcima(nivel);
+  const podeCriarAtividade = isAdmin
+    || nivelEhCoordenadorOuAcima(nivel)
+    || (nivelPodeEscrever(nivel) && !isColaboradorProjeto && !!euNoProjeto);
+  const podeMoverStatus = podeCriarAtividade;
+  const podeRegistrarImpedimento = podeCriarAtividade;
 
   const atividadesEmAndamento = useMemo(
     () => atividades.filter((a) => a.status?.toUpperCase() === "EM_ANDAMENTO"),
     [atividades]
   );
+
+  const carregarParticipantes = useCallback(async () => {
+    if (!projeto?.id) {
+      setParticipantes([]);
+      return;
+    }
+
+    setCarregandoResponsaveis(true);
+    try {
+      const lista = await projetoService.listarParticipantes(projeto.id);
+      setParticipantes(lista);
+    } catch {
+      // Mantém a lista atual para não bloquear o preenchimento do formulário.
+    } finally {
+      setCarregandoResponsaveis(false);
+    }
+  }, [projeto?.id, projetoService]);
+
+  const carregarMembrosGrupo = useCallback(async () => {
+    if (!projeto?.grupoId) {
+      setMembrosGrupo([]);
+      return;
+    }
+
+    try {
+      const membros = await grupoService.listarPesquisadores(projeto.grupoId, { size: 200 });
+      setMembrosGrupo(
+        (membros.items || [])
+          .map((m) => ({
+            usuarioId: m.usuarioId ?? m.id ?? 0,
+            nome: m.nome,
+            email: m.email,
+            nivel: m.nivel,
+          }))
+          .filter((m) => m.usuarioId > 0)
+      );
+    } catch {
+      setMembrosGrupo([]);
+    }
+  }, [projeto?.grupoId, grupoService]);
 
   const carregar = useCallback(async () => {
     if (!projeto?.id) {
@@ -152,25 +239,12 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     setError("");
     setActionError("");
     try {
-      const [atividadesRes, participantesRes] = await Promise.all([
+      const [atividadesRes] = await Promise.all([
         atividadeService.listarPorProjeto(projeto.id),
-        projetoService.listarParticipantes(projeto.id),
+        carregarParticipantes(),
+        carregarMembrosGrupo(),
       ]);
       setAtividades(atividadesRes);
-      setParticipantes(participantesRes);
-
-      if (projeto.grupoId) {
-        try {
-          const membros = await grupoService.listarPesquisadores(projeto.grupoId, { size: 200 });
-          setMembrosGrupo(
-            (membros.items || [])
-              .map((m) => ({ usuarioId: m.usuarioId ?? m.id ?? 0, nome: m.nome }))
-              .filter((m) => m.usuarioId > 0)
-          );
-        } catch {
-          setMembrosGrupo([]);
-        }
-      }
     } catch (err) {
       if (err instanceof HttpError) {
         setError(err.response?.mensagem || err.message);
@@ -180,7 +254,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     } finally {
       setLoading(false);
     }
-  }, [projeto?.id, projeto?.grupoId, atividadeService, projetoService, grupoService]);
+  }, [projeto?.id, atividadeService, carregarParticipantes, carregarMembrosGrupo]);
 
   useEffect(() => {
     carregar();
@@ -196,6 +270,10 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     setFormAtividadePaiId(paiId ? String(paiId) : "");
     setFormError("");
     setModalAberto(true);
+
+    // Recarrega as listas para refletir participantes/membros alterados recentemente.
+    void carregarParticipantes();
+    void carregarMembrosGrupo();
   };
 
   const abrirEdicao = (atividade: AtividadeResponse) => {
@@ -208,6 +286,10 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     setFormAtividadePaiId(atividade.atividadePaiId ? String(atividade.atividadePaiId) : "");
     setFormError("");
     setModalAberto(true);
+
+    // Recarrega as listas para refletir participantes/membros alterados recentemente.
+    void carregarParticipantes();
+    void carregarMembrosGrupo();
   };
 
   const handleSalvar = async (e: React.FormEvent) => {
@@ -275,7 +357,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
       const atualizada = await atividadeService.atualizarStatus(atividade.id, proximo);
       setAtividades((prev) => prev.map((a) => (a.id === atualizada.id ? atualizada : a)));
 
-      if (atualizada.projetoPodeSerFinalizado && podeGerenciar) {
+      if (atualizada.projetoPodeSerFinalizado && podeFinalizarProjeto) {
         setFinalizarAberto(true);
       }
     } catch (err) {
@@ -286,6 +368,45 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
       }
     } finally {
       setAvancandoId(null);
+    }
+  };
+
+  const handleAprovar = async (atividade: AtividadeResponse) => {
+    setActionError("");
+    setAvancandoId(atividade.id);
+    try {
+      const atualizada = await atividadeService.aprovar(atividade.id);
+      setAtividades((prev) => prev.map((a) => (a.id === atualizada.id ? atualizada : a)));
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setActionError(err.response?.mensagem || err.message);
+      } else {
+        setActionError("Erro ao aprovar a atividade.");
+      }
+    } finally {
+      setAvancandoId(null);
+    }
+  };
+
+  const confirmarRejeicao = async () => {
+    if (!atividadeParaRejeitar) return;
+    setRejeitando(true);
+    setActionError("");
+    try {
+      const atualizada = await atividadeService.rejeitar(atividadeParaRejeitar.id, {
+        motivo: motivoRejeicao.trim() || null,
+      });
+      setAtividades((prev) => prev.map((a) => (a.id === atualizada.id ? atualizada : a)));
+      setAtividadeParaRejeitar(null);
+      setMotivoRejeicao("");
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setActionError(err.response?.mensagem || err.message);
+      } else {
+        setActionError("Erro ao rejeitar a atividade.");
+      }
+    } finally {
+      setRejeitando(false);
     }
   };
 
@@ -339,9 +460,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
 
   const total = atividades.length;
   const atrasadas = atividades.filter((a) => a.isAtrasada).length;
-  const abertas = atividades.filter(
-    (a) => a.status !== "CONCLUIDA" && a.status !== "ENCERRADA"
-  ).length;
+  const abertas = atividades.filter((a) => atividadeEstaAberta(a.status)).length;
 
   const responsaveis = editando?.atividadePaiId || modoImpedimento ? membrosGrupo : participantes;
 
@@ -370,7 +489,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </button>
-          {podeGerenciar && (
+          {podeCriarAtividade && (
             <button
               type="button"
               onClick={() => abrirNovaAtividade(false)}
@@ -407,7 +526,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
           <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7 gap-4">
           {COLUNAS.map((coluna) => {
             const itens = atividades.filter((a) => a.status?.toUpperCase() === coluna.status);
             const Icone = coluna.icon;
@@ -431,7 +550,9 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                     const proximo = proximoStatusAtividade(atividade.status);
                     const exigeCoordenacao =
                       proximo === "CONCLUIDA" || proximo === "ENCERRADA";
-                    const podeAvancar = !!proximo && (!exigeCoordenacao || podeGerenciar);
+                    const podeAvancar = !!proximo && podeMoverStatus && (!exigeCoordenacao || podeGerenciar);
+                    const emAprovacao =
+                      atividade.status?.toUpperCase() === "AGUARDANDO_APROVACAO";
                     const pai = atividade.atividadePaiId
                       ? atividades.find((a) => a.id === atividade.atividadePaiId)
                       : null;
@@ -468,6 +589,12 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                           </div>
                         )}
 
+                        {atividade.status?.toUpperCase() === "REJEITADA" && atividade.motivoRejeicao && (
+                          <div className="p-2 rounded-lg bg-[#ef4444]/10 border border-[#ef4444]/25 text-[11px] text-[#ef4444]">
+                            Motivo: {atividade.motivoRejeicao}
+                          </div>
+                        )}
+
                         <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <User className="w-3 h-3" />
@@ -484,7 +611,39 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                         </div>
 
                         <div className="flex items-center gap-1.5 pt-1 border-t border-border/20">
-                          {podeAvancar && (
+                          {emAprovacao && atividade.podeSerAprovada && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleAprovar(atividade)}
+                                disabled={avancandoId === atividade.id}
+                                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-[#10b981]/10 hover:bg-[#10b981]/20 text-[#10b981] text-[11px] font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                                title="Aprovar atividade"
+                              >
+                                {avancandoId === atividade.id ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <>
+                                    <Check className="w-3.5 h-3.5" />
+                                    <span>Aprovar</span>
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAtividadeParaRejeitar(atividade);
+                                  setMotivoRejeicao("");
+                                }}
+                                className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-[#ef4444]/10 hover:bg-[#ef4444]/20 text-[#ef4444] text-[11px] font-semibold transition-colors cursor-pointer"
+                                title="Rejeitar atividade"
+                              >
+                                <ThumbsDown className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          )}
+
+                          {!emAprovacao && podeAvancar && (
                             <button
                               type="button"
                               onClick={() => handleAvancarStatus(atividade)}
@@ -653,19 +812,32 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                   <select
                     value={formResponsavelId}
                     onChange={(e) => setFormResponsavelId(e.target.value)}
-                    disabled={salvando}
+                    disabled={salvando || carregandoResponsaveis}
                     className={inputClass}
                   >
-                    <option value="">Selecione o responsável</option>
+                    <option value="">
+                      {carregandoResponsaveis ? "Carregando responsáveis..." : "Selecione o responsável"}
+                    </option>
                     {responsaveis.map((r) => (
                       <option key={r.usuarioId} value={r.usuarioId}>
                         {r.nome}
                       </option>
                     ))}
                   </select>
-                  {modoImpedimento && (
+                  {modoImpedimento ? (
                     <p className="text-[11px] text-muted-foreground mt-1">
                       Impedimentos podem ser atribuídos a qualquer membro do grupo.
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Apenas participantes do projeto podem ser responsáveis. Adicione o membro em
+                      "Gerenciar participantes" do projeto.
+                    </p>
+                  )}
+                  {!modoImpedimento && !carregandoResponsaveis && responsaveis.length === 0 && (
+                    <p className="text-[11px] text-[#f59e0b] mt-1">
+                      Este projeto ainda não possui participantes. Adicione um participante para
+                      poder atribuir a atividade.
                     </p>
                   )}
                 </div>
@@ -708,6 +880,60 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {atividadeParaRejeitar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-card rounded-2xl w-full max-w-md border border-border/40 overflow-hidden">
+            <div className="p-6 border-b border-border/30 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#ef4444] flex items-center justify-center">
+                <ThumbsDown className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-foreground font-semibold text-lg">Rejeitar atividade</h3>
+                <p className="text-muted-foreground text-xs">{atividadeParaRejeitar.titulo}</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1.5">
+                  Motivo da rejeição
+                </label>
+                <textarea
+                  rows={3}
+                  value={motivoRejeicao}
+                  onChange={(e) => setMotivoRejeicao(e.target.value)}
+                  disabled={rejeitando}
+                  maxLength={255}
+                  placeholder="Descreva o que precisa ser ajustado (opcional)"
+                  className={inputClass}
+                />
+              </div>
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAtividadeParaRejeitar(null);
+                    setMotivoRejeicao("");
+                  }}
+                  disabled={rejeitando}
+                  className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmarRejeicao}
+                  disabled={rejeitando}
+                  className="px-5 py-2.5 bg-[#ef4444] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                >
+                  {rejeitando ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsDown className="w-4 h-4" />}
+                  <span>Confirmar rejeição</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
