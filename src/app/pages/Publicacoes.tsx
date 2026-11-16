@@ -17,16 +17,17 @@ import {
   CheckCircle2,
   FolderKanban,
   Pencil,
+  Link2,
 } from "lucide-react";
 import { PublicacaoService } from "../services/publicacoes/PublicacaoService";
 import { ProjetoService } from "../services/projetos/ProjetoService";
 import { AuthService } from "../services/auth/AuthService";
 import { useGrupo } from "../contexts/GrupoContext";
-import { PublicacaoResponse } from "../models/dto/publicacoes/Publicacao";
+import { PublicacaoResponse, TIPOS_PUBLICACAO } from "../models/dto/publicacoes/Publicacao";
 import { ParticipanteProjetoResponse } from "../models/dto/projetos/ParticipanteProjeto";
 import {
   nivelEhColaborador,
-  nivelEhCoordenadorOuAcima,
+  nivelEhLider,
 } from "../models/dto/NivelMembro";
 import { DateInput } from "../components/DateInput";
 
@@ -55,7 +56,7 @@ export function Publicacoes({
       && (participante.email || "").toLowerCase() === usuarioEmail
   );
   const podeGerenciar = !isColaborador
-    && (isAdmin || nivelEhCoordenadorOuAcima(grupoAtual?.nivel) || isLiderProjeto);
+    && (isAdmin || nivelEhLider(grupoAtual?.nivel) || isLiderProjeto);
 
   useEffect(() => {
     if (!projetoId) {
@@ -91,6 +92,9 @@ export function Publicacoes({
     projetoId ? String(projetoId) : ""
   );
   const [arquivoPdf, setArquivoPdf] = useState<File | null>(null);
+  const [novoTipo, setNovoTipo] = useState<string>(TIPOS_PUBLICACAO[0]);
+  const [novaDataPublicacao, setNovaDataPublicacao] = useState("");
+  const [novoLink, setNovoLink] = useState("");
 
   // Modal de Edição
   const [publicacaoParaEditar, setPublicacaoParaEditar] =
@@ -98,6 +102,9 @@ export function Publicacoes({
   const [editTitulo, setEditTitulo] = useState("");
   const [editDescricao, setEditDescricao] = useState("");
   const [editArquivoPdf, setEditArquivoPdf] = useState<File | null>(null);
+  const [editTipo, setEditTipo] = useState<string>(TIPOS_PUBLICACAO[0]);
+  const [editDataPublicacao, setEditDataPublicacao] = useState("");
+  const [editLink, setEditLink] = useState("");
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
   const [erroEdicao, setErroEdicao] = useState<string | null>(null);
 
@@ -219,6 +226,14 @@ export function Publicacoes({
       setErroCriacao("O arquivo PDF da publicação é obrigatório.");
       return;
     }
+    if (!novaDataPublicacao) {
+      setErroCriacao("A data da publicação é obrigatória.");
+      return;
+    }
+    if (novoLink.trim() && !/^https?:\/\/\S+$/.test(novoLink.trim())) {
+      setErroCriacao("O link deve começar com http:// ou https://.");
+      return;
+    }
 
     setSalvando(true);
     try {
@@ -227,6 +242,9 @@ export function Publicacoes({
         descricao: novaDescricao.trim(),
         projetoId: targetProjetoId,
         arquivo: arquivoPdf,
+        tipo: novoTipo,
+        dataPublicacao: novaDataPublicacao,
+        link: novoLink.trim() || undefined,
       });
 
       setMensagemSucesso(
@@ -239,6 +257,9 @@ export function Publicacoes({
       setNovaDescricao("");
       if (!projetoId) setNovoProjetoId("");
       setArquivoPdf(null);
+      setNovoTipo(TIPOS_PUBLICACAO[0]);
+      setNovaDataPublicacao("");
+      setNovoLink("");
       setMostrarModalCriacao(false);
 
       // Recarregar lista
@@ -260,6 +281,9 @@ export function Publicacoes({
     setEditTitulo(publicacao.titulo);
     setEditDescricao(publicacao.descricao);
     setEditArquivoPdf(null);
+    setEditTipo(publicacao.tipo || TIPOS_PUBLICACAO[0]);
+    setEditDataPublicacao(publicacao.dataPublicacao || "");
+    setEditLink(publicacao.link || "");
     setErroEdicao(null);
   };
 
@@ -293,6 +317,14 @@ export function Publicacoes({
       setErroEdicao("A descrição da publicação é obrigatória.");
       return;
     }
+    if (!editDataPublicacao) {
+      setErroEdicao("A data da publicação é obrigatória.");
+      return;
+    }
+    if (editLink.trim() && !/^https?:\/\/\S+$/.test(editLink.trim())) {
+      setErroEdicao("O link deve começar com http:// ou https://.");
+      return;
+    }
 
     setSalvandoEdicao(true);
     try {
@@ -301,6 +333,9 @@ export function Publicacoes({
         descricao: editDescricao.trim(),
         projetoId: publicacaoParaEditar.projetoId ?? undefined,
         arquivo: editArquivoPdf,
+        tipo: editTipo,
+        dataPublicacao: editDataPublicacao,
+        link: editLink.trim(),
       });
       setMensagemSucesso("Publicação atualizada com sucesso!");
       setTimeout(() => setMensagemSucesso(null), 4000);
@@ -358,6 +393,11 @@ export function Publicacoes({
     const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  const formatarDataSimples = (data: string) => {
+    const [ano, mes, dia] = data.split("-");
+    return dia && mes && ano ? `${dia}/${mes}/${ano}` : data;
   };
 
   const formatarData = (dataIso: string) => {
@@ -582,6 +622,11 @@ export function Publicacoes({
                 </div>
 
                 {/* Título & Descrição */}
+                {publicacao.tipo && (
+                  <span className="inline-block mb-2 px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary border border-primary/20">
+                    {publicacao.tipo}
+                  </span>
+                )}
                 <h3 className="text-foreground font-semibold text-base mb-2 line-clamp-2 leading-snug">
                   {publicacao.titulo}
                 </h3>
@@ -592,10 +637,26 @@ export function Publicacoes({
 
               {/* Rodapé do Card */}
               <div className="pt-3 border-t border-border/20 flex items-center justify-between text-xs text-muted-foreground gap-2">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5" title={publicacao.dataPublicacao ? "Data da publicação" : "Data de cadastro"}>
                   <Calendar className="w-3.5 h-3.5" />
-                  <span>{formatarData(publicacao.dthRegistro)}</span>
+                  <span>
+                    {publicacao.dataPublicacao
+                      ? formatarDataSimples(publicacao.dataPublicacao)
+                      : formatarData(publicacao.dthRegistro)}
+                  </span>
                 </div>
+
+                {publicacao.link && (
+                  <a
+                    href={publicacao.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-primary hover:underline"
+                  >
+                    <Link2 className="w-3.5 h-3.5" />
+                    Link
+                  </a>
+                )}
 
                 <button
                   type="button"
@@ -693,6 +754,56 @@ export function Publicacoes({
                   onChange={(e) => setNovaDescricao(e.target.value)}
                   disabled={salvando}
                   className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm resize-none"
+                />
+              </div>
+
+              {/* REQ-088: tipo, data da publicação e link */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                    Tipo *
+                  </label>
+                  <select
+                    value={novoTipo}
+                    onChange={(e) => setNovoTipo(e.target.value)}
+                    disabled={salvando}
+                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                  >
+                    {TIPOS_PUBLICACAO.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                    {!TIPOS_PUBLICACAO.includes(novoTipo as (typeof TIPOS_PUBLICACAO)[number]) && (
+                      <option value={novoTipo}>{novoTipo}</option>
+                    )}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                    Data da publicação *
+                  </label>
+                  <DateInput
+                    type="date"
+                    value={novaDataPublicacao}
+                    onChange={setNovaDataPublicacao}
+                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Link{" "}
+                  <span className="text-muted-foreground font-normal">(opcional, ex.: DOI)</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://doi.org/..."
+                  value={novoLink}
+                  onChange={(e) => setNovoLink(e.target.value)}
+                  disabled={salvando}
+                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                 />
               </div>
 
@@ -852,6 +963,56 @@ export function Publicacoes({
                   onChange={(e) => setEditDescricao(e.target.value)}
                   disabled={salvandoEdicao}
                   className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60 resize-none"
+                />
+              </div>
+
+              {/* REQ-088: tipo, data da publicação e link */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                    Tipo *
+                  </label>
+                  <select
+                    value={editTipo}
+                    onChange={(e) => setEditTipo(e.target.value)}
+                    disabled={salvandoEdicao}
+                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                  >
+                    {TIPOS_PUBLICACAO.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                    {!TIPOS_PUBLICACAO.includes(editTipo as (typeof TIPOS_PUBLICACAO)[number]) && (
+                      <option value={editTipo}>{editTipo}</option>
+                    )}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                    Data da publicação *
+                  </label>
+                  <DateInput
+                    type="date"
+                    value={editDataPublicacao}
+                    onChange={setEditDataPublicacao}
+                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Link{" "}
+                  <span className="text-muted-foreground font-normal">(opcional, ex.: DOI)</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://doi.org/..."
+                  value={editLink}
+                  onChange={(e) => setEditLink(e.target.value)}
+                  disabled={salvandoEdicao}
+                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                 />
               </div>
 

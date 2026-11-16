@@ -13,7 +13,6 @@ import { GrupoService } from "../services/grupos/GrupoService";
 import { AuthService } from "../services/auth/AuthService";
 import { ProjetoResponse } from "../models/dto/projetos/Projeto";
 import {
-  nivelEhCoordenadorOuAcima,
   nivelEhLider,
 } from "../models/dto/NivelMembro";
 import {
@@ -100,7 +99,7 @@ function mensagemDeErro(err: unknown, padrao: string): string {
 }
 
 export function Lembretes() {
-  const { grupoAtual } = useGrupo();
+  const { grupoAtual, meusGrupos } = useGrupo();
   const lembreteService = useMemo(() => new LembreteService(), []);
   const projetoService = useMemo(() => new ProjetoService(), []);
   const grupoService = useMemo(() => new GrupoService(), []);
@@ -119,6 +118,11 @@ export function Lembretes() {
   });
   const [projetos, setProjetos] = useState<ProjetoResponse[]>([]);
   const [meuUsuarioId, setMeuUsuarioId] = useState<number | null>(null);
+
+  // o próprio id vem de /grupos/meus-grupos (a lista de membros do grupo é restrita ao líder)
+  useEffect(() => {
+    setMeuUsuarioId(grupoAtual?.usuarioId ?? meusGrupos[0]?.usuarioId ?? null);
+  }, [grupoAtual, meusGrupos]);
   const [filtroProjetoId, setFiltroProjetoId] = useState<number | "all">("all");
   const [mostrarModal, setMostrarModal] = useState(false);
   const [editando, setEditando] = useState<LembreteResponse | null>(null);
@@ -136,7 +140,7 @@ export function Lembretes() {
 
   const grupoId = grupoAtual?.id;
   const isAdmin = authService.isAdminOrInitialAdmin();
-  const podeGerenciarGrupo = isAdmin || nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+  const podeGerenciarGrupo = isAdmin || nivelEhLider(grupoAtual?.nivel);
   const podeEscolherGrupoInteiro = isAdmin || nivelEhLider(grupoAtual?.nivel);
   const projetosLideradosIds = useMemo(() => {
     if (!meuUsuarioId) return [];
@@ -156,17 +160,9 @@ export function Lembretes() {
       return;
     }
     try {
-      const [listaProjetos, membros] = await Promise.all([
-        projetoService.listarProjetosPorGrupo(grupoId),
-        grupoService.listarPesquisadores(grupoId, { size: 500 }),
-      ]);
+      const listaProjetos = await projetoService.listarProjetosPorGrupo(grupoId);
       setProjetos(listaProjetos);
-
-      const email = (authService.getUserEmail() || "").toLowerCase();
-      const eu = (membros.items || []).find(
-        (membro) => (membro.email || "").toLowerCase() === email
-      );
-      setMeuUsuarioId(eu?.usuarioId ?? eu?.id ?? null);
+      setMeuUsuarioId(grupoAtual?.usuarioId ?? meusGrupos[0]?.usuarioId ?? null);
     } catch {
       setProjetos([]);
       setMeuUsuarioId(null);

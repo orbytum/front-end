@@ -10,6 +10,8 @@ export const solicitacaoResponseSchema = z.object({
   isAprovada: z.boolean(),
   projetoId: z.number().nullable().optional(),
   projetoTitulo: z.string().nullable().optional(),
+  grupoId: z.number().nullable().optional(),
+  grupoNome: z.string().nullable().optional(),
   usuarioId: z.number().nullable().optional(),
   usuarioNome: z.string().nullable().optional(),
   materialId: z.number().nullable().optional(),
@@ -18,6 +20,8 @@ export const solicitacaoResponseSchema = z.object({
   valor: z.number().nullable().optional(),
   dthSolicitacao: z.string(),
   dthResposta: z.string().nullable().optional(),
+  aprovadorLiderNome: z.string().nullable().optional(),
+  dthAprovacaoLider: z.string().nullable().optional(),
 });
 
 export type SolicitacaoResponse = z.infer<typeof solicitacaoResponseSchema>;
@@ -47,6 +51,7 @@ export type EditarSolicitacaoRequest = z.infer<typeof editarSolicitacaoRequestSc
 
 export const SOLICITACAO_STATUS = [
   "PENDENTE",
+  "AGUARDANDO_ADMINISTRADOR",
   "EM_ANDAMENTO",
   "CONCLUIDA",
   "ENCERRADA",
@@ -56,15 +61,25 @@ export const SOLICITACAO_STATUS = [
 export type SolicitacaoStatus = (typeof SOLICITACAO_STATUS)[number];
 
 export const SolicitacaoStatusLabels: Record<string, string> = {
-  PENDENTE: "Pendente",
+  PENDENTE: "Aguardando líder do grupo",
+  AGUARDANDO_ADMINISTRADOR: "Aguardando administrador",
   EM_ANDAMENTO: "Em Andamento",
   CONCLUIDA: "Concluída",
   ENCERRADA: "Encerrada",
   REJEITADA: "Rejeitada",
 };
 
-export function podemAprovarOuRejeitar(status?: string | null): boolean {
-  return status === "PENDENTE";
+/**
+ * Aprovação em duas etapas: o Líder do grupo avalia as pendentes e encaminha ao administrador,
+ * que dá a decisão final. Solicitações criadas pelo próprio Líder do grupo já nascem na segunda etapa.
+ */
+export function podeAvaliarSolicitacao(
+  status: string | null | undefined,
+  perfil: { isAdmin: boolean; isLiderGrupo: boolean },
+): boolean {
+  if (status === "PENDENTE") return perfil.isLiderGrupo;
+  if (status === "AGUARDANDO_ADMINISTRADOR") return perfil.isAdmin;
+  return false;
 }
 
 export function podemConcluirOuEncerrar(status?: string | null): boolean {
@@ -72,7 +87,7 @@ export function podemConcluirOuEncerrar(status?: string | null): boolean {
 }
 
 export function solicitacaoEstaAberta(status?: string | null): boolean {
-  return status === "PENDENTE" || status === "EM_ANDAMENTO";
+  return status === "PENDENTE" || status === "AGUARDANDO_ADMINISTRADOR" || status === "EM_ANDAMENTO";
 }
 
 export const TIPOS_SOLICITACAO = [

@@ -181,9 +181,7 @@ export const router = createBrowserRouter([
       {
         path: "solicitacoes",
         element: (
-          <AdminOnlyRoute>
-            <Solicitacoes />
-          </AdminOnlyRoute>
+          <Solicitacoes />
         ),
       },
     ],

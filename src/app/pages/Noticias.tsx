@@ -34,7 +34,7 @@ import {
 import { ProjetoResponse } from "../models/dto/projetos/Projeto";
 import {
   nivelEhColaborador,
-  nivelEhCoordenadorOuAcima,
+  nivelEhLider,
 } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "../components/DateInput";
@@ -50,18 +50,23 @@ const STATUS_BADGE: Record<NoticiaStatus, string> = {
 };
 
 export function Noticias() {
-  const { grupoAtual, carregandoGrupos } = useGrupo();
+  const { grupoAtual, carregandoGrupos, meusGrupos } = useGrupo();
   const noticiaService = useMemo(() => new NoticiaService(), []);
   const projetoService = useMemo(() => new ProjetoService(), []);
   const grupoService = useMemo(() => new GrupoService(), []);
   const authService = useMemo(() => new AuthService(), []);
 
   const isAdmin = authService.isAdminOrInitialAdmin();
-  const isCoordenadorOuAcima = nivelEhCoordenadorOuAcima(grupoAtual?.nivel);
+  const isLiderGrupo = nivelEhLider(grupoAtual?.nivel);
   const isColaborador = nivelEhColaborador(grupoAtual?.nivel);
 
   const [projetos, setProjetos] = useState<ProjetoResponse[]>([]);
   const [meuUsuarioId, setMeuUsuarioId] = useState<number | null>(null);
+
+  // o próprio id vem de /grupos/meus-grupos (a lista de membros do grupo é restrita ao líder)
+  useEffect(() => {
+    setMeuUsuarioId(grupoAtual?.usuarioId ?? meusGrupos[0]?.usuarioId ?? null);
+  }, [grupoAtual, meusGrupos]);
   const [filtroProjetoId, setFiltroProjetoId] = useState<number | "all">("all");
 
   const [aba, setAba] = useState<Aba>("publicadas");
@@ -109,16 +114,16 @@ export function Noticias() {
 
   const isLiderProjeto = projetosLideradosIds.length > 0;
   const podeCriarNoticia = isAdmin || !isColaborador;
-  const podeVerAprovacoes = isAdmin || isCoordenadorOuAcima || isLiderProjeto;
+  const podeVerAprovacoes = isAdmin || isLiderGrupo || isLiderProjeto;
 
   const podeAprovarNoticia = (noticia: NoticiaResponse) =>
     isAdmin
-    || isCoordenadorOuAcima
+    || isLiderGrupo
     || (noticia.projetos || []).some((projeto) => projetosLideradosIds.includes(projeto.id));
 
   const podeEditarNoticia = (noticia: NoticiaResponse) =>
     isAdmin
-    || isCoordenadorOuAcima
+    || isLiderGrupo
     || (noticia.projetos || []).some((projeto) => projetosLideradosIds.includes(projeto.id));
 
   const carregarContextoProjetos = useCallback(async () => {
@@ -129,17 +134,9 @@ export function Noticias() {
     }
 
     try {
-      const [listaProjetos, membros] = await Promise.all([
-        projetoService.listarProjetosPorGrupo(grupoAtual.id),
-        grupoService.listarPesquisadores(grupoAtual.id, { size: 500 }),
-      ]);
+      const listaProjetos = await projetoService.listarProjetosPorGrupo(grupoAtual.id);
       setProjetos(listaProjetos);
-
-      const email = (authService.getUserEmail() || "").toLowerCase();
-      const eu = (membros.items || []).find(
-        (membro) => (membro.email || "").toLowerCase() === email
-      );
-      setMeuUsuarioId(eu?.usuarioId ?? eu?.id ?? null);
+      setMeuUsuarioId(grupoAtual?.usuarioId ?? meusGrupos[0]?.usuarioId ?? null);
     } catch {
       setProjetos([]);
       setMeuUsuarioId(null);
@@ -546,12 +543,12 @@ export function Noticias() {
             className="bg-transparent text-foreground focus:outline-none text-sm"
           >
             <option value="all">
-              {isLiderProjeto && !isAdmin && !isCoordenadorOuAcima
+              {isLiderProjeto && !isAdmin && !isLiderGrupo
                 ? "Todos os projetos que lidero"
                 : "Todos os projetos"}
             </option>
             {projetos
-              .filter((projeto) => isAdmin || isCoordenadorOuAcima || projetosLideradosIds.includes(projeto.id))
+              .filter((projeto) => isAdmin || isLiderGrupo || projetosLideradosIds.includes(projeto.id))
               .map((projeto) => (
                 <option key={projeto.id} value={projeto.id}>
                   {projeto.titulo}
@@ -848,8 +845,12 @@ export function Noticias() {
 
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">
-                  Projetos relacionados (rótulos)
+                  Compartilhar com projetos
                 </label>
+                <p className="text-xs text-muted-foreground mb-1.5">
+                  Sem projetos marcados, a notícia é pública e todo o grupo a vê. Com projetos marcados, só os
+                  participantes desses projetos e o líder do grupo a veem.
+                </p>
                 <div className="max-h-36 overflow-y-auto rounded-xl border border-border/40 bg-background p-2 space-y-1">
                   {projetos.length === 0 && (
                     <p className="text-xs text-muted-foreground px-2 py-1">

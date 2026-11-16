@@ -2,7 +2,11 @@ import { useCallback, useEffect, useMemo, useState, type ElementType } from "rea
 import {
   AlertCircle,
   Calendar as CalendarIcon,
+  CalendarPlus,
+  Check,
   ChevronLeft,
+  Copy,
+  ExternalLink,
   ChevronRight,
   Clock,
   Coffee,
@@ -180,8 +184,17 @@ export function Calendario() {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
   const [exportando, setExportando] = useState(false);
+  const [assinaturaAberta, setAssinaturaAberta] = useState(false);
+  const [carregandoAssinatura, setCarregandoAssinatura] = useState(false);
+  const [urlAssinatura, setUrlAssinatura] = useState("");
+  const [copiado, setCopiado] = useState(false);
 
   const grupoId = grupoAtual?.id;
+
+  useEffect(() => {
+    setAssinaturaAberta(false);
+    setUrlAssinatura("");
+  }, [grupoId]);
 
   const carregar = useCallback(async () => {
     if (!grupoId) {
@@ -314,6 +327,42 @@ export function Calendario() {
     }
   };
 
+  const abrirAssinatura = async () => {
+    if (!grupoId) return;
+    if (assinaturaAberta) {
+      setAssinaturaAberta(false);
+      return;
+    }
+    setCarregandoAssinatura(true);
+    setErro("");
+    setCopiado(false);
+    try {
+      const { url } = await lembreteService.obterAssinatura(grupoId);
+      setUrlAssinatura(url);
+      setAssinaturaAberta(true);
+    } catch (err) {
+      setErro(mensagemDeErro(err, "Erro ao gerar o link de assinatura da agenda."));
+    } finally {
+      setCarregandoAssinatura(false);
+    }
+  };
+
+  const copiarAssinatura = async () => {
+    try {
+      await navigator.clipboard.writeText(urlAssinatura);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2500);
+    } catch {
+      setCopiado(false);
+    }
+  };
+
+  const urlWebcal = urlAssinatura.replace(/^https?:\/\//, "webcal://");
+  const linkGoogle = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(urlWebcal)}`;
+  const linkOutlook =
+    `https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(urlAssinatura)}` +
+    `&name=${encodeURIComponent(`Orbytum - ${grupoAtual?.nome ?? "Grupo"}`)}`;
+
   if (carregandoGrupos) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -369,8 +418,69 @@ export function Calendario() {
             )}
             Exportar .ics
           </button>
+          <button
+            onClick={abrirAssinatura}
+            disabled={!grupoId || carregandoAssinatura}
+            title="Sincronizar a agenda do grupo com Google Calendar ou Outlook"
+            className="px-5 py-3 disabled:opacity-50 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
+          >
+            {carregandoAssinatura ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <CalendarPlus className="w-5 h-5" />
+            )}
+            Assinar agenda
+          </button>
         </div>
       </div>
+
+      {assinaturaAberta && (
+        <div className="mb-6 bg-card border border-border/30 rounded-2xl p-5 space-y-4">
+          <div>
+            <h2 className="text-foreground font-semibold mb-1">Sincronizar com agenda externa</h2>
+            <p className="text-muted-foreground text-sm">
+              Assine este link no Google Calendar ou no Outlook para ver os lembretes do grupo na sua agenda. Os
+              aplicativos atualizam a assinatura periodicamente. O link é pessoal: não o compartilhe.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              readOnly
+              value={urlAssinatura}
+              onFocus={(e) => e.target.select()}
+              aria-label="Link de assinatura da agenda"
+              className="flex-1 px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm font-mono"
+            />
+            <button
+              onClick={copiarAssinatura}
+              className="px-4 py-2 bg-primary/15 text-primary hover:bg-primary/25 rounded-xl text-sm font-medium inline-flex items-center justify-center gap-2"
+            >
+              {copiado ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copiado ? "Copiado" : "Copiar link"}
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={linkGoogle}
+              target="_blank"
+              rel="noreferrer"
+              className="px-4 py-2 bg-background border border-border/40 hover:border-primary/50 rounded-xl text-sm text-foreground inline-flex items-center gap-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Adicionar ao Google Calendar
+            </a>
+            <a
+              href={linkOutlook}
+              target="_blank"
+              rel="noreferrer"
+              className="px-4 py-2 bg-background border border-border/40 hover:border-primary/50 rounded-xl text-sm text-foreground inline-flex items-center gap-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Adicionar ao Outlook
+            </a>
+          </div>
+        </div>
+      )}
 
       {erro && (
         <div className="mb-6 flex items-center gap-3 p-4 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444] text-sm">

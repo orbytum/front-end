@@ -142,7 +142,7 @@ export function Login() {
 
         {/* Badges de funções */}
         <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
-          {["Administrador", "Líder", "Coordenador", "Pesquisador"].map((funcao) => (
+          {["Administrador", "Líder", "Pesquisador", "Colaborador"].map((funcao) => (
             <span
               key={funcao}
               className="px-3 py-1 rounded-full text-xs text-muted-foreground bg-card/60 border border-border/20"

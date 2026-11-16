@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { BaseService } from "../BaseService";
 import {
+    AssinaturaCalendario,
+    assinaturaCalendarioSchema,
     CriarLembreteRequest,
     FiltrosLembrete,
     LembreteResponse,
@@ -72,6 +74,11 @@ export class LembreteService extends BaseService {
     /** Baixa os lembretes do grupo em formato iCalendar (.ics). */
     async exportarIcs(grupoId: number): Promise<Blob> {
         return this.getBlob(`/lembretes/grupo/${grupoId}/ics`);
+    }
+
+    /** REQ-069: link para assinar a agenda do grupo no Google Calendar ou Outlook. */
+    async obterAssinatura(grupoId: number): Promise<AssinaturaCalendario> {
+        return this.get(`/lembretes/grupo/${grupoId}/assinatura`, {}, assinaturaCalendarioSchema);
     }
 
     /** Baixa o arquivo de ata da reunião. */

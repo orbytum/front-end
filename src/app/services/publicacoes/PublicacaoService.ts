@@ -40,6 +40,9 @@ export class PublicacaoService extends BaseService {
     formData.append("descricao", data.descricao);
     formData.append("projetoId", String(data.projetoId));
     formData.append("arquivo", data.arquivo);
+    formData.append("tipo", data.tipo);
+    formData.append("dataPublicacao", data.dataPublicacao);
+    if (data.link) formData.append("link", data.link);
 
     return this.post("/publicacoes", formData, {}, publicacaoResponseSchema);
   }
@@ -48,6 +51,9 @@ export class PublicacaoService extends BaseService {
     const formData = new FormData();
     formData.append("titulo", data.titulo);
     formData.append("descricao", data.descricao);
+    if (data.tipo) formData.append("tipo", data.tipo);
+    if (data.dataPublicacao) formData.append("dataPublicacao", data.dataPublicacao);
+    if (data.link !== undefined) formData.append("link", data.link);
     if (data.projetoId) {
       formData.append("projetoId", String(data.projetoId));
     }

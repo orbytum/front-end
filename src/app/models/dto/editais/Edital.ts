@@ -33,9 +33,14 @@ export interface ListarEditaisParams {
     organizacao?: string;
     dataInicio?: string;
     dataFim?: string;
+    /** REQ-060: mostra só editais que citam as palavras-chave do grupo. */
+    somenteRelevantes?: boolean;
     page?: number;
     size?: number;
 }
+
+/** REQ-060: palavras-chave dos temas do grupo. */
+export const palavrasChaveSchema = z.array(z.string());
 
 export interface SalvarEditalData {
     organizador: string;

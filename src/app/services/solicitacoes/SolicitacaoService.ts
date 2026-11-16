@@ -8,6 +8,15 @@ import {
 } from "../../models/dto/solicitacoes/Solicitacao";
 
 export class SolicitacaoService extends BaseService {
+  /** Todas as solicitações do sistema (exclusivo do administrador). */
+  async listarTodas(): Promise<SolicitacaoResponse[]> {
+    return this.get("/solicitacoes", {}, z.array(solicitacaoResponseSchema));
+  }
+
+  async listarPorGrupo(grupoId: number): Promise<SolicitacaoResponse[]> {
+    return this.get(`/solicitacoes/grupo/${grupoId}`, {}, z.array(solicitacaoResponseSchema));
+  }
+
   async listarPorProjeto(projetoId: number): Promise<SolicitacaoResponse[]> {
     return this.get(`/solicitacoes/projeto/${projetoId}`, {}, z.array(solicitacaoResponseSchema));
   }

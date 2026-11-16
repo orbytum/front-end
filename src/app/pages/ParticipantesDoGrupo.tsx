@@ -25,7 +25,6 @@ import { GrupoDetalhe } from "../models/dto/grupos/GrupoDetalhe";
 import { ParticipanteResponse } from "../models/dto/grupos/Participante";
 import {
   NivelMembroLabels,
-  nivelEhCoordenadorOuAcima,
   nivelEhLider,
 } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
@@ -60,7 +59,7 @@ export function ParticipantesDoGrupo() {
   const isAdmin = authService.isAdminOrInitialAdmin();
   const numericGroupId = Number(groupId) || grupoAtual?.id || 0;
   const podeConvidar = isAdmin
-    || (grupoAtual?.id === numericGroupId && nivelEhCoordenadorOuAcima(grupoAtual?.nivel));
+    || (grupoAtual?.id === numericGroupId && nivelEhLider(grupoAtual?.nivel));
 
   const carregarDados = useCallback(async () => {
     if (!numericGroupId) {
@@ -168,9 +167,6 @@ export function ParticipantesDoGrupo() {
     const nivel = p.nivel ?? (p.isLider ? "LIDER" : "PESQUISADOR");
     if (filtroFuncao === "Líder") {
       return correspondeBusca && nivel === "LIDER";
-    }
-    if (filtroFuncao === "Coordenador") {
-      return correspondeBusca && nivel === "COORDENADOR";
     }
     if (filtroFuncao === "Colaborador") {
       return correspondeBusca && nivel === "COLABORADOR";
@@ -315,7 +311,6 @@ export function ParticipantesDoGrupo() {
         >
           <option value="all">Todos os Membros</option>
           <option value="Líder">Líderes</option>
-          <option value="Coordenador">Coordenadores</option>
           <option value="Pesquisador">Pesquisadores</option>
           <option value="Colaborador">Colaboradores</option>
         </select>
@@ -339,7 +334,7 @@ export function ParticipantesDoGrupo() {
               <span>Convidar Membro</span>
             </button>
             <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-card text-muted-foreground text-xs px-3 py-1.5 rounded-lg border border-border/40 whitespace-nowrap shadow-xl z-10">
-              Apenas líderes e coordenadores do grupo podem convidar participantes
+              Apenas o líder do grupo pode convidar participantes
             </div>
           </div>
         )}

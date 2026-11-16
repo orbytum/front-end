@@ -14,16 +14,20 @@ import {
   X,
   Circle,
   RefreshCw,
+  Hourglass,
+  Info,
 } from "lucide-react";
 import { useGrupo } from "../contexts/GrupoContext";
 import { SolicitacaoService } from "../services/solicitacoes/SolicitacaoService";
 import { ProjetoService } from "../services/projetos/ProjetoService";
+import { AuthService } from "../services/auth/AuthService";
+import { nivelEhLider } from "../models/dto/NivelMembro";
 import {
   SolicitacaoResponse,
   SolicitacaoStatusLabels,
   TIPOS_SOLICITACAO_CRIAVEIS,
   TipoSolicitacaoLabels,
-  podemAprovarOuRejeitar,
+  podeAvaliarSolicitacao,
   podemConcluirOuEncerrar,
 } from "../models/dto/solicitacoes/Solicitacao";
 import { HttpError } from "../utils/HttpError";
@@ -44,6 +48,7 @@ function obterCorStatus(status: string) {
     case "REJEITADA": return "bg-[#ef4444]/20 text-[#ef4444]";
     case "EM_ANDAMENTO": return "bg-[#ff8c42]/20 text-[#ff8c42]";
     case "PENDENTE": return "bg-muted-foreground/20 text-muted-foreground";
+    case "AGUARDANDO_ADMINISTRADOR": return "bg-[#4a9eff]/20 text-[#4a9eff]";
     case "ENCERRADA": return "bg-[#7c3aed]/20 text-[#7c3aed]";
     default: return "bg-muted-foreground/20 text-muted-foreground";
   }
@@ -55,6 +60,7 @@ function obterIconeStatus(status: string) {
     case "REJEITADA": return <XCircle className="w-5 h-5 text-[#ef4444]" />;
     case "EM_ANDAMENTO": return <Clock className="w-5 h-5 text-[#ff8c42]" />;
     case "PENDENTE": return <AlertCircle className="w-5 h-5 text-muted-foreground" />;
+    case "AGUARDANDO_ADMINISTRADOR": return <Hourglass className="w-5 h-5 text-[#4a9eff]" />;
     case "ENCERRADA": return <Circle className="w-5 h-5 text-[#7c3aed]" />;
     default: return <AlertCircle className="w-5 h-5 text-muted-foreground" />;
   }
@@ -88,9 +94,12 @@ export function Solicitacoes() {
   const { grupoAtual } = useGrupo();
   const solicitacaoService = useMemo(() => new SolicitacaoService(), []);
   const projetoService = useMemo(() => new ProjetoService(), []);
+  const isAdmin = useMemo(() => new AuthService().isAdminOrInitialAdmin(), []);
+  const isLiderGrupo = !isAdmin && nivelEhLider(grupoAtual?.nivel);
+  const usuarioId = grupoAtual?.usuarioId ?? null;
 
   const [solicitacoes, setSolicitacoes] = useState<SolicitacaoResponse[]>([]);
-  const [projetos, setProjetos] = useState<{ id: number; titulo: string }[]>([]);
+  const [projetos, setProjetos] = useState<{ id: number; titulo: string; liderProjetoId?: number | null }[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [acaoId, setAcaoId] = useState<number | null>(null);
@@ -103,6 +112,8 @@ export function Solicitacoes() {
   const [erroForm, setErroForm] = useState("");
 
   const [formTitulo, setFormTitulo] = useState("");
+  const [formEditTitulo, setFormEditTitulo] = useState("");
+  const [formEditDescricao, setFormEditDescricao] = useState("");
   const [formDescricao, setFormDescricao] = useState("");
   const [formJustificativa, setFormJustificativa] = useState("");
   const [formTipo, setFormTipo] = useState("financiamento");
@@ -123,22 +134,29 @@ export function Solicitacoes() {
   const [erroEdicao, setErroEdicao] = useState("");
 
   const carregarSolicitacoes = useCallback(async () => {
+    if (isAdmin) {
+      setCarregando(true);
+      setErro("");
+      try {
+        setSolicitacoes(await solicitacaoService.listarTodas());
+      } catch (err) {
+        setSolicitacoes([]);
+        setErro(err instanceof HttpError ? err.response?.mensagem || err.message : "Erro ao carregar solicitações.");
+      } finally {
+        setCarregando(false);
+      }
+      return;
+    }
     if (!grupoAtual?.id) { setSolicitacoes([]); setCarregando(false); return; }
     setCarregando(true);
     setErro("");
     try {
-      const listaProjetos = await projetoService.listarProjetosPorGrupo(grupoAtual.id);
-      setProjetos(listaProjetos.map((p) => ({ id: p.id, titulo: p.titulo })));
-
-      const todas: SolicitacaoResponse[] = [];
-      for (const projeto of listaProjetos) {
-        try {
-          const solicitacoesProjeto = await solicitacaoService.listarPorProjeto(projeto.id);
-          todas.push(...solicitacoesProjeto);
-        } catch {
-        }
-      }
-      setSolicitacoes(todas);
+      const [listaProjetos, lista] = await Promise.all([
+        projetoService.listarProjetosPorGrupo(grupoAtual.id),
+        solicitacaoService.listarPorGrupo(grupoAtual.id),
+      ]);
+      setProjetos(listaProjetos.map((p) => ({ id: p.id, titulo: p.titulo, liderProjetoId: p.liderProjetoId })));
+      setSolicitacoes(lista);
     } catch (err) {
       setSolicitacoes([]);
       if (err instanceof HttpError) {
@@ -149,7 +167,21 @@ export function Solicitacoes() {
     } finally {
       setCarregando(false);
     }
-  }, [grupoAtual?.id, solicitacaoService, projetoService]);
+  }, [isAdmin, grupoAtual?.id, solicitacaoService, projetoService]);
+
+  // Solicita o líder do projeto (nos seus projetos) ou o Líder do grupo (em qualquer projeto do grupo).
+  const projetosQuePodeSolicitar = isAdmin
+    ? []
+    : projetos.filter((p) => isLiderGrupo || (usuarioId != null && p.liderProjetoId === usuarioId));
+  const podeCriar = projetosQuePodeSolicitar.length > 0;
+  const perfil = { isAdmin, isLiderGrupo };
+  const ehAutor = (s: SolicitacaoResponse) => usuarioId != null && s.usuarioId === usuarioId;
+  const podeAlterar = (s: SolicitacaoResponse) =>
+    (s.status === "PENDENTE" && (isLiderGrupo || ehAutor(s))) ||
+    (s.status === "AGUARDANDO_ADMINISTRADOR" && isLiderGrupo);
+  const podeConcluir = (s: SolicitacaoResponse) =>
+    podemConcluirOuEncerrar(s.status) && (isAdmin || isLiderGrupo || ehAutor(s));
+  const podeEncerrar = (s: SolicitacaoResponse) => podemConcluirOuEncerrar(s.status) && (isAdmin || isLiderGrupo);
 
   useEffect(() => {
     carregarSolicitacoes();
@@ -162,7 +194,8 @@ export function Solicitacoes() {
       s.titulo.toLowerCase().includes(termo) ||
       s.justificativa.toLowerCase().includes(termo) ||
       (s.usuarioNome && s.usuarioNome.toLowerCase().includes(termo)) ||
-      (s.projetoTitulo && s.projetoTitulo.toLowerCase().includes(termo));
+      (s.projetoTitulo && s.projetoTitulo.toLowerCase().includes(termo)) ||
+      (s.grupoNome && s.grupoNome.toLowerCase().includes(termo));
 
     const correspondeStatus = filtroStatus === "all" || s.status === filtroStatus;
 
@@ -176,7 +209,7 @@ export function Solicitacoes() {
   const estatisticas = {
     total: solicitacoes.length,
     pendentes: solicitacoes.filter((s) => s.status === "PENDENTE").length,
-    emAndamento: solicitacoes.filter((s) => s.status === "EM_ANDAMENTO").length,
+    aguardandoAdmin: solicitacoes.filter((s) => s.status === "AGUARDANDO_ADMINISTRADOR").length,
     concluidas: solicitacoes.filter((s) => s.status === "CONCLUIDA").length,
     rejeitadas: solicitacoes.filter((s) => s.status === "REJEITADA" || s.status === "ENCERRADA").length,
   };
@@ -242,6 +275,8 @@ export function Solicitacoes() {
 
   const abrirEdicao = (s: SolicitacaoResponse) => {
     setEditando(s);
+    setFormEditTitulo(s.titulo ?? "");
+    setFormEditDescricao(s.descricao ?? "");
     setFormEditJustificativa(s.justificativa ?? "");
     setFormEditValor(s.valor != null ? String(s.valor) : "");
     setFormEditQuantidade(s.quantidade != null ? String(s.quantidade) : "");
@@ -252,16 +287,16 @@ export function Solicitacoes() {
   const handleSalvarEdicao = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editando) return;
-    if (!formEditJustificativa.trim()) {
-      setErroEdicao("A justificativa e obrigatoria.");
+    if (!formEditTitulo.trim() || !formEditDescricao.trim() || !formEditJustificativa.trim()) {
+      setErroEdicao("Preencha título, descrição e justificativa.");
       return;
     }
     setSalvandoEdicao(true);
     setErroEdicao("");
     try {
       const atualizada = await solicitacaoService.atualizar(editando.id, {
-        titulo: formEditJustificativa.trim(),
-        descricao: formEditJustificativa.trim(),
+        titulo: formEditTitulo.trim(),
+        descricao: formEditDescricao.trim(),
         justificativa: formEditJustificativa.trim(),
         valor: formEditValor ? Number(formEditValor) : undefined,
         quantidade: formEditQuantidade ? Number(formEditQuantidade) : undefined,
@@ -334,8 +369,12 @@ export function Solicitacoes() {
     <div className="h-full overflow-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-foreground mb-2">Solicitacoes de Recursos</h1>
-          <p className="text-muted-foreground">Gerencie solicitacoes de verbas, equipamentos e materiais</p>
+          <h1 className="text-foreground mb-2">Solicitações de Recursos</h1>
+          <p className="text-muted-foreground">
+            {isAdmin
+              ? "Decida as solicitações de verbas e materiais aprovadas pelos líderes dos grupos"
+              : "Solicite verbas e materiais para os projetos e acompanhe a aprovação"}
+          </p>
         </div>
         <button
           onClick={() => carregarSolicitacoes()}
@@ -344,6 +383,14 @@ export function Solicitacoes() {
         >
           <RefreshCw className="w-5 h-5 text-muted-foreground" />
         </button>
+      </div>
+
+      <div className="flex items-start gap-3 bg-card rounded-xl p-4 border border-border/30 mb-6 text-sm text-muted-foreground">
+        <Info className="w-5 h-5 text-[#4a9eff] shrink-0 mt-0.5" />
+        <p>
+          O líder do projeto cria a solicitação, o Líder do grupo aprova e a encaminha ao administrador, que dá a
+          decisão final. Solicitações criadas pelo próprio Líder do grupo seguem direto para o administrador.
+        </p>
       </div>
 
       {erro && (
@@ -363,7 +410,7 @@ export function Solicitacoes() {
 
         <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">Pendentes</span>
+            <span className="text-muted-foreground text-sm">Aguardando líder</span>
             <AlertCircle className="w-5 h-5 text-muted-foreground" />
           </div>
           <div className="text-foreground text-2xl font-bold">{estatisticas.pendentes}</div>
@@ -371,10 +418,10 @@ export function Solicitacoes() {
 
         <div className="bg-card rounded-xl p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">Em Andamento</span>
-            <Clock className="w-5 h-5 text-[#ff8c42]" />
+            <span className="text-muted-foreground text-sm">Aguardando administrador</span>
+            <Hourglass className="w-5 h-5 text-[#4a9eff]" />
           </div>
-          <div className="text-foreground text-2xl font-bold">{estatisticas.emAndamento}</div>
+          <div className="text-foreground text-2xl font-bold">{estatisticas.aguardandoAdmin}</div>
         </div>
 
         <div className="bg-card rounded-xl p-4 border border-border/30">
@@ -412,20 +459,23 @@ export function Solicitacoes() {
           className="px-4 py-3 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
-          <option value="PENDENTE">Pendentes</option>
+          <option value="PENDENTE">Aguardando líder do grupo</option>
+          <option value="AGUARDANDO_ADMINISTRADOR">Aguardando administrador</option>
           <option value="EM_ANDAMENTO">Em Andamento</option>
           <option value="CONCLUIDA">Concluidas</option>
           <option value="REJEITADA">Rejeitadas</option>
           <option value="ENCERRADA">Encerradas</option>
         </select>
 
-        <button
-          onClick={abrirModalCriar}
-          className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Nova Solicitacao</span>
-        </button>
+        {podeCriar && (
+          <button
+            onClick={abrirModalCriar}
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-xl transition-all duration-300 flex items-center gap-2 font-medium"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Nova Solicitação</span>
+          </button>
+        )}
       </div>
 
       {carregando && (
@@ -466,6 +516,20 @@ export function Solicitacoes() {
                           <span className="text-xs text-muted-foreground">Projeto</span>
                           <p className="text-sm text-foreground">{solicitacao.projetoTitulo ?? NA}</p>
                         </div>
+                        {isAdmin && (
+                          <div>
+                            <span className="text-xs text-muted-foreground">Grupo</span>
+                            <p className="text-sm text-foreground">{solicitacao.grupoNome ?? NA}</p>
+                          </div>
+                        )}
+                        {solicitacao.aprovadorLiderNome && (
+                          <div>
+                            <span className="text-xs text-muted-foreground">Aprovada pelo líder</span>
+                            <p className="text-sm text-foreground">
+                              {solicitacao.aprovadorLiderNome} em {formatarData(solicitacao.dthAprovacaoLider)}
+                            </p>
+                          </div>
+                        )}
                         <div>
                           <span className="text-xs text-muted-foreground">Valor</span>
                           <p className="text-sm text-[#ff8c42] font-semibold">{formatarValor(solicitacao.valor)}</p>
@@ -516,14 +580,14 @@ export function Solicitacoes() {
                     Ver detalhes
                   </button>
 
-                  {podemAprovarOuRejeitar(solicitacao.status) && (
+                  {podeAvaliarSolicitacao(solicitacao.status, perfil) && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleAprovar(solicitacao.id)}
                         disabled={ocupado}
                         className="px-4 py-2 bg-[#10b981]/20 text-[#10b981] rounded-lg hover:bg-[#10b981]/30 transition-colors text-xs font-medium disabled:opacity-50"
                       >
-                        Aprovar
+                        {solicitacao.status === "PENDENTE" ? "Aprovar e encaminhar" : "Aprovar"}
                       </button>
                       <button
                         onClick={() => handleRejeitar(solicitacao.id)}
@@ -532,6 +596,11 @@ export function Solicitacoes() {
                       >
                         Rejeitar
                       </button>
+                    </div>
+                  )}
+
+                  {podeAlterar(solicitacao) && (
+                    <div className="flex gap-2">
                       <button
                         onClick={() => abrirEdicao(solicitacao)}
                         disabled={ocupado}
@@ -543,26 +612,30 @@ export function Solicitacoes() {
                     </div>
                   )}
 
-                  {podemConcluirOuEncerrar(solicitacao.status) && (
+                  {(podeConcluir(solicitacao) || podeEncerrar(solicitacao)) && (
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => handleConcluir(solicitacao.id)}
-                        disabled={ocupado}
-                        className="px-4 py-2 bg-[#10b981]/20 text-[#10b981] rounded-lg hover:bg-[#10b981]/30 transition-colors text-xs font-medium disabled:opacity-50"
-                      >
-                        Concluir
-                      </button>
-                      <button
-                        onClick={() => handleEncerrar(solicitacao.id)}
-                        disabled={ocupado}
-                        className="px-4 py-2 bg-[#7c3aed]/20 text-[#7c3aed] rounded-lg hover:bg-[#7c3aed]/30 transition-colors text-xs font-medium disabled:opacity-50"
-                      >
-                        Encerrar
-                      </button>
+                      {podeConcluir(solicitacao) && (
+                        <button
+                          onClick={() => handleConcluir(solicitacao.id)}
+                          disabled={ocupado}
+                          className="px-4 py-2 bg-[#10b981]/20 text-[#10b981] rounded-lg hover:bg-[#10b981]/30 transition-colors text-xs font-medium disabled:opacity-50"
+                        >
+                          Concluir
+                        </button>
+                      )}
+                      {podeEncerrar(solicitacao) && (
+                        <button
+                          onClick={() => handleEncerrar(solicitacao.id)}
+                          disabled={ocupado}
+                          className="px-4 py-2 bg-[#7c3aed]/20 text-[#7c3aed] rounded-lg hover:bg-[#7c3aed]/30 transition-colors text-xs font-medium disabled:opacity-50"
+                        >
+                          Encerrar
+                        </button>
+                      )}
                     </div>
                   )}
 
-                  {solicitacao.status === "PENDENTE" && (
+                  {podeAlterar(solicitacao) && (
                     <button
                       onClick={() => handleRemover(solicitacao.id)}
                       disabled={ocupado}
@@ -587,7 +660,7 @@ export function Solicitacoes() {
               ? "Nenhuma solicitacao encontrada para este grupo"
               : "Nenhuma solicitacao corresponde aos filtros"}
           </p>
-          {solicitacoes.length === 0 && (
+          {solicitacoes.length === 0 && podeCriar && (
             <button
               onClick={abrirModalCriar}
               className="mt-4 px-6 py-3 bg-[#ff8c42]/20 text-[#ff8c42] rounded-xl transition-colors"
@@ -664,7 +737,7 @@ export function Solicitacoes() {
                   required
                 >
                   <option value="">Selecione um projeto</option>
-                  {projetos.map((p) => (
+                  {projetosQuePodeSolicitar.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.titulo}
                     </option>
@@ -755,6 +828,28 @@ export function Solicitacoes() {
 
             <form onSubmit={handleSalvarEdicao} className="space-y-4">
               <div>
+                <label className={labelClass}>Título *</label>
+                <input
+                  type="text"
+                  value={formEditTitulo}
+                  onChange={(e) => setFormEditTitulo(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Descrição *</label>
+                <textarea
+                  value={formEditDescricao}
+                  onChange={(e) => setFormEditDescricao(e.target.value)}
+                  className={`${inputClass} min-h-[80px]`}
+                  rows={3}
+                  required
+                />
+              </div>
+
+              <div>
                 <label className={labelClass}>Justificativa *</label>
                 <textarea
                   value={formEditJustificativa}
@@ -842,6 +937,18 @@ export function Solicitacoes() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
+                    <span className={labelClass}>Aprovada pelo líder</span>
+                    <p className="text-sm text-foreground">
+                      {solicitacaoDetalhe.aprovadorLiderNome
+                        ? `${solicitacaoDetalhe.aprovadorLiderNome} em ${formatarData(solicitacaoDetalhe.dthAprovacaoLider)}`
+                        : NA}
+                    </p>
+                  </div>
+                  <div>
+                    <span className={labelClass}>Grupo</span>
+                    <p className="text-sm text-foreground">{solicitacaoDetalhe.grupoNome ?? NA}</p>
+                  </div>
+                  <div>
                     <span className={labelClass}>Solicitante</span>
                     <p className="text-sm text-foreground">{solicitacaoDetalhe.usuarioNome ?? NA}</p>
                   </div>
@@ -862,7 +969,7 @@ export function Solicitacoes() {
                     <p className="text-sm text-[#ff8c42] font-semibold">{formatarValor(solicitacaoDetalhe.valor)}</p>
                   </div>
                   <div>
-                    <span className={labelClass}>Aprovada</span>
+                    <span className={labelClass}>Aprovada pelo administrador</span>
                     <p className="text-sm text-foreground">{solicitacaoDetalhe.isAprovada ? "Sim" : "Nao"}</p>
                   </div>
                   <div>
@@ -873,6 +980,11 @@ export function Solicitacoes() {
                     <span className={labelClass}>Respondido em</span>
                     <p className="text-sm text-foreground">{formatarData(solicitacaoDetalhe.dthResposta)}</p>
                   </div>
+                </div>
+
+                <div className="bg-background rounded-lg p-3 border border-border/30">
+                  <span className="text-xs text-muted-foreground block mb-1">Descrição</span>
+                  <p className="text-sm text-foreground">{solicitacaoDetalhe.descricao}</p>
                 </div>
 
                 <div className="bg-background rounded-lg p-3 border border-border/30">

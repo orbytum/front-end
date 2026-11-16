@@ -268,7 +268,6 @@ export function ModalConvidarMembro({
             >
               <option value="PESQUISADOR">{NivelMembroLabels.PESQUISADOR}</option>
               <option value="COLABORADOR">{NivelMembroLabels.COLABORADOR}</option>
-              <option value="COORDENADOR">{NivelMembroLabels.COORDENADOR}</option>
               <option value="LIDER">{NivelMembroLabels.LIDER}</option>
             </select>
             <p className="text-[10px] text-[#9e9e9e] mt-1">

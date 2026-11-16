@@ -72,6 +72,7 @@ export function Layout() {
         { path: "/calendario", label: "Calendário", icon: Calendar },
         { path: "/materiais", label: "Materiais", icon: Box },
         { path: "/lembretes", label: "Lembretes", icon: Bell },
+        { path: "/solicitacoes", label: "Solicitações", icon: FileText },
       ];
 
   return (
