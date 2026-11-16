@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { projetoRotuloSchema } from "../projetos/ProjetoRotulo";
+import { documentoResponseSchema } from "./Documento";
 
 export const editalResponseSchema = z.object({
     id: z.number(),
@@ -8,6 +10,8 @@ export const editalResponseSchema = z.object({
     uri: z.string(),
     dthAbertura: z.string(),
     dthEncerramento: z.string(),
+    projetos: z.array(projetoRotuloSchema).default([]),
+    documentos: z.array(documentoResponseSchema).default([]),
 });
 
 export type EditalResponse = z.infer<typeof editalResponseSchema>;
