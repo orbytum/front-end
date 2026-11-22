@@ -1,6 +1,7 @@
 import { APIRequestContext } from "@playwright/test";
 
 export type UsuarioSeed = {
+  id?: number;
   nome: string;
   email: string;
   senha: string;
@@ -128,4 +129,175 @@ export async function adicionarAoGrupo(
     if (texto.includes("já") || texto.includes("Ja")) return;
     throw new Error(`Falha ao aceitar convite de grupo para ${usuario.email}: ${aceite.status()} ${texto}`);
   }
+}
+
+function auth(token: string): Record<string, string> {
+  return { Authorization: `Bearer ${token}` };
+}
+
+async function exigirOk(resposta: Awaited<ReturnType<APIRequestContext["post"]>>, contexto: string): Promise<void> {
+  if (!resposta.ok()) {
+    throw new Error(`${contexto}: ${resposta.status()} ${await resposta.text()}`);
+  }
+}
+
+export async function obterUsuarioId(
+  api: APIRequestContext,
+  token: string,
+  grupoId: number,
+): Promise<number> {
+  const resposta = await api.get("/grupos/meus-grupos", { headers: auth(token) });
+  await exigirOk(resposta, "Falha ao listar meus grupos");
+  const grupos = (await resposta.json()) as Array<{ id: number; usuarioId: number }>;
+  const grupo = grupos.find((item) => item.id === grupoId);
+  if (!grupo) throw new Error(`Usuário não pertence ao grupo ${grupoId}`);
+  return grupo.usuarioId;
+}
+
+export async function criarProjeto(
+  api: APIRequestContext,
+  token: string,
+  grupoId: number,
+  titulo: string,
+  status = "PLANEJADO",
+): Promise<{ id: number; titulo: string }> {
+  const resposta = await api.post("/projetos", {
+    headers: auth(token),
+    data: { grupoId, status, titulo, assunto: "Projeto criado pela suíte E2E" },
+  });
+  await exigirOk(resposta, "Falha ao criar projeto");
+  return resposta.json();
+}
+
+export async function criarAtividade(
+  api: APIRequestContext,
+  token: string,
+  projetoId: number,
+  responsavelId: number,
+  titulo: string,
+): Promise<{ id: number; titulo: string }> {
+  const prazo = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19);
+  const resposta = await api.post("/atividades", {
+    headers: auth(token),
+    data: {
+      projetoId,
+      responsavelId,
+      titulo,
+      descricao: "Atividade criada pela suíte E2E",
+      dthPrazo: prazo,
+    },
+  });
+  await exigirOk(resposta, "Falha ao criar atividade");
+  return resposta.json();
+}
+
+export async function criarNoticia(
+  api: APIRequestContext,
+  token: string,
+  grupoId: number,
+  titulo: string,
+  projetoIds: number[] = [],
+): Promise<{ id: number; titulo: string }> {
+  const resposta = await api.post("/noticias", {
+    headers: auth(token),
+    data: {
+      grupoId,
+      titulo,
+      conteudo: "Conteúdo criado pela suíte E2E",
+      assunto: "E2E",
+      projetoIds,
+    },
+  });
+  await exigirOk(resposta, "Falha ao criar notícia");
+  return resposta.json();
+}
+
+export async function criarEdital(
+  api: APIRequestContext,
+  token: string,
+  grupoId: number,
+  organizador: string,
+  descricao: string,
+  projetoIds: number[] = [],
+): Promise<{ id: number; descricao: string }> {
+  const abertura = new Date().toISOString().slice(0, 19);
+  const encerramento = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19);
+  const resposta = await api.post(`/grupos/${grupoId}/editais`, {
+    headers: auth(token),
+    data: {
+      organizador,
+      descricao,
+      valor: 1000,
+      uri: `https://example.com/edital-e2e-${Date.now()}`,
+      dthAbertura: abertura,
+      dthEncerramento: encerramento,
+      projetoIds,
+    },
+  });
+  await exigirOk(resposta, "Falha ao criar edital");
+  return resposta.json();
+}
+
+export async function criarMaterial(
+  api: APIRequestContext,
+  token: string,
+  nome: string,
+  identificador: string,
+): Promise<{ id: number; nome: string }> {
+  const resposta = await api.post("/materiais", {
+    headers: auth(token),
+    data: {
+      nome,
+      descricao: "Material criado pela suíte E2E",
+      categoria: "Equipamento",
+      identificador,
+      quantidade: 1,
+      localizacao: "Sala E2E",
+      dthCompra: new Date().toISOString().slice(0, 19),
+      status: "DISPONIVEL",
+    },
+  });
+  await exigirOk(resposta, "Falha ao criar material");
+  return resposta.json();
+}
+
+export async function criarLembrete(
+  api: APIRequestContext,
+  token: string,
+  grupoId: number,
+  titulo: string,
+): Promise<{ id: number; titulo: string }> {
+  const resposta = await api.post("/lembretes", {
+    headers: auth(token),
+    data: {
+      grupoId,
+      titulo,
+      tipo: "Reunião",
+      dataHora: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 19),
+      paraGrupoInteiro: true,
+    },
+  });
+  await exigirOk(resposta, "Falha ao criar lembrete");
+  return resposta.json();
+}
+
+export async function criarSolicitacao(
+  api: APIRequestContext,
+  token: string,
+  projetoId: number,
+  titulo: string,
+): Promise<{ id: number; titulo: string }> {
+  const resposta = await api.post("/solicitacoes", {
+    headers: auth(token),
+    data: {
+      titulo,
+      descricao: "Solicitação criada pela suíte E2E",
+      justificativa: "Teste E2E",
+      tipo: "financiamento",
+      projetoId,
+      valor: 500,
+    },
+  });
+  await exigirOk(resposta, "Falha ao criar solicitação");
+  return resposta.json();
 }

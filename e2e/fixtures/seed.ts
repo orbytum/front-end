@@ -4,19 +4,36 @@ import { APIRequestContext } from "@playwright/test";
 import {
   ADMIN_INICIAL,
   adicionarAoGrupo,
+  criarAtividade,
+  criarEdital,
+  criarLembrete,
+  criarMaterial,
+  criarNoticia,
+  criarProjeto,
+  criarSolicitacao,
   criarUsuarioPorConvite,
   login,
   obterOuCriarGrupo,
+  obterUsuarioId,
   registrarAdmin,
   type UsuarioSeed,
 } from "../support/api";
 
+export type UsuarioSeedComId = UsuarioSeed & { id: number };
+
 export type SeedData = {
-  admin: UsuarioSeed;
-  lider: UsuarioSeed;
-  pesquisador: UsuarioSeed;
-  colaborador: UsuarioSeed;
+  admin: UsuarioSeedComId;
+  lider: UsuarioSeedComId;
+  pesquisador: UsuarioSeedComId;
+  colaborador: UsuarioSeedComId;
   grupo: { id: number; nome: string };
+  projeto: { id: number; titulo: string };
+  atividade: { id: number; titulo: string };
+  noticia: { id: number; titulo: string };
+  edital: { id: number; descricao: string };
+  material: { id: number; nome: string };
+  lembrete: { id: number; titulo: string };
+  solicitacao: { id: number; titulo: string };
 };
 
 const ADMIN: UsuarioSeed = {
@@ -72,13 +89,21 @@ function salvarStorageState(token: string, destino: string): void {
   fs.writeFileSync(caminho, JSON.stringify(conteudo, null, 2));
 }
 
+async function idDoUsuario(api: APIRequestContext, token: string, grupoId: number): Promise<number> {
+  try {
+    return await obterUsuarioId(api, token, grupoId);
+  } catch {
+    return 0;
+  }
+}
+
 export async function seedDados(api: APIRequestContext): Promise<SeedData> {
   let tokenAdmin = await login(api, ADMIN.email, ADMIN.senha);
 
   if (!tokenAdmin) {
     const tokenInicial = await login(api, ADMIN_INICIAL.email, ADMIN_INICIAL.senha);
     if (!tokenInicial) {
-      throw new Error("Não foi possível autenticar como admin inicial nem como admin E2E.");
+      throw new Error("Não foi possível autenticar como admin inicial nem admin E2E.");
     }
     await registrarAdmin(api, tokenInicial, ADMIN);
     tokenAdmin = await login(api, ADMIN.email, ADMIN.senha);
@@ -95,21 +120,47 @@ export async function seedDados(api: APIRequestContext): Promise<SeedData> {
   await adicionarAoGrupo(api, tokenAdmin, grupo.id, PESQUISADOR, "PESQUISADOR");
   await adicionarAoGrupo(api, tokenAdmin, grupo.id, COLABORADOR, "COLABORADOR");
 
+  const adminId = await idDoUsuario(api, tokenAdmin, grupo.id);
+  const liderId = await idDoUsuario(api, tokenLider, grupo.id);
+  const pesquisadorId = await idDoUsuario(api, tokenPesquisador, grupo.id);
+  const colaboradorId = await idDoUsuario(api, tokenColaborador, grupo.id);
+
+  const sufixo = Date.now();
+  const projeto = await criarProjeto(api, tokenLider, grupo.id, `Projeto E2E ${sufixo}`);
+  const atividade = await criarAtividade(api, tokenLider, projeto.id, liderId, `Atividade E2E ${sufixo}`);
+  const noticia = await criarNoticia(api, tokenLider, grupo.id, `Notícia E2E ${sufixo}`, [projeto.id]);
+  const edital = await criarEdital(api, tokenLider, grupo.id, `Organização E2E ${sufixo}`, `Edital E2E ${sufixo}`, [projeto.id]);
+  const material = await criarMaterial(api, tokenAdmin, `Material E2E ${sufixo}`, `E2E-${sufixo}`);
+  const lembrete = await criarLembrete(api, tokenLider, grupo.id, `Lembrete E2E ${sufixo}`);
+  const solicitacao = await criarSolicitacao(api, tokenLider, projeto.id, `Solicitação E2E ${sufixo}`);
+
   salvarStorageState(tokenAdmin, ".auth/admin.json");
   salvarStorageState(tokenLider, ".auth/lider.json");
   salvarStorageState(tokenPesquisador, ".auth/pesquisador.json");
   salvarStorageState(tokenColaborador, ".auth/colaborador.json");
 
   const dados: SeedData = {
-    admin: ADMIN,
-    lider: LIDER,
-    pesquisador: PESQUISADOR,
-    colaborador: COLABORADOR,
+    admin: { ...ADMIN, id: adminId },
+    lider: { ...LIDER, id: liderId },
+    pesquisador: { ...PESQUISADOR, id: pesquisadorId },
+    colaborador: { ...COLABORADOR, id: colaboradorId },
     grupo: { id: grupo.id, nome: grupo.nome },
+    projeto: { id: projeto.id, titulo: projeto.titulo },
+    atividade: { id: atividade.id, titulo: atividade.titulo },
+    noticia: { id: noticia.id, titulo: noticia.titulo },
+    edital: { id: edital.id, descricao: edital.descricao },
+    material: { id: material.id, nome: material.nome },
+    lembrete: { id: lembrete.id, titulo: lembrete.titulo },
+    solicitacao: { id: solicitacao.id, titulo: solicitacao.titulo },
   };
 
   fs.mkdirSync("test-results", { recursive: true });
   fs.writeFileSync("test-results/seed-data.json", JSON.stringify(dados, null, 2));
 
   return dados;
+}
+
+export function lerSeed(): SeedData {
+  const caminho = path.resolve("test-results/seed-data.json");
+  return JSON.parse(fs.readFileSync(caminho, "utf-8")) as SeedData;
 }
