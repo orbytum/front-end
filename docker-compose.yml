@@ -1,0 +1,93 @@
+name: orbytum
+
+# Sobe a stack completa: PostgreSQL + API (Spring Boot) + front-end (Vite em modo dev).
+#
+# Uso:
+#   docker compose up -d --build
+#
+# O front-end fica em http://localhost:5173 e a API em http://localhost:18080.
+# As chamadas do navegador vão para /api e o proxy do Vite encaminha para o container da API,
+# então não existe CORS nem URL fixa de "localhost" dentro do bundle.
+#
+# Portas do host: 5173 (front) e 18080 (API, pois 8080 pode estar ocupado).
+# O PostgreSQL não publica porta no host; 5432/5433 do servidor não são afetados.
+#
+# Cloudflare Tunnel: aponte o túnel para http://localhost:5173.
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-admin}
+      POSTGRES_USER: ${DB_USERNAME:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-admin} -d ${DB_NAME:-admin}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      # O repositório da API deve estar ao lado deste (../api).
+      # Para outro caminho, defina API_CONTEXT no .env.
+      context: ${API_CONTEXT:-../api}
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-admin}
+      DB_USERNAME: ${DB_USERNAME:-admin}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no arquivo .env (veja .env.example)}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      # Conta criada automaticamente apenas quando o banco está vazio.
+      ORBYTUM_INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-admin.inicial@orbytum.com}
+      ORBYTUM_INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-AdminInit@123}
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
+      FRONT_END_URL: ${FRONT_END_URL:-http://localhost:5173}
+      API_PUBLIC_URL: ${API_PUBLIC_URL:-http://localhost:8080}
+      AWS_REGION: ${AWS_REGION:-sa-east-1}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-auto}
+      STORAGE_FALLBACK_ENABLED: ${STORAGE_FALLBACK_ENABLED:-true}
+      STORAGE_MAX_FILE_SIZE_BYTES: ${STORAGE_MAX_FILE_SIZE_BYTES:-20971520}
+    ports:
+      # 8080 do host pode estar ocupado; a API é publicada em 18080.
+      # Internamente ela continua em 8080 (o proxy usa http://api:8080).
+      - "${BIND_ADDRESS:-127.0.0.1}:${API_HOST_PORT:-18080}:8080"
+
+  web:
+    image: node:22-alpine
+    working_dir: /app
+    restart: unless-stopped
+    depends_on:
+      - api
+    command: sh -c "npm ci --no-audit --no-fund && npm run dev -- --host 0.0.0.0 --port 5173"
+    environment:
+      # As chamadas saem como /api e o proxy do Vite resolve o destino.
+      VITE_BASE_URL: /api
+      VITE_PROXY_TARGET: http://api:8080
+      # Hosts aceitos pelo Vite (Cloudflare Tunnel + localhost).
+      VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS:-orbytum.luiz-antonio.site,.luiz-antonio.site,.trycloudflare.com,localhost,127.0.0.1}
+      # Em Docker Desktop (Mac/Windows) costuma ser necessário: VITE_USE_POLLING=true
+      VITE_USE_POLLING: ${VITE_USE_POLLING:-false}
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${WEB_PORT:-5173}:5173"
+
+volumes:
+  postgres_data:
+  node_modules:
