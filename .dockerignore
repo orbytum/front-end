@@ -1,0 +1,17 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+e2e
+playwright-report
+test-results
+blob-report
+.auth
+.idea
+guidelines
+docker-compose.yml
+README.md
+*.md
