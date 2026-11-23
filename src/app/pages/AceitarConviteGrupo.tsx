@@ -17,7 +17,7 @@ import { AuthService } from "../services/auth/AuthService";
 import { ConviteGrupoDetalhe } from "../models/dto/convites/ConviteGrupoDetalhe";
 import { HttpError } from "../utils/HttpError";
 
-type ViewStatus = "carregando" | "visualizacao" | "sucesso" | "ja_membro" | "invalido";
+type ViewStatus = "carregando" | "visualizacao" | "sucesso" | "ja_membro" | "invalido" | "restrito";
 
 function formatarData(dataIso?: string | null) {
   if (!dataIso) return null;
@@ -66,6 +66,12 @@ export function AceitarConviteGrupo() {
         setStatus("visualizacao");
       } catch (err: any) {
         if (!montado) return;
+        // 403: convite pessoal, visível só para a conta do e-mail convidado com sessão iniciada
+        if (err instanceof HttpError && err.status === 403) {
+          setStatus("restrito");
+          setMensagemErro(err.message);
+          return;
+        }
         setStatus("invalido");
         if (err instanceof HttpError) {
           setMensagemErro(err.response?.mensagem || "Este convite é inválido, expirou ou atingiu o limite de usos.");
@@ -81,6 +87,12 @@ export function AceitarConviteGrupo() {
       montado = false;
     };
   }, [token]);
+
+  const irParaLoginERetornar = () => {
+    // Encerra a sessão atual (se houver) para entrar com a conta do e-mail convidado.
+    if (estaAutenticado) authService.logout();
+    navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
+  };
 
   const handleAceitarConvite = async () => {
     if (!token) return;
@@ -185,6 +197,25 @@ export function AceitarConviteGrupo() {
                 Ir para o login
               </button>
             </div>
+          </div>
+        )}
+
+        {/* ── CONVITE PESSOAL DE OUTRA CONTA (OU SEM SESSÃO) ── */}
+        {status === "restrito" && (
+          <div className="bg-card rounded-2xl p-8 border border-primary/30 text-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="text-foreground font-semibold text-lg mb-2">Convite pessoal</h2>
+            <p className="text-muted-foreground text-sm mb-6">{mensagemErro}</p>
+            <button
+              type="button"
+              onClick={irParaLoginERetornar}
+              className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-primary/90"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>{estaAutenticado ? "Entrar com outra conta" : "Fazer login"}</span>
+            </button>
           </div>
         )}
 

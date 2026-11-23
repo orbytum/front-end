@@ -18,10 +18,10 @@ import {
   Clock,
   UserCheck,
   Pencil,
-  UserPlus,
 } from "lucide-react";
 import { DataTable, Column } from "../components/DataTable";
 import { GrupoService } from "../services/grupos/GrupoService";
+import { ConviteService } from "../services/convites/ConviteService";
 import { AuthService } from "../services/auth/AuthService";
 import { HttpError } from "../utils/HttpError";
 import { GrupoDetalhe } from "../models/dto/grupos/GrupoDetalhe";
@@ -30,6 +30,7 @@ import { GrupoPaginadoResponse } from "../models/dto/grupos/ListarGrupos";
 export function Grupos() {
   const navigate = useNavigate();
   const grupoService = new GrupoService();
+  const conviteService = new ConviteService();
   const authService = new AuthService();
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -53,13 +54,11 @@ export function Grupos() {
 
   const [liderModalOpen, setLiderModalOpen] = useState(false);
   const [selectedGrupoLider, setSelectedGrupoLider] = useState<GrupoDetalhe | null>(null);
-  const [liderNome, setLiderNome] = useState("");
   const [liderEmail, setLiderEmail] = useState("");
-  const [liderTelefone, setLiderTelefone] = useState("");
-  const [liderTitulo, setLiderTitulo] = useState("");
-  const [liderSenha, setLiderSenha] = useState("");
-  const [cadastrandoLider, setCadastrandoLider] = useState(false);
+  const [liderDiasValidade, setLiderDiasValidade] = useState<number>(7);
+  const [convidandoLider, setConvidandoLider] = useState(false);
   const [liderError, setLiderError] = useState("");
+  const [liderSucesso, setLiderSucesso] = useState("");
 
   const [paginatedData, setPaginatedData] = useState<GrupoPaginadoResponse>({
     items: [],
@@ -212,42 +211,46 @@ export function Grupos() {
     }
   };
 
-  const handleOpenCadastrarLider = (grupo: GrupoDetalhe) => {
+  const handleOpenConvidarLider = (grupo: GrupoDetalhe) => {
     setSelectedGrupoLider(grupo);
-    setLiderNome("");
     setLiderEmail("");
-    setLiderTelefone("");
-    setLiderTitulo("");
-    setLiderSenha("");
+    setLiderDiasValidade(7);
     setLiderError("");
+    setLiderSucesso("");
     setLiderModalOpen(true);
   };
 
-  const handleCadastrarLider = async (e: React.FormEvent) => {
+  // O líder é sempre um usuário já cadastrado, convidado nominalmente por e-mail;
+  // ele passa a liderar o grupo quando aceitar o convite.
+  const handleConvidarLider = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedGrupoLider) return;
 
-    setCadastrandoLider(true);
+    setConvidandoLider(true);
     setLiderError("");
+    setLiderSucesso("");
     try {
-      await grupoService.cadastrarLider(selectedGrupoLider.id, {
-        nome: liderNome.trim(),
-        email: liderEmail.trim(),
-        telefone: liderTelefone.trim(),
-        titulo: liderTitulo.trim(),
-        senha: liderSenha,
+      const email = liderEmail.trim();
+      await conviteService.enviarConviteGrupo({
+        idGrupo: selectedGrupoLider.id,
+        email,
+        diasValidade: liderDiasValidade || 7,
+        nivel: "LIDER",
       });
-      setLiderModalOpen(false);
-      setSelectedGrupoLider(null);
-      carregarGrupos();
+      setLiderSucesso(`Convite enviado para ${email}. O líder será vinculado ao grupo quando aceitar o convite.`);
+      setLiderEmail("");
     } catch (err) {
       if (err instanceof HttpError) {
-        setLiderError(err.response?.mensagem || err.message);
+        setLiderError(
+          err.status === 404
+            ? "Não há usuário cadastrado com este e-mail. O convite de líder é enviado apenas a usuários já cadastrados."
+            : err.response?.mensagem || err.message
+        );
       } else {
-        setLiderError("Erro ao cadastrar o líder. Tente novamente.");
+        setLiderError("Erro ao enviar o convite. Tente novamente.");
       }
     } finally {
-      setCadastrandoLider(false);
+      setConvidandoLider(false);
     }
   };
 
@@ -325,13 +328,13 @@ export function Grupos() {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleOpenCadastrarLider(g);
+                    handleOpenConvidarLider(g);
                   }}
                   disabled={!g.isAtivo}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#ff8c42]/10 hover:bg-[#ff8c42]/20 border border-[#ff8c42]/30 text-[#ff8c42] text-xs font-medium transition-colors cursor-pointer disabled:opacity-40"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-xs font-medium transition-colors cursor-pointer disabled:opacity-40"
                 >
-                  <UserPlus className="w-3.5 h-3.5" />
-                  <span>Cadastrar Líder</span>
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Convidar Líder</span>
                 </button>
               </div>
             )}
@@ -885,12 +888,12 @@ export function Grupos() {
           <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
             <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
-                  <UserPlus className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                  <Send className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-foreground font-semibold text-lg">Cadastrar Líder</h3>
-                  <p className="text-muted-foreground text-xs">Vincular líder ao grupo: {selectedGrupoLider.nome}</p>
+                  <h3 className="text-foreground font-semibold text-lg">Convidar Líder</h3>
+                  <p className="text-muted-foreground text-xs">Grupo: {selectedGrupoLider.nome}</p>
                 </div>
               </div>
               <button
@@ -910,82 +913,47 @@ export function Grupos() {
                 </div>
               )}
 
-              <form onSubmit={handleCadastrarLider} className="space-y-4">
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
-                    Nome Completo <span className="text-[#ff8c42]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={liderNome}
-                    onChange={(e) => setLiderNome(e.target.value)}
-                    placeholder="Ex: Dr. Carlos Silva"
-                    disabled={cadastrandoLider}
-                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
-                  />
+              {liderSucesso && (
+                <div className="p-3 bg-[#10b981]/10 border border-[#10b981]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#10b981]">
+                  <UserCheck className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{liderSucesso}</span>
                 </div>
+              )}
+
+              <form onSubmit={handleConvidarLider} className="space-y-4">
+                <p className="text-xs text-muted-foreground">
+                  Informe o e-mail de um usuário já cadastrado no sistema. Ele receberá um convite com o perfil de
+                  Líder e passará a liderar o grupo ao aceitá-lo.
+                </p>
 
                 <div>
                   <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
-                    E-mail <span className="text-[#ff8c42]">*</span>
+                    E-mail do líder <span className="text-primary">*</span>
                   </label>
                   <input
                     type="email"
                     required
                     value={liderEmail}
                     onChange={(e) => setLiderEmail(e.target.value)}
-                    placeholder="carlos.silva@universidade.edu.br"
-                    disabled={cadastrandoLider}
-                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    placeholder="lider@universidade.edu.br"
+                    disabled={convidandoLider}
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
                   />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
-                      Telefone <span className="text-[#ff8c42]">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={liderTelefone}
-                      onChange={(e) => setLiderTelefone(e.target.value)}
-                      placeholder="(11) 98765-4321"
-                      disabled={cadastrandoLider}
-                      className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
-                      Titulação <span className="text-[#ff8c42]">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={liderTitulo}
-                      onChange={(e) => setLiderTitulo(e.target.value)}
-                      placeholder="Ex: Doutor, Mestre"
-                      disabled={cadastrandoLider}
-                      className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
-                    />
-                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
-                    Senha Provisória <span className="text-[#ff8c42]">*</span>
+                    Validade do convite (dias) <span className="text-primary">*</span>
                   </label>
                   <input
-                    type="password"
+                    type="number"
                     required
-                    minLength={6}
-                    value={liderSenha}
-                    onChange={(e) => setLiderSenha(e.target.value)}
-                    placeholder="Mínimo 6 caracteres"
-                    disabled={cadastrandoLider}
-                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    min={1}
+                    max={30}
+                    value={liderDiasValidade}
+                    onChange={(e) => setLiderDiasValidade(Number(e.target.value))}
+                    disabled={convidandoLider}
+                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
                   />
                 </div>
 
@@ -993,25 +961,25 @@ export function Grupos() {
                   <button
                     type="button"
                     onClick={() => setLiderModalOpen(false)}
-                    disabled={cadastrandoLider}
+                    disabled={convidandoLider}
                     className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
                   >
-                    Cancelar
+                    {liderSucesso ? "Fechar" : "Cancelar"}
                   </button>
                   <button
                     type="submit"
-                    disabled={cadastrandoLider}
-                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                    disabled={convidandoLider}
+                    className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
-                    {cadastrandoLider ? (
+                    {convidandoLider ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Cadastrando...</span>
+                        <span>Enviando...</span>
                       </>
                     ) : (
                       <>
-                        <UserPlus className="w-4 h-4" />
-                        <span>Cadastrar Líder</span>
+                        <Send className="w-4 h-4" />
+                        <span>Enviar Convite</span>
                       </>
                     )}
                   </button>
