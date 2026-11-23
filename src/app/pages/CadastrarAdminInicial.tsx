@@ -14,17 +14,7 @@ import {
 } from "lucide-react";
 import { LoginService } from "../services/auth/LoginService";
 import { AuthService } from "../services/auth/AuthService";
-
-function formatPhone(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
-  if (!digits) return "";
-  if (digits.length <= 2) return `(${digits}`;
-  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  if (digits.length <= 10) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-  }
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
-}
+import { formatarTelefone } from "../utils/Telefone";
 
 export function CadastrarAdminInicial() {
   const navigate = useNavigate();
@@ -57,7 +47,7 @@ export function CadastrarAdminInicial() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhone(e.target.value);
+    const formatted = formatarTelefone(e.target.value);
     setForm((prev) => ({ ...prev, telefone: formatted }));
     if (errors.telefone) {
       setErrors((prev) => ({ ...prev, telefone: "" }));

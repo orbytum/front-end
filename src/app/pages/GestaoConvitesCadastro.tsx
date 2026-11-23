@@ -29,6 +29,7 @@ import { LoginService } from "../services/auth/LoginService";
 import { HttpError } from "../utils/HttpError";
 import { ConviteCadastroDetalhe } from "../models/dto/convites/ConviteCadastroDetalhe";
 import { ConviteCadastroPaginadoResponse } from "../models/dto/convites/ListarConvitesCadastro";
+import { formatarTelefone, MENSAGEM_TELEFONE_INVALIDO, PADRAO_TELEFONE } from "../utils/Telefone";
 
 export function GestaoConvitesCadastro() {
   const navigate = useNavigate();
@@ -843,10 +844,13 @@ export function GestaoConvitesCadastro() {
                         Telefone <span className="text-[#ff8c42]">*</span>
                       </label>
                       <input
-                        type="text"
+                        type="tel"
+                        inputMode="numeric"
                         required
+                        pattern={PADRAO_TELEFONE}
+                        title={MENSAGEM_TELEFONE_INVALIDO}
                         value={adminTelefone}
-                        onChange={(e) => setAdminTelefone(e.target.value)}
+                        onChange={(e) => setAdminTelefone(formatarTelefone(e.target.value))}
                         placeholder="(11) 98765-4321"
                         disabled={cadastrandoAdmin}
                         className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"

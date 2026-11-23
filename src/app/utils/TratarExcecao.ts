@@ -8,7 +8,7 @@ export class TratarExcecao {
         if (error instanceof HttpError) {
             this.tratarHttpError(error);
         } else if (error instanceof ZodError) {
-            this.exibirAlerta("Resposta inválida", "O servidor retornou um formato inesperado.");
+            this.exibirAlerta(null, "O servidor retornou uma resposta em formato inesperado.");
         } else {
             this.tratarException(error);
         }
@@ -19,16 +19,15 @@ export class TratarExcecao {
             RouterRef.navigate("/login");
             return;
         }
-        const mensagem = error.response?.mensagem || "Erro ao processar a requisição.";
-        this.exibirAlerta(`Erro ${error.status}`, mensagem);
+        this.exibirAlerta(null, error.message);
     }
 
     private static tratarException(error: any): void {
         const mensagem = error?.message || "Ocorreu um erro inesperado.";
-        this.exibirAlerta("Erro inesperado", mensagem);
+        this.exibirAlerta(null, mensagem);
     }
 
-    private static exibirAlerta(titulo: string, mensagem: string): void {
+    private static exibirAlerta(titulo: string | null, mensagem: string): void {
         window.dispatchEvent(new CustomEvent("app:error", { detail: { titulo, mensagem } }));
     }
 }

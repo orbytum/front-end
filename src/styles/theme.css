@@ -186,3 +186,21 @@
     text-shadow: none !important;
   }
 }
+
+/*
+ * Campo reprovado na validação nativa do formulário (marcado por utils/ValidacaoFormulario.ts).
+ * Fica fora das camadas do Tailwind para prevalecer sobre utilitários como bg-background e border-border.
+ */
+input[data-invalido="true"],
+select[data-invalido="true"],
+textarea[data-invalido="true"] {
+  background-color: color-mix(in srgb, var(--destructive) 12%, var(--background));
+  border-color: var(--destructive);
+}
+
+input[data-invalido="true"]:focus,
+select[data-invalido="true"]:focus,
+textarea[data-invalido="true"]:focus {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 25%, transparent);
+}

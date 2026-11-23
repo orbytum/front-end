@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, X } from "lucide-react";
 
 interface ErroAlerta {
-  titulo: string;
+  titulo?: string | null;
   mensagem: string;
 }
 
@@ -39,11 +39,19 @@ export function GlobalErrorAlert() {
           <AlertTriangle className="w-5 h-5" />
         </div>
 
-        <div className="flex-1 space-y-1 pr-1">
-          <h4 className="font-semibold text-sm text-foreground leading-tight">
-            {erro.titulo}
-          </h4>
-          <p className="text-xs text-muted-foreground leading-relaxed break-words">
+        <div className="flex-1 space-y-1 pr-1 self-center">
+          {erro.titulo && (
+            <h4 className="font-semibold text-sm text-foreground leading-tight">
+              {erro.titulo}
+            </h4>
+          )}
+          <p
+            className={
+              erro.titulo
+                ? "text-xs text-muted-foreground leading-relaxed break-words"
+                : "text-sm text-foreground leading-relaxed break-words"
+            }
+          >
             {erro.mensagem}
           </p>
         </div>
