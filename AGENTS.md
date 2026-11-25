@@ -120,7 +120,7 @@ try {
 - **Indentação**: services/models/utils usam 4 espaços; componentes/páginas usam 2 espaços (siga o arquivo que estiver editando).
 - **Componentes**: function components nomeados (`export function MinhaPagina()`).
 - **Páginas** ficam em `src/app/pages/` e são registradas nas rotas em `src/main.tsx`.
-- **Estilo visual**: dois temas (claro/escuro) com cantos arredondados (`rounded-xl`/`rounded-2xl`). Use SOMENTE as classes semânticas de cor do tema (ver "Tema e cores" abaixo).
+- **Estilo visual**: dois temas (claro/escuro) com cantos discretos: **`rounded-lg` no máximo** (8px, via `--radius` em `theme.css`) para cards, modais, campos e botões; `rounded-md` para etiquetas/badges; `rounded-full` só para elementos realmente circulares (avatares, pontos, ícones redondos, spinners). Não use `rounded-xl`, `rounded-2xl` ou `rounded-3xl`. Use SOMENTE as classes semânticas de cor do tema (ver "Tema e cores" abaixo).
 - **Ícones**: `lucide-react`.
 - **Não criar** novos arquivos de configuração, clientes HTTP ou pastas fora da estrutura acima sem necessidade.
 

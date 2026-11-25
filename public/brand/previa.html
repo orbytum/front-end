@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orbytum — Marca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --laranja: #ff8c42; --marinho: #0a1929; --marinho2: #0d1f30; --cinza: #f3f4f6; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #e5e7eb; color: #111827; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 16px 48px; display: grid; gap: 20px; }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 22px; margin: 0 0 4px; }
+    p.sub { margin: 0; color: #4b5563; font-size: 14px; }
+    .painel { border-radius: 20px; padding: 40px 32px; display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; }
+    .escuro { background: var(--marinho); }
+    .claro { background: #fff; border: 1px solid #d1d5db; }
+    .rotulo { font-size: 12px; color: #6b7280; margin: -8px 4px 0; }
+    .tamanhos { display: flex; align-items: end; gap: 24px; }
+    .tamanhos span { display: block; text-align: center; font-size: 11px; color: #94a3b8; margin-top: 6px; }
+    .paleta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .cor { width: 150px; border-radius: 14px; overflow: hidden; background: #fff; border: 1px solid #d1d5db; font-size: 12px; }
+    .cor div { height: 56px; }
+    .cor p { margin: 8px 10px; }
+    svg text { font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif; }
+  </style>
+</head>
+<body>
+<main>
+  <div>
+    <h1>Orbytum — logotipo</h1>
+    <p class="sub">Anel = o "O" de Orbytum e a órbita dos projetos; o satélite, com o vão no anel, dá a ideia de movimento.</p>
+  </div>
+
+  <div class="painel escuro">
+    <svg width="402" height="96" viewBox="0 0 268 64" aria-label="Orbytum">
+      <defs><mask id="m1"><rect width="64" height="64" fill="#fff"/><circle cx="46.14" cy="17.86" r="10" fill="#000"/></mask></defs>
+      <circle cx="32" cy="32" r="20" fill="none" stroke="#ff8c42" stroke-width="7.5" mask="url(#m1)"/>
+      <circle cx="46.14" cy="17.86" r="5.5" fill="#ff8c42"/>
+      <text x="74" y="44" fill="#f1f5f9" font-size="36" font-weight="600" letter-spacing="-0.5">orbytum</text>
+    </svg>
+  </div>
+  <p class="rotulo">Logotipo horizontal — fundo escuro (tema padrão)</p>
+
+  <div class="painel claro">
+    <svg width="402" height="96" viewBox="0 0 268 64" aria-label="Orbytum">
+      <defs><mask id="m2"><rect width="64" height="64" fill="#fff"/><circle cx="46.14" cy="17.86" r="10" fill="#000"/></mask></defs>
+      <circle cx="32" cy="32" r="20" fill="none" stroke="#ff8c42" stroke-width="7.5" mask="url(#m2)"/>
+      <circle cx="46.14" cy="17.86" r="5.5" fill="#ff8c42"/>
+      <text x="74" y="44" fill="#0a1929" font-size="36" font-weight="600" letter-spacing="-0.5">orbytum</text>
+    </svg>
+  </div>
+  <p class="rotulo">Logotipo horizontal — fundo claro</p>
+
+  <div class="painel escuro">
+    <div class="tamanhos">
+      <div><img src="orbytum-icone.svg" width="96" height="96" alt="Ícone"><span>ícone 96</span></div>
+      <div><img src="orbytum-icone.svg" width="48" height="48" alt="Ícone"><span>48</span></div>
+      <div><img src="orbytum-icone.svg" width="32" height="32" alt="Ícone"><span>32</span></div>
+      <div><img src="orbytum-icone.svg" width="16" height="16" alt="Ícone"><span>16</span></div>
+    </div>
+    <div class="tamanhos">
+      <div><img src="orbytum-simbolo.svg" width="96" height="96" alt="Símbolo"><span>símbolo 96</span></div>
+      <div><img src="orbytum-simbolo.svg" width="32" height="32" alt="Símbolo"><span>32</span></div>
+      <div><img src="orbytum-simbolo.svg" width="20" height="20" alt="Símbolo"><span>20</span></div>
+    </div>
+  </div>
+  <p class="rotulo">Ícone de aplicativo/favicon e símbolo isolado em tamanhos reduzidos</p>
+
+  <div class="paleta">
+    <div class="cor"><div style="background:#ff8c42"></div><p><b>Laranja Orbytum</b><br>#FF8C42</p></div>
+    <div class="cor"><div style="background:#0a1929"></div><p><b>Azul-marinho</b><br>#0A1929</p></div>
+    <div class="cor"><div style="background:#f1f5f9"></div><p><b>Gelo</b><br>#F1F5F9</p></div>
+    <div class="cor"><div style="background:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:600;font-size:22px">Aa</div><p><b>Space Grotesk</b><br>600 · marca</p></div>
+  </div>
+</main>
+</body>
+</html>

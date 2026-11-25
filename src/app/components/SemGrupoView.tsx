@@ -34,9 +34,9 @@ export function SemGrupoView() {
 
       <div className="w-full max-w-md relative z-10 text-center">
         {/* Card */}
-        <div className="bg-card rounded-2xl p-8 border border-border/30 shadow-2xl">
+        <div className="bg-card rounded-lg p-8 border border-border/30 shadow-2xl">
           {/* Ícone */}
-          <div className="w-16 h-16 rounded-2xl bg-[#ff8c42]/10 border border-[#ff8c42]/20 flex items-center justify-center mx-auto mb-6 text-[#ff8c42]">
+          <div className="w-16 h-16 rounded-lg bg-[#ff8c42]/10 border border-[#ff8c42]/20 flex items-center justify-center mx-auto mb-6 text-[#ff8c42]">
             <Users className="w-8 h-8" />
           </div>
 
@@ -53,7 +53,7 @@ export function SemGrupoView() {
             <button
               onClick={handleRecarregar}
               disabled={recarregando}
-              className="w-full py-3 px-4 bg-[#ff8c42] hover:bg-[#ff8c42]/90 disabled:opacity-50 text-white font-medium rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#ff8c42]/10"
+              className="w-full py-3 px-4 bg-[#ff8c42] hover:bg-[#ff8c42]/90 disabled:opacity-50 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#ff8c42]/10"
             >
               <RefreshCw className={`w-4 h-4 ${recarregando ? "animate-spin" : ""}`} />
               <span>{recarregando ? "Verificando..." : "Verificar novamente"}</span>
@@ -61,7 +61,7 @@ export function SemGrupoView() {
 
             <button
               onClick={handleLogout}
-              className="w-full py-3 px-4 bg-background hover:bg-border/40 text-muted-foreground hover:text-foreground font-medium rounded-xl border border-border/40 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 px-4 bg-background hover:bg-border/40 text-muted-foreground hover:text-foreground font-medium rounded-lg border border-border/40 transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Sair da conta</span>

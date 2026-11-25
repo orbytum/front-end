@@ -40,7 +40,7 @@ export function PerfilMenu({ isAdmin, role, avatarLabel }: PerfilMenuProps) {
       <button
         type="button"
         onClick={() => setAberto((prev) => !prev)}
-        className={`flex items-center gap-2 pl-1 pr-2 py-1 rounded-full border transition-colors cursor-pointer ${
+        className={`flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg border transition-colors cursor-pointer ${
           aberto
             ? "bg-background border-primary/60"
             : "bg-transparent border-transparent hover:bg-background hover:border-border/40"
@@ -59,7 +59,7 @@ export function PerfilMenu({ isAdmin, role, avatarLabel }: PerfilMenuProps) {
       </button>
 
       {aberto && (
-        <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-2xl bg-card border border-border/60 p-2 z-50 animate-in fade-in-50 zoom-in-95 duration-150">
+        <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-lg bg-card border border-border/60 p-2 z-50 animate-in fade-in-50 zoom-in-95 duration-150">
           <div className="flex items-center gap-3 px-3 py-3 border-b border-border/40 mb-1">
             <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary shrink-0">
               <User className="w-5 h-5" />
@@ -75,7 +75,7 @@ export function PerfilMenu({ isAdmin, role, avatarLabel }: PerfilMenuProps) {
           <button
             type="button"
             onClick={handleSair}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Sair</span>

@@ -1,5 +1,6 @@
-import { Outlet, NavLink, Navigate } from "react-router";
+import { Outlet, NavLink, Navigate, useLocation } from "react-router";
 import {
+  UserCog,
   LayoutDashboard,
   Users,
   Hexagon,
@@ -24,9 +25,14 @@ import { GrupoCombobox } from "./GrupoCombobox";
 import { SemGrupoView } from "./SemGrupoView";
 import { ThemeToggle } from "./ThemeToggle";
 import { PerfilMenu } from "./PerfilMenu";
+import { CabecalhoContext } from "../contexts/CabecalhoContext";
+import { LogoOrbytum } from "./LogoOrbytum";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Título definido pela própria página (ex.: nome do grupo); sem ele, vale o nome da rota
+  const [tituloPagina, setTituloPagina] = useState<string | null>(null);
+  const location = useLocation();
   const authService = new AuthService();
 
   if (!authService.isAuthenticated()) {
@@ -60,6 +66,7 @@ export function Layout() {
     ? [
         { path: "/grupos", label: "Grupos de Pesquisa", icon: Users },
         { path: "/gestao-convites", label: "Convites de Cadastro", icon: MailPlus },
+        { path: "/usuarios", label: "Usuários", icon: UserCog },
         { path: "/recursos", label: "Recursos Financeiros", icon: Hexagon },
         { path: "/solicitacoes", label: "Solicitações", icon: FileText },
       ]
@@ -75,7 +82,23 @@ export function Layout() {
         { path: "/solicitacoes", label: "Solicitações", icon: FileText },
       ];
 
+  // Nome da página atual no header: rótulo do menu da rota (ou de uma rota fora do menu)
+  const ROTAS_FORA_DO_MENU: { prefixo: string; label: string }[] = [
+    { prefixo: "/grupos/", label: "Grupos de Pesquisa" },
+    { prefixo: "/participantes", label: "Participantes" },
+    { prefixo: "/publicacoes", label: "Publicações" },
+  ];
+  const caminho = location.pathname;
+  const nomeRota =
+    ROTAS_FORA_DO_MENU.find((r) => caminho.startsWith(r.prefixo))?.label ??
+    navItems.find((item) =>
+      item.path === "/" ? caminho === "/" : caminho === item.path || caminho.startsWith(`${item.path}/`)
+    )?.label ??
+    null;
+  const trilha = [nomeRota, tituloPagina].filter(Boolean) as string[];
+
   return (
+    <CabecalhoContext.Provider value={{ definirTitulo: setTituloPagina }}>
     <div className="flex h-full bg-background">
       {/* Sidebar */}
       <aside
@@ -84,10 +107,7 @@ export function Layout() {
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-border/30">
           {sidebarOpen && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary" />
-              <span className="text-foreground font-semibold">SGA</span>
-            </div>
+            <LogoOrbytum tamanho={30} comNome classeNome="text-xl" />
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -109,7 +129,7 @@ export function Layout() {
               to={item.path}
               end={item.path === "/"}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
                   isActive
                     ? "bg-background text-primary font-medium"
                     : "hover:bg-background/50 text-muted-foreground hover:text-foreground"
@@ -138,7 +158,7 @@ export function Layout() {
               <div className="text-muted-foreground mt-1">v1.0.0</div>
             </div>
           ) : (
-            <div className="w-2 h-2 rounded-full bg-primary mx-auto" />
+            <LogoOrbytum tamanho={22} className="mx-auto flex justify-center" />
           )}
         </div>
       </aside>
@@ -147,14 +167,29 @@ export function Layout() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="relative z-50 h-16 bg-card/50 backdrop-blur-sm border-b border-border/30 flex items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <h2 className="text-foreground font-bold tracking-wide">ORBYTUM</h2>
+          <div className="flex items-center gap-3 min-w-0">
+            <h2 className="shrink-0 -mb-2">
+              <LogoOrbytum tamanho={24} comNome classeNome="text-lg" />
+            </h2>
             {!isAdmin && (
               <>
                 <span className="text-muted-foreground/50 font-light select-none">/</span>
                 <GrupoCombobox />
               </>
             )}
+            {trilha.map((parte, i) => (
+              <span key={`${i}-${parte}`} className="hidden sm:flex items-center gap-3 min-w-0">
+                <span className="text-muted-foreground/50 font-light select-none">/</span>
+                <span
+                  className={`text-md font-bold truncate max-w-[16rem] ${
+                    i === trilha.length - 1 ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                  title={parte}
+                >
+                  {parte}
+                </span>
+              </span>
+            ))}
           </div>
           
           <div className="flex items-center gap-4">
@@ -178,5 +213,6 @@ export function Layout() {
         </div>
       </main>
     </div>
+    </CabecalhoContext.Provider>
   );
 }

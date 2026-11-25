@@ -4,20 +4,20 @@ import {
   Eye,
   EyeOff,
   UserPlus,
-  Orbit,
   CheckCircle2,
   AlertTriangle,
   User,
   Lock,
   Phone,
   Award,
-  ChevronDown,
   Loader2,
   ArrowRight,
 } from "lucide-react";
 import { ConviteService } from "../services/convites/ConviteService";
 import { HttpError } from "../utils/HttpError";
 import { formatarTelefone } from "../utils/Telefone";
+import { Seletor } from "../components/Seletor";
+import { LogoOrbytum } from "../components/LogoOrbytum";
 
 const TITULOS = [
   "Aluno",
@@ -177,18 +177,15 @@ export function AceitarConviteCadastro() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-3">
-            <div className="w-12 h-12 rounded-full bg-[#ff8c42] flex items-center justify-center">
-              <Orbit className="w-6 h-6 text-white" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-foreground tracking-wider">ORBYTUM</h1>
-          <p className="text-muted-foreground text-xs mt-1">Gestão acadêmica orbital</p>
+          <h1>
+            <LogoOrbytum tamanho={52} comNome vertical classeNome="text-3xl" />
+          </h1>
+          <p className="text-muted-foreground text-xs mt-2">Gestão acadêmica orbital</p>
         </div>
 
         {/* ── INVALID TOKEN ── */}
         {step === "invalid" && (
-          <div className="bg-card rounded-2xl p-8 border border-[#ef4444]/20 text-center">
+          <div className="bg-card rounded-lg p-8 border border-[#ef4444]/20 text-center">
             <div className="w-16 h-16 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-8 h-8 text-[#ef4444]" />
             </div>
@@ -199,7 +196,7 @@ export function AceitarConviteCadastro() {
             <button
               type="button"
               onClick={() => navigate("/login")}
-              className="w-full py-2.5 bg-background rounded-xl border border-border/30 text-muted-foreground hover:text-foreground transition-colors text-sm"
+              className="w-full py-2.5 bg-background rounded-lg border border-border/30 text-muted-foreground hover:text-foreground transition-colors text-sm"
             >
               Ir para o login
             </button>
@@ -208,7 +205,7 @@ export function AceitarConviteCadastro() {
 
         {/* ── SUCCESS ── */}
         {step === "success" && (
-          <div className="bg-card rounded-2xl p-8 border border-[#10b981]/20 text-center">
+          <div className="bg-card rounded-lg p-8 border border-[#10b981]/20 text-center">
             <div className="w-16 h-16 rounded-full bg-[#10b981]/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8 text-[#10b981]" />
             </div>
@@ -219,7 +216,7 @@ export function AceitarConviteCadastro() {
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="w-full py-3 bg-[#ff8c42] text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#ff8c42] text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
             >
               <span>Acessar o sistema</span>
               <ArrowRight className="w-4 h-4" />
@@ -229,11 +226,11 @@ export function AceitarConviteCadastro() {
 
         {/* ── FORM ── */}
         {step === "form" && (
-          <div className="bg-card rounded-2xl border border-border/30 overflow-hidden">
+          <div className="bg-card rounded-lg border border-border/30 overflow-hidden">
             {/* Header */}
             <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-[#ff8c42] flex items-center justify-center shrink-0">
                   <UserPlus className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -246,7 +243,7 @@ export function AceitarConviteCadastro() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
               {submitError && (
-                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{submitError}</span>
                 </div>
@@ -270,8 +267,8 @@ export function AceitarConviteCadastro() {
               {/* Título */}
               <Field label="Título" error={errors.titulo} required>
                 <div className="relative">
-                  <Award className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                  <select
+                  <Award className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+                  <Seletor
                     value={form.titulo}
                     onChange={handleChange("titulo")}
                     disabled={loading}
@@ -281,8 +278,7 @@ export function AceitarConviteCadastro() {
                     {TITULOS.map((t) => (
                       <option key={t} value={t}>{t}</option>
                     ))}
-                  </select>
-                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                  </Seletor>
                 </div>
                 {form.titulo === "Outro" && (
                   <input
@@ -361,7 +357,7 @@ export function AceitarConviteCadastro() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 mt-2 bg-[#ff8c42] text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full py-3 mt-2 bg-[#ff8c42] text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? (
                   <>
@@ -423,7 +419,7 @@ function Field({
 }
 
 function inputCls(hasError: boolean) {
-  return `w-full py-2.5 bg-background rounded-xl border text-foreground placeholder-muted-foreground focus:outline-none transition-colors ${
+  return `w-full py-2.5 bg-background rounded-lg border text-foreground placeholder-muted-foreground focus:outline-none transition-colors ${
     hasError
       ? "border-[#ef4444]/50 focus:border-[#ef4444]/80"
       : "border-border/30 focus:border-[#ff8c42]/50"
@@ -431,7 +427,7 @@ function inputCls(hasError: boolean) {
 }
 
 function selectCls(hasError: boolean) {
-  return `w-full pl-10 pr-9 py-2.5 bg-background rounded-xl border text-foreground focus:outline-none appearance-none transition-colors ${
+  return `w-full pl-10 pr-3.5 py-2.5 bg-background rounded-lg border text-foreground focus:outline-none transition-colors ${
     hasError
       ? "border-[#ef4444]/50 focus:border-[#ef4444]/80"
       : "border-border/30 focus:border-[#ff8c42]/50"

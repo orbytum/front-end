@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { LoginService } from "../services/auth/LoginService";
 import { HttpError } from "../utils/HttpError";
-import { Eye, EyeOff, Orbit, UserPlus } from "lucide-react";
+import { Eye, EyeOff, UserPlus } from "lucide-react";
+import { LogoOrbytum } from "../components/LogoOrbytum";
 
 export function CriarAdminInicial() {
   const navigate = useNavigate();
@@ -55,17 +56,12 @@ export function CriarAdminInicial() {
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="relative">
-              <div className="w-14 h-14 rounded-full bg-[#ff8c42] flex items-center justify-center">
-                <Orbit className="w-7 h-7 text-white" />
-              </div>
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-foreground tracking-wider">ORBYTUM</h1>
+          <h1>
+            <LogoOrbytum tamanho={64} comNome vertical classeNome="text-4xl" />
+          </h1>
         </div>
 
-        <div className="bg-card rounded-2xl p-8 border border-border/30">
+        <div className="bg-card rounded-lg p-8 border border-border/30">
           <h2 className="text-foreground text-xl font-semibold mb-2">Criar Administrador</h2>
           <p className="text-muted-foreground text-sm mb-6">Preencha os dados para o primeiro administrador do sistema</p>
 
@@ -78,7 +74,7 @@ export function CriarAdminInicial() {
                 onChange={(e) => setFormulario({ ...formulario, nome: e.target.value })}
                 placeholder="Seu nome"
                 required
-                className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                className="w-full px-4 py-3 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
             </div>
 
@@ -90,7 +86,7 @@ export function CriarAdminInicial() {
                 onChange={(e) => setFormulario({ ...formulario, email: e.target.value })}
                 placeholder="email@example.com"
                 required
-                className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                className="w-full px-4 py-3 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
             </div>
 
@@ -102,7 +98,7 @@ export function CriarAdminInicial() {
                 onChange={(e) => setFormulario({ ...formulario, telefone: e.target.value })}
                 placeholder="(00) 00000-0000"
                 required
-                className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                className="w-full px-4 py-3 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
             </div>
 
@@ -114,7 +110,7 @@ export function CriarAdminInicial() {
                 onChange={(e) => setFormulario({ ...formulario, titulo: e.target.value })}
                 placeholder="Ex: Dr., Ms., Prof."
                 required
-                className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                className="w-full px-4 py-3 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
             </div>
 
@@ -128,7 +124,7 @@ export function CriarAdminInicial() {
                   placeholder="Mínimo 6 caracteres"
                   required
                   minLength={6}
-                  className="w-full px-4 py-3 pr-12 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                  className="w-full px-4 py-3 pr-12 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
                 />
                 <button
                   type="button"
@@ -146,7 +142,7 @@ export function CriarAdminInicial() {
 
             <button
               type="submit"
-              className="w-full py-3 bg-[#ff8c42] text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#ff8c42] text-white rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
             >
               <UserPlus className="w-5 h-5" />
               Criar Administrador

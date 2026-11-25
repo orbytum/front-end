@@ -19,6 +19,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useGrupo } from "../contexts/GrupoContext";
+import { useTituloPagina } from "../contexts/CabecalhoContext";
 import { AuthService } from "../services/auth/AuthService";
 import { GrupoService } from "../services/grupos/GrupoService";
 import { GrupoDetalhe } from "../models/dto/grupos/GrupoDetalhe";
@@ -29,8 +30,11 @@ import {
 } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { ModalConvidarMembro } from "../components/ModalConvidarMembro";
+import { useConfirmacao } from "../contexts/ConfirmacaoContext";
+import { Seletor } from "../components/Seletor";
 
 export function ParticipantesDoGrupo() {
+  const confirmar = useConfirmacao();
   const { groupId } = useParams();
   const navigate = useNavigate();
   const grupoService = new GrupoService();
@@ -38,6 +42,8 @@ export function ParticipantesDoGrupo() {
   const { grupoAtual } = useGrupo();
 
   const [grupo, setGrupo] = useState<GrupoDetalhe | null>(null);
+  // Header: "ORBYTUM / Grupos de Pesquisa / <nome do grupo>"
+  useTituloPagina(grupo?.nome ?? null);
   const [participantes, setParticipantes] = useState<ParticipanteResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -137,9 +143,13 @@ export function ParticipantesDoGrupo() {
     if (!numericGroupId) return;
     setActionError("");
 
-    if (!window.confirm(`Deseja realmente remover o participante "${p.nome}" deste grupo?`)) {
-      return;
-    }
+    const confirmado = await confirmar({
+      titulo: "Remover participante",
+      mensagem: `Deseja realmente remover o participante "${p.nome}" deste grupo?`,
+      textoConfirmar: "Remover",
+      perigo: true,
+    });
+    if (!confirmado) return;
 
     setDeletingId(p.usuarioId);
     try {
@@ -204,47 +214,31 @@ export function ParticipantesDoGrupo() {
 
   return (
     <div className="h-full overflow-auto p-6 space-y-6">
-      {/* Cabeçalho */}
-      <div>
+      <div className="flex items-center justify-between gap-4">
         <button
           type="button"
           onClick={() => navigate("/grupos")}
-          className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-4 cursor-pointer"
+          className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Voltar para Grupos</span>
         </button>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-              <Users className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-foreground text-2xl font-bold">
-                {grupo ? grupo.nome : `Grupo #${numericGroupId}`}
-              </h1>
-              <p className="text-muted-foreground text-sm">
-                Gerencie os membros, líderes e pesquisadores vinculados ao grupo
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={carregarDados}
-            disabled={loading}
-            className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer self-start sm:self-auto"
-            title="Recarregar"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={carregarDados}
+          disabled={loading}
+          className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+          title="Recarregar"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+        </button>
       </div>
 
       {/* Cards de Métricas */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-card rounded-2xl p-6 border border-border/30">
+        <div className="bg-card rounded-lg p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-[#4a9eff]/15 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-[#4a9eff]/15 flex items-center justify-center">
               <Users className="w-5 h-5 text-[#4a9eff]" />
             </div>
             <div>
@@ -255,9 +249,9 @@ export function ParticipantesDoGrupo() {
           <span className="text-xs text-muted-foreground">Integrantes ativos no grupo</span>
         </div>
 
-        <div className="bg-card rounded-2xl p-6 border border-border/30">
+        <div className="bg-card rounded-lg p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
               <Crown className="w-5 h-5 text-primary" />
             </div>
             <div>
@@ -268,9 +262,9 @@ export function ParticipantesDoGrupo() {
           <span className="text-xs text-primary">Supervisão do grupo</span>
         </div>
 
-        <div className="bg-card rounded-2xl p-6 border border-border/30">
+        <div className="bg-card rounded-lg p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-[#10b981]/15 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-[#10b981]/15 flex items-center justify-center">
               <UserCheck className="w-5 h-5 text-[#10b981]" />
             </div>
             <div>
@@ -282,8 +276,7 @@ export function ParticipantesDoGrupo() {
         </div>
       </div>
 
-      {/* Barra de Ações (Busca, Filtro, Convidar Membro) */}
-      <div className="bg-card rounded-2xl p-4 border border-border/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-card rounded-lg p-4 border border-border/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -291,7 +284,7 @@ export function ParticipantesDoGrupo() {
             placeholder="Buscar por nome, e-mail, título..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-primary/50 transition-colors"
+            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-primary/50 transition-colors"
           />
           {termoBusca && (
             <button
@@ -304,22 +297,22 @@ export function ParticipantesDoGrupo() {
           )}
         </div>
 
-        <select
+        <Seletor
           value={filtroFuncao}
           onChange={(e) => setFiltroFuncao(e.target.value)}
-          className="px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground text-sm focus:outline-none focus:border-primary/50 cursor-pointer"
+          className="px-4 py-2.5 bg-background rounded-lg border border-border/30 text-foreground text-sm focus:outline-none focus:border-primary/50 cursor-pointer"
         >
           <option value="all">Todos os Membros</option>
           <option value="Líder">Líderes</option>
           <option value="Pesquisador">Pesquisadores</option>
           <option value="Colaborador">Colaboradores</option>
-        </select>
+        </Seletor>
 
         {/* Botão Convidar Membro */}
         {podeConvidar ? (
           <button
             onClick={() => setModalConvidarAberto(true)}
-            className="px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-300 flex items-center gap-2 font-medium cursor-pointer shadow-lg shadow-primary/20 text-sm whitespace-nowrap"
+            className="px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-300 flex items-center gap-2 font-medium cursor-pointer shadow-lg shadow-primary/20 text-sm whitespace-nowrap"
           >
             <UserPlus className="w-4 h-4" />
             <span>Convidar Membro</span>
@@ -328,7 +321,7 @@ export function ParticipantesDoGrupo() {
           <div className="relative group">
             <button
               disabled
-              className="px-5 py-2.5 bg-background text-muted-foreground rounded-xl flex items-center gap-2 font-medium cursor-not-allowed text-sm border border-border/30 whitespace-nowrap"
+              className="px-5 py-2.5 bg-background text-muted-foreground rounded-lg flex items-center gap-2 font-medium cursor-not-allowed text-sm border border-border/30 whitespace-nowrap"
             >
               <Lock className="w-4 h-4" />
               <span>Convidar Membro</span>
@@ -342,7 +335,7 @@ export function ParticipantesDoGrupo() {
 
       {/* Alertas de Erro */}
       {actionError && (
-        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center justify-between text-sm text-[#ef4444]">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{actionError}</span>
@@ -358,7 +351,7 @@ export function ParticipantesDoGrupo() {
       )}
 
       {error && (
-        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center justify-between text-sm text-[#ef4444]">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
@@ -378,7 +371,7 @@ export function ParticipantesDoGrupo() {
         {participantesFiltrados.map((participante) => (
           <div
             key={participante.usuarioId}
-            className="bg-card rounded-2xl p-6 border border-border/30 transition-all"
+            className="bg-card rounded-lg p-6 border border-border/30 transition-all"
           >
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               <div className="flex-1">
@@ -401,12 +394,12 @@ export function ParticipantesDoGrupo() {
                     <div className="flex flex-wrap items-center gap-2.5">
                       <h3 className="text-foreground font-semibold text-base">{participante.nome}</h3>
                       {nivelEhLider(participante.nivel ?? (participante.isLider ? "LIDER" : null)) ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 bg-primary/15 text-primary border border-primary/30">
+                        <span className="px-2.5 py-0.5 rounded-md text-xs font-medium flex items-center gap-1 bg-primary/15 text-primary border border-primary/30">
                           <Crown className="w-3.5 h-3.5" />
                           Líder
                         </span>
                       ) : (
-                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 border ${
+                        <span className={`px-2.5 py-0.5 rounded-md text-xs font-medium flex items-center gap-1 border ${
                           (participante.nivel === "COLABORADOR")
                             ? "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/30"
                             : "bg-[#4a9eff]/15 text-[#4a9eff] border-[#4a9eff]/30"
@@ -470,7 +463,7 @@ export function ParticipantesDoGrupo() {
       </div>
 
       {participantesFiltrados.length === 0 && !loading && (
-        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+        <div className="text-center py-12 bg-card rounded-lg border border-border/30">
           <UserCheck className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground text-sm">
             {termoBusca || filtroFuncao !== "all"
@@ -483,10 +476,10 @@ export function ParticipantesDoGrupo() {
       {/* Modal Editar Participante */}
       {editModalOpen && editingParticipante && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
+          <div className="bg-card rounded-lg w-full max-w-lg border border-border/40 overflow-hidden">
             <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
                   <Edit className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -505,7 +498,7 @@ export function ParticipantesDoGrupo() {
 
             <div className="p-6 space-y-4">
               {editError && (
-                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{editError}</span>
                 </div>
@@ -522,7 +515,7 @@ export function ParticipantesDoGrupo() {
                     value={editNome}
                     onChange={(e) => setEditNome(e.target.value)}
                     disabled={updating}
-                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
                   />
                 </div>
 
@@ -536,7 +529,7 @@ export function ParticipantesDoGrupo() {
                     value={editTelefone}
                     onChange={(e) => setEditTelefone(e.target.value)}
                     disabled={updating}
-                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
                   />
                 </div>
 
@@ -551,7 +544,7 @@ export function ParticipantesDoGrupo() {
                     onChange={(e) => setEditTitulo(e.target.value)}
                     placeholder="Ex: Doutor, Mestre, Pesquisador"
                     disabled={updating}
-                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
                   />
                 </div>
 
@@ -560,14 +553,14 @@ export function ParticipantesDoGrupo() {
                     type="button"
                     onClick={() => setEditModalOpen(false)}
                     disabled={updating}
-                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-lg text-sm transition-colors cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={updating}
-                    className="px-5 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
                     {updating ? (
                       <>

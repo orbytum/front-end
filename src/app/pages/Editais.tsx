@@ -45,6 +45,7 @@ import {
 import { nivelEhLider } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "../components/DateInput";
+import { Seletor } from "../components/Seletor";
 
 type Aba = "editais" | "eventos";
 
@@ -666,28 +667,21 @@ export function Editais() {
     !!filtrosEventos.dataFim;
 
   return (
-    <div className="h-full overflow-auto p-6 space-y-6">
+    <div className="h-full overflow-auto p-6 space-y-3">
       {mensagemSucesso && (
-        <div className="bg-[#10b981]/10 border border-[#10b981]/30 text-[#10b981] px-4 py-3 rounded-xl flex items-center gap-3">
+        <div className="bg-[#10b981]/10 border border-[#10b981]/30 text-[#10b981] px-4 py-3 rounded-lg flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 shrink-0" />
           <span className="text-sm font-medium">{mensagemSucesso}</span>
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-foreground text-2xl font-bold mb-1">Editais e Eventos</h1>
-          <p className="text-muted-foreground text-sm">
-            Acompanhe oportunidades de fomento e eventos do grupo
-            {grupoAtual ? ` "${grupoAtual.nome}"` : ""}
-          </p>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 empty:hidden">
         {aba === "editais" && podeGerenciar && (
           <button
             type="button"
             onClick={abrirModalCriacao}
             disabled={!grupoId}
-            className="px-5 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0"
+            className="px-5 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0"
           >
             <Plus className="w-5 h-5" />
             Novo Edital
@@ -730,14 +724,14 @@ export function Editais() {
         <>
           <form
             onSubmit={aplicarFiltrosEditais}
-            className="bg-card rounded-2xl p-4 border border-border/30 space-y-4"
+            className="bg-card rounded-lg p-4 border border-border/30 space-y-4"
           >
             <div className="flex items-center gap-2">
               <FolderKanban className="w-4 h-4 text-muted-foreground shrink-0" />
-              <select
+              <Seletor
                 value={projetoIdEdital}
                 onChange={(e) => setProjetoIdEdital(e.target.value === "all" ? "all" : Number(e.target.value))}
-                className="px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60 min-w-[200px]"
+                className="px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60 min-w-[200px]"
               >
                 <option value="all">Todos os projetos</option>
                 {projetos.map((projeto) => (
@@ -745,7 +739,7 @@ export function Editais() {
                     {projeto.titulo}
                   </option>
                 ))}
-              </select>
+              </Seletor>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
@@ -760,7 +754,7 @@ export function Editais() {
                     placeholder="Buscar na descrição..."
                     value={palavraChave}
                     onChange={(e) => setPalavraChave(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                    className="w-full pl-10 pr-4 py-2 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                   />
                 </div>
               </div>
@@ -774,7 +768,7 @@ export function Editais() {
                   placeholder="Ex.: FAPESP, CNPq..."
                   value={organizacao}
                   onChange={(e) => setOrganizacao(e.target.value)}
-                  className="w-full px-4 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                  className="w-full px-4 py-2 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                 />
               </div>
 
@@ -786,7 +780,7 @@ export function Editais() {
                   type="date"
                   value={dataInicioEdital}
                   onChange={setDataInicioEdital}
-                  className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                  className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                 />
               </div>
 
@@ -798,7 +792,7 @@ export function Editais() {
                   type="date"
                   value={dataFimEdital}
                   onChange={setDataFimEdital}
-                  className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                  className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                 />
               </div>
 
@@ -807,7 +801,7 @@ export function Editais() {
                   type="submit"
                   title="Filtrar"
                   aria-label="Filtrar editais"
-                  className="p-2 w-full bg-primary/15 text-primary hover:bg-primary/25 rounded-xl transition-colors cursor-pointer flex items-center justify-center"
+                  className="p-2 w-full bg-primary/15 text-primary hover:bg-primary/25 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
                 >
                   <Filter className="w-4 h-4" />
                 </button>
@@ -856,7 +850,7 @@ export function Editais() {
                     palavrasGrupo.map((palavra) => (
                       <span
                         key={palavra}
-                        className="px-2.5 py-0.5 rounded-full text-xs bg-primary/10 text-primary border border-primary/20"
+                        className="px-2.5 py-0.5 rounded-md text-xs bg-primary/10 text-primary border border-primary/20"
                       >
                         {palavra}
                       </span>
@@ -866,7 +860,7 @@ export function Editais() {
               )}
 
               {editandoPalavras && (
-                <div className="rounded-xl border border-border/40 bg-background/50 p-3 space-y-3">
+                <div className="rounded-lg border border-border/40 bg-background/50 p-3 space-y-3">
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -880,12 +874,12 @@ export function Editais() {
                           adicionarPalavra();
                         }
                       }}
-                      className="flex-1 px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                      className="flex-1 px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                     />
                     <button
                       type="button"
                       onClick={adicionarPalavra}
-                      className="px-3 py-2 bg-primary/15 text-primary hover:bg-primary/25 rounded-xl text-sm cursor-pointer inline-flex items-center gap-1"
+                      className="px-3 py-2 bg-primary/15 text-primary hover:bg-primary/25 rounded-lg text-sm cursor-pointer inline-flex items-center gap-1"
                     >
                       <Plus className="w-4 h-4" />
                       Adicionar
@@ -898,7 +892,7 @@ export function Editais() {
                     {rascunhoPalavras.map((palavra) => (
                       <span
                         key={palavra}
-                        className="pl-2.5 pr-1 py-0.5 rounded-full text-xs bg-primary/10 text-primary border border-primary/20 inline-flex items-center gap-1"
+                        className="pl-2.5 pr-1 py-0.5 rounded-md text-xs bg-primary/10 text-primary border border-primary/20 inline-flex items-center gap-1"
                       >
                         {palavra}
                         <button
@@ -917,7 +911,7 @@ export function Editais() {
                     <button
                       type="button"
                       onClick={() => setEditandoPalavras(false)}
-                      className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-xl cursor-pointer"
+                      className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-lg cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -925,7 +919,7 @@ export function Editais() {
                       type="button"
                       onClick={salvarPalavras}
                       disabled={salvandoPalavras}
-                      className="px-4 py-1.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-xl text-sm cursor-pointer inline-flex items-center gap-2"
+                      className="px-4 py-1.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-lg text-sm cursor-pointer inline-flex items-center gap-2"
                     >
                       {salvandoPalavras && <Loader2 className="w-4 h-4 animate-spin" />}
                       Salvar palavras-chave
@@ -950,7 +944,7 @@ export function Editais() {
           </form>
 
           {erroEditais && (
-            <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+            <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center justify-between text-sm text-[#ef4444]">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{erroEditais}</span>
@@ -972,7 +966,7 @@ export function Editais() {
               <span className="text-muted-foreground text-sm">Carregando editais...</span>
             </div>
           ) : !grupoId ? (
-            <div className="text-center py-16 bg-card rounded-2xl border border-border/30 p-6">
+            <div className="text-center py-16 bg-card rounded-lg border border-border/30 p-6">
               <Telescope className="w-14 h-14 text-muted-foreground/50 mx-auto mb-3" />
               <h3 className="text-foreground font-semibold text-lg mb-1">
                 Nenhum grupo selecionado
@@ -982,7 +976,7 @@ export function Editais() {
               </p>
             </div>
           ) : editais.length === 0 ? (
-            <div className="text-center py-16 bg-card rounded-2xl border border-border/30 p-6">
+            <div className="text-center py-16 bg-card rounded-lg border border-border/30 p-6">
               <Telescope className="w-14 h-14 text-muted-foreground/50 mx-auto mb-3" />
               <h3 className="text-foreground font-semibold text-lg mb-1">
                 {filtrosEditaisAtivos
@@ -1000,7 +994,7 @@ export function Editais() {
                 <button
                   type="button"
                   onClick={limparFiltrosEditais}
-                  className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 rounded-xl text-sm transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 rounded-lg text-sm transition-colors cursor-pointer"
                 >
                   Limpar Filtros
                 </button>
@@ -1009,7 +1003,7 @@ export function Editais() {
                   <button
                     type="button"
                     onClick={abrirModalCriacao}
-                    className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-sm transition-colors cursor-pointer"
                   >
                     Cadastrar Edital
                   </button>
@@ -1025,12 +1019,12 @@ export function Editais() {
                   return (
                     <div
                       key={edital.id}
-                      className="bg-card rounded-2xl p-5 border border-border/30 flex flex-col justify-between hover:border-border/60 transition-all duration-200"
+                      className="bg-card rounded-lg p-5 border border-border/30 flex flex-col justify-between hover:border-border/60 transition-all duration-200"
                     >
                       <div>
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${status.classe}`}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border ${status.classe}`}
                           >
                             {status.rotulo}
                           </span>
@@ -1051,7 +1045,7 @@ export function Editais() {
                             {edital.projetos.map((projeto) => (
                               <span
                                 key={projeto.id}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#4a9eff]/10 text-[#4a9eff] border border-[#4a9eff]/25 max-w-full"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#4a9eff]/10 text-[#4a9eff] border border-[#4a9eff]/25 max-w-full"
                               >
                                 <FolderKanban className="w-3 h-3 shrink-0" />
                                 <span className="truncate">{projeto.titulo}</span>
@@ -1156,7 +1150,7 @@ export function Editais() {
         <>
           <form
             onSubmit={aplicarFiltrosEventos}
-            className="bg-card rounded-2xl p-4 border border-border/30 space-y-4"
+            className="bg-card rounded-lg p-4 border border-border/30 space-y-4"
           >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
               <div className="md:col-span-4">
@@ -1170,7 +1164,7 @@ export function Editais() {
                     placeholder="Buscar por nome ou descrição..."
                     value={termoEvento}
                     onChange={(e) => setTermoEvento(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                    className="w-full pl-10 pr-4 py-2 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                   />
                 </div>
               </div>
@@ -1179,10 +1173,10 @@ export function Editais() {
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">
                   Tipo
                 </label>
-                <select
+                <Seletor
                   value={tipoEvento}
                   onChange={(e) => setTipoEvento(e.target.value as "all" | TipoLembrete)}
-                  className="w-full px-4 py-2 bg-background rounded-xl border border-border/40 text-foreground focus:outline-none focus:border-primary/60 text-sm cursor-pointer"
+                  className="w-full px-4 py-2 bg-background rounded-lg border border-border/40 text-foreground focus:outline-none focus:border-primary/60 text-sm cursor-pointer"
                 >
                   <option value="all">Todos os tipos</option>
                   {TIPOS_LEMBRETE.map((tipo) => (
@@ -1190,7 +1184,7 @@ export function Editais() {
                       {tipo}
                     </option>
                   ))}
-                </select>
+                </Seletor>
               </div>
 
               <div className="md:col-span-2">
@@ -1201,7 +1195,7 @@ export function Editais() {
                   type="date"
                   value={dataInicioEvento}
                   onChange={setDataInicioEvento}
-                  className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                  className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                 />
               </div>
 
@@ -1213,7 +1207,7 @@ export function Editais() {
                   type="date"
                   value={dataFimEvento}
                   onChange={setDataFimEvento}
-                  className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                  className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                 />
               </div>
 
@@ -1222,7 +1216,7 @@ export function Editais() {
                   type="submit"
                   title="Filtrar"
                   aria-label="Filtrar eventos"
-                  className="p-2 w-full bg-primary/15 text-primary hover:bg-primary/25 rounded-xl transition-colors cursor-pointer flex items-center justify-center"
+                  className="p-2 w-full bg-primary/15 text-primary hover:bg-primary/25 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
                 >
                   <Filter className="w-4 h-4" />
                 </button>
@@ -1244,7 +1238,7 @@ export function Editais() {
           </form>
 
           {erroEventos && (
-            <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+            <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center justify-between text-sm text-[#ef4444]">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{erroEventos}</span>
@@ -1266,7 +1260,7 @@ export function Editais() {
               <span className="text-muted-foreground text-sm">Carregando eventos...</span>
             </div>
           ) : !grupoId ? (
-            <div className="text-center py-16 bg-card rounded-2xl border border-border/30 p-6">
+            <div className="text-center py-16 bg-card rounded-lg border border-border/30 p-6">
               <Calendar className="w-14 h-14 text-muted-foreground/50 mx-auto mb-3" />
               <h3 className="text-foreground font-semibold text-lg mb-1">
                 Nenhum grupo selecionado
@@ -1276,7 +1270,7 @@ export function Editais() {
               </p>
             </div>
           ) : eventos.length === 0 ? (
-            <div className="text-center py-16 bg-card rounded-2xl border border-border/30 p-6">
+            <div className="text-center py-16 bg-card rounded-lg border border-border/30 p-6">
               <Calendar className="w-14 h-14 text-muted-foreground/50 mx-auto mb-3" />
               <h3 className="text-foreground font-semibold text-lg mb-1">
                 {filtrosEventosAtivos
@@ -1292,7 +1286,7 @@ export function Editais() {
                 <button
                   type="button"
                   onClick={limparFiltrosEventos}
-                  className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 rounded-xl text-sm transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 rounded-lg text-sm transition-colors cursor-pointer"
                 >
                   Limpar Filtros
                 </button>
@@ -1307,12 +1301,12 @@ export function Editais() {
                   return (
                     <div
                       key={evento.id}
-                      className="bg-card rounded-2xl p-5 border border-border/30 flex flex-col justify-between hover:border-border/60 transition-all duration-200"
+                      className="bg-card rounded-lg p-5 border border-border/30 flex flex-col justify-between hover:border-border/60 transition-all duration-200"
                     >
                       <div>
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${config.fundo} ${config.cor}`}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold ${config.fundo} ${config.cor}`}
                           >
                             <IconeTipo className="w-3.5 h-3.5" />
                             {evento.tipo}
@@ -1379,7 +1373,7 @@ export function Editais() {
 
       {modalAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-card rounded-2xl border border-border/40 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-card rounded-lg border border-border/40 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-border/30">
               <div>
                 <h2 className="text-foreground font-bold text-lg">
@@ -1403,7 +1397,7 @@ export function Editais() {
 
             <form onSubmit={submeterFormulario} className="p-5 space-y-4">
               {erroForm && (
-                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center gap-2 text-sm text-[#ef4444]">
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center gap-2 text-sm text-[#ef4444]">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{erroForm}</span>
                 </div>
@@ -1418,7 +1412,7 @@ export function Editais() {
                   value={formOrganizador}
                   onChange={(e) => setFormOrganizador(e.target.value)}
                   placeholder="Ex.: FAPESP, CNPq, CAPES..."
-                  className="w-full px-4 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                  className="w-full px-4 py-2 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                 />
               </div>
 
@@ -1428,10 +1422,11 @@ export function Editais() {
                 </label>
                 <textarea
                   value={formDescricao}
+                  maxLength={1000}
                   onChange={(e) => setFormDescricao(e.target.value)}
                   rows={4}
                   placeholder="Descreva o edital, requisitos e áreas contempladas..."
-                  className="w-full px-4 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm resize-y"
+                  className="w-full px-4 py-2 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm resize-y"
                 />
               </div>
 
@@ -1447,7 +1442,7 @@ export function Editais() {
                     value={formValor}
                     onChange={(e) => setFormValor(e.target.value)}
                     placeholder="Opcional"
-                    className="w-full px-4 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                    className="w-full px-4 py-2 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                   />
                 </div>
 
@@ -1460,7 +1455,7 @@ export function Editais() {
                     value={formUri}
                     onChange={(e) => setFormUri(e.target.value)}
                     placeholder="https://..."
-                    className="w-full px-4 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                    className="w-full px-4 py-2 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                   />
                 </div>
 
@@ -1472,7 +1467,7 @@ export function Editais() {
                     type="datetime-local"
                     value={formAbertura}
                     onChange={setFormAbertura}
-                    className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                    className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />
                 </div>
 
@@ -1484,7 +1479,7 @@ export function Editais() {
                     type="datetime-local"
                     value={formEncerramento}
                     onChange={setFormEncerramento}
-                    className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                    className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />
                 </div>
               </div>
@@ -1497,7 +1492,7 @@ export function Editais() {
                   Sem projetos marcados, o edital é público e todo o grupo o vê. Com projetos marcados, só os
                   participantes desses projetos e o líder do grupo o veem.
                 </p>
-                <div className="max-h-36 overflow-y-auto rounded-xl border border-border/40 bg-background p-2 space-y-1">
+                <div className="max-h-36 overflow-y-auto rounded-lg border border-border/40 bg-background p-2 space-y-1">
                   {projetos.length === 0 && (
                     <p className="text-xs text-muted-foreground px-2 py-1">
                       Nenhum projeto disponível neste grupo.
@@ -1558,7 +1553,7 @@ export function Editais() {
                 </div>
 
                 {erroDocumentos && (
-                  <div className="mb-2 p-2.5 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center gap-2 text-xs text-[#ef4444]">
+                  <div className="mb-2 p-2.5 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center gap-2 text-xs text-[#ef4444]">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     <span>{erroDocumentos}</span>
                   </div>
@@ -1569,11 +1564,11 @@ export function Editais() {
                     Salve o edital para poder anexar documentos.
                   </p>
                 ) : documentosModal.length === 0 ? (
-                  <p className="text-xs text-muted-foreground px-2 py-3 rounded-xl border border-dashed border-border/40 text-center">
+                  <p className="text-xs text-muted-foreground px-2 py-3 rounded-lg border border-dashed border-border/40 text-center">
                     Nenhum documento anexado. Use "Anexar documento" para enviar o primeiro arquivo.
                   </p>
                 ) : (
-                  <div className="max-h-44 overflow-y-auto rounded-xl border border-border/40 bg-background divide-y divide-border/20">
+                  <div className="max-h-44 overflow-y-auto rounded-lg border border-border/40 bg-background divide-y divide-border/20">
                     {documentosModal.map((documento) => (
                       <div key={documento.id} className="flex items-center gap-2 px-3 py-2">
                         <Paperclip className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -1650,14 +1645,14 @@ export function Editais() {
                   type="button"
                   onClick={() => setModalAberto(false)}
                   disabled={salvando}
-                  className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 disabled:opacity-50 rounded-xl text-sm font-medium transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 disabled:opacity-50 rounded-lg text-sm font-medium transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={salvando}
-                  className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 rounded-xl text-sm font-medium transition-colors cursor-pointer inline-flex items-center gap-2"
+                  className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 rounded-lg text-sm font-medium transition-colors cursor-pointer inline-flex items-center gap-2"
                 >
                   {salvando ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -1674,9 +1669,9 @@ export function Editais() {
 
       {editalParaRemover && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-card rounded-2xl border border-border/40 w-full max-w-md p-6">
+          <div className="bg-card rounded-lg border border-border/40 w-full max-w-md p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-xl bg-[#ef4444]/10 text-[#ef4444]">
+              <div className="p-2 rounded-lg bg-[#ef4444]/10 text-[#ef4444]">
                 <Trash2 className="w-5 h-5" />
               </div>
               <h2 className="text-foreground font-bold text-lg">Remover edital</h2>
@@ -1693,7 +1688,7 @@ export function Editais() {
                 type="button"
                 onClick={() => setEditalParaRemover(null)}
                 disabled={removendo}
-                className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 disabled:opacity-50 rounded-xl text-sm font-medium transition-colors cursor-pointer"
+                className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 disabled:opacity-50 rounded-lg text-sm font-medium transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1701,7 +1696,7 @@ export function Editais() {
                 type="button"
                 onClick={confirmarRemocao}
                 disabled={removendo}
-                className="px-4 py-2 bg-[#ef4444] text-white hover:bg-[#ef4444]/90 disabled:opacity-60 rounded-xl text-sm font-medium transition-colors cursor-pointer inline-flex items-center gap-2"
+                className="px-4 py-2 bg-[#ef4444] text-white hover:bg-[#ef4444]/90 disabled:opacity-60 rounded-lg text-sm font-medium transition-colors cursor-pointer inline-flex items-center gap-2"
               >
                 {removendo ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

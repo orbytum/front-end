@@ -4,7 +4,6 @@ import {
   Eye,
   EyeOff,
   UserPlus,
-  Orbit,
   CheckCircle2,
   User,
   Lock,
@@ -15,6 +14,7 @@ import {
 import { LoginService } from "../services/auth/LoginService";
 import { AuthService } from "../services/auth/AuthService";
 import { formatarTelefone } from "../utils/Telefone";
+import { LogoOrbytum } from "../components/LogoOrbytum";
 
 export function CadastrarAdminInicial() {
   const navigate = useNavigate();
@@ -127,7 +127,7 @@ export function CadastrarAdminInicial() {
   if (sucesso) {
     return (
       <div className="min-h-screen bg-[#121212] flex items-center justify-center p-6 relative overflow-hidden">
-        <div className="w-full max-w-md bg-[#1e1e1e] rounded-2xl p-8 border border-[#2e2e2e]/30 text-center relative z-10">
+        <div className="w-full max-w-md bg-[#1e1e1e] rounded-lg p-8 border border-[#2e2e2e]/30 text-center relative z-10">
           <div className="w-16 h-16 bg-[#22c55e]/10 text-[#22c55e] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#22c55e]/20">
             <CheckCircle2 className="w-8 h-8" />
           </div>
@@ -139,7 +139,7 @@ export function CadastrarAdminInicial() {
           </p>
           <button
             onClick={() => navigate("/login")}
-            className="w-full py-3 bg-[#ff8c42] text-white rounded-xl font-semibold hover:bg-[#ff8c42]/90 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-3 bg-[#ff8c42] text-white rounded-lg font-semibold hover:bg-[#ff8c42]/90 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
           >
             Ir para a tela de Login
           </button>
@@ -159,17 +159,14 @@ export function CadastrarAdminInicial() {
       <div className="w-full max-w-lg relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-14 h-14 rounded-full bg-[#ff8c42] flex items-center justify-center">
-              <Orbit className="w-7 h-7 text-white" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-white tracking-wider">ORBYTUM</h1>
+          <h1>
+            <LogoOrbytum tamanho={64} comNome vertical classeNome="text-4xl text-white!" />
+          </h1>
           <p className="text-[#9e9e9e] text-sm mt-1">Configuração Inicial do Sistema</p>
         </div>
 
         {/* Card */}
-        <div className="bg-[#1e1e1e] rounded-2xl p-8 border border-[#2e2e2e]/30 shadow-2xl">
+        <div className="bg-[#1e1e1e] rounded-lg p-8 border border-[#2e2e2e]/30 shadow-2xl">
           <div className="mb-6 border-b border-[#2e2e2e]/40 pb-4">
             <h2 className="text-white text-xl font-semibold flex items-center gap-2">
               <UserPlus className="w-5 h-5 text-[#ff8c42]" />
@@ -192,7 +189,7 @@ export function CadastrarAdminInicial() {
                 value={form.nome}
                 onChange={handleChange("nome")}
                 placeholder="Ex: João da Silva"
-                className="w-full px-4 py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/40 text-white placeholder-[#404040] text-sm focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                className="w-full px-4 py-2.5 bg-[#121212] rounded-lg border border-[#2e2e2e]/40 text-white placeholder-[#404040] text-sm focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
               {errors.nome && (
                 <p className="text-[#ef4444] text-xs mt-1">{errors.nome}</p>
@@ -210,7 +207,7 @@ export function CadastrarAdminInicial() {
                 value={form.email}
                 onChange={handleChange("email")}
                 placeholder="admin@empresa.com"
-                className="w-full px-4 py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/40 text-white placeholder-[#404040] text-sm focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                className="w-full px-4 py-2.5 bg-[#121212] rounded-lg border border-[#2e2e2e]/40 text-white placeholder-[#404040] text-sm focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
               {errors.email && (
                 <p className="text-[#ef4444] text-xs mt-1">{errors.email}</p>
@@ -228,7 +225,7 @@ export function CadastrarAdminInicial() {
                 value={form.telefone}
                 onChange={handlePhoneChange}
                 placeholder="(00) 00000-0000"
-                className="w-full px-4 py-2.5 bg-[#121212] rounded-xl border border-[#2e2e2e]/40 text-white placeholder-[#404040] text-sm focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                className="w-full px-4 py-2.5 bg-[#121212] rounded-lg border border-[#2e2e2e]/40 text-white placeholder-[#404040] text-sm focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
               {errors.telefone && (
                 <p className="text-[#ef4444] text-xs mt-1">{errors.telefone}</p>
@@ -248,7 +245,7 @@ export function CadastrarAdminInicial() {
                     value={form.senha}
                     onChange={handleChange("senha")}
                     placeholder="••••••••"
-                    className="w-full px-4 py-2.5 pr-10 bg-[#121212] rounded-xl border border-[#2e2e2e]/40 text-white placeholder-[#404040] text-sm focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                    className="w-full px-4 py-2.5 pr-10 bg-[#121212] rounded-lg border border-[#2e2e2e]/40 text-white placeholder-[#404040] text-sm focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
                   />
                   <button
                     type="button"
@@ -274,7 +271,7 @@ export function CadastrarAdminInicial() {
                     value={form.confirmarSenha}
                     onChange={handleChange("confirmarSenha")}
                     placeholder="••••••••"
-                    className="w-full px-4 py-2.5 pr-10 bg-[#121212] rounded-xl border border-[#2e2e2e]/40 text-white placeholder-[#404040] text-sm focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                    className="w-full px-4 py-2.5 pr-10 bg-[#121212] rounded-lg border border-[#2e2e2e]/40 text-white placeholder-[#404040] text-sm focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
                   />
                   <button
                     type="button"
@@ -291,7 +288,7 @@ export function CadastrarAdminInicial() {
             </div>
 
             {erro && (
-              <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl text-[#ef4444] text-xs">
+              <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-lg text-[#ef4444] text-xs">
                 {erro}
               </div>
             )}
@@ -300,7 +297,7 @@ export function CadastrarAdminInicial() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 mt-4 bg-[#ff8c42] hover:bg-[#ff8c42]/90 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 mt-4 bg-[#ff8c42] hover:bg-[#ff8c42]/90 disabled:opacity-50 text-white rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <>

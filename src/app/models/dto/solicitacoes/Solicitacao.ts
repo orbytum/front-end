@@ -49,6 +49,12 @@ export const editarSolicitacaoRequestSchema = z.object({
 
 export type EditarSolicitacaoRequest = z.infer<typeof editarSolicitacaoRequestSchema>;
 
+/** Solicitações aprovadas pelo administrador (decisão final), com ou sem uso em curso. */
+export const STATUS_SOLICITACAO_APROVADA: ReadonlySet<string> = new Set(["EM_ANDAMENTO", "CONCLUIDA", "ENCERRADA"]);
+
+/** Solicitações ainda sem decisão: aguardando o Líder do grupo ou o administrador. */
+export const STATUS_SOLICITACAO_EM_ANALISE: ReadonlySet<string> = new Set(["PENDENTE", "AGUARDANDO_ADMINISTRADOR"]);
+
 export const SOLICITACAO_STATUS = [
   "PENDENTE",
   "AGUARDANDO_ADMINISTRADOR",

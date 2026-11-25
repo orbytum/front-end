@@ -1,5 +1,6 @@
 import { FolderKanban, Plus, Search, Clock, CheckCircle, AlertCircle, Circle } from "lucide-react";
 import { useState } from "react";
+import { Seletor } from "../components/Seletor";
 
 export function Projetos() {
   const [termoBusca, setTermoBusca] = useState("");
@@ -125,7 +126,7 @@ export function Projetos() {
 
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-card rounded-xl p-4 border border-border/30">
+        <div className="bg-card rounded-lg p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">Total</span>
             <FolderKanban className="w-5 h-5 text-[#4a9eff]" />
@@ -133,7 +134,7 @@ export function Projetos() {
           <div className="text-foreground text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-card rounded-xl p-4 border border-border/30">
+        <div className="bg-card rounded-lg p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">Em Andamento</span>
             <Clock className="w-5 h-5 text-[#ff8c42]" />
@@ -141,7 +142,7 @@ export function Projetos() {
           <div className="text-foreground text-2xl font-bold">{estatisticas.emAndamento}</div>
         </div>
 
-        <div className="bg-card rounded-xl p-4 border border-border/30">
+        <div className="bg-card rounded-lg p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">Concluídas</span>
             <CheckCircle className="w-5 h-5 text-[#10b981]" />
@@ -149,7 +150,7 @@ export function Projetos() {
           <div className="text-foreground text-2xl font-bold">{estatisticas.concluidos}</div>
         </div>
 
-        <div className="bg-card rounded-xl p-4 border border-border/30">
+        <div className="bg-card rounded-lg p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">Atrasadas</span>
             <AlertCircle className="w-5 h-5 text-[#ef4444]" />
@@ -168,25 +169,25 @@ export function Projetos() {
             placeholder="Buscar projetos..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
         {/* Filtro */}
-        <select
+        <Seletor
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-card rounded-lg border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           <option value="Em Andamento">Em Andamento</option>
           <option value="Planejada">Planejadas</option>
           <option value="Concluída">Concluídas</option>
           <option value="Atrasada">Atrasadas</option>
-        </select>
+        </Seletor>
 
         {/* Botão Novo Projeto */}
-        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium">
+        <button className="px-6 py-3 bg-[#ff8c42] text-white rounded-lg transition-all duration-300 flex items-center gap-2 font-medium">
           <Plus className="w-5 h-5" />
           <span>Novo Projeto</span>
         </button>
@@ -197,7 +198,7 @@ export function Projetos() {
         {projetosFiltrados.map((projeto) => (
           <div
             key={projeto.id}
-            className="bg-card rounded-2xl p-6 border border-border/30 transition-all duration-300"
+            className="bg-card rounded-lg p-6 border border-border/30 transition-all duration-300"
           >
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               {/* Informações do Projeto */}
@@ -232,10 +233,10 @@ export function Projetos() {
               {/* Metadados do Projeto */}
               <div className="flex flex-wrap lg:flex-col items-start gap-3 lg:items-end">
                 <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${obterCorStatus(projeto.status)}`}>
+                  <span className={`px-3 py-1 rounded-md text-xs font-medium ${obterCorStatus(projeto.status)}`}>
                     {projeto.status}
                   </span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${obterCorPrioridade(projeto.prioridade)}`}>
+                  <span className={`px-3 py-1 rounded-md text-xs font-medium ${obterCorPrioridade(projeto.prioridade)}`}>
                     {projeto.prioridade}
                   </span>
                 </div>
@@ -250,7 +251,7 @@ export function Projetos() {
 
       {/* Estado Vazio */}
       {projetosFiltrados.length === 0 && (
-        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+        <div className="text-center py-12 bg-card rounded-lg border border-border/30">
           <FolderKanban className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">Nenhum projeto encontrado</p>
         </div>

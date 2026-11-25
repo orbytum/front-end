@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router";
 import {
-  Orbit,
   Users,
   CheckCircle2,
   AlertTriangle,
@@ -16,6 +15,7 @@ import { ConviteService } from "../services/convites/ConviteService";
 import { AuthService } from "../services/auth/AuthService";
 import { ConviteGrupoDetalhe } from "../models/dto/convites/ConviteGrupoDetalhe";
 import { HttpError } from "../utils/HttpError";
+import { LogoOrbytum } from "../components/LogoOrbytum";
 
 type ViewStatus = "carregando" | "visualizacao" | "sucesso" | "ja_membro" | "invalido" | "restrito";
 
@@ -160,18 +160,15 @@ export function AceitarConviteGrupo() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo superior */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-3">
-            <div className="w-12 h-12 rounded-full bg-[#ff8c42] flex items-center justify-center">
-              <Orbit className="w-6 h-6 text-white" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-foreground tracking-wider">ORBYTUM</h1>
-          <p className="text-muted-foreground text-xs mt-1">Gestão acadêmica orbital</p>
+          <h1>
+            <LogoOrbytum tamanho={52} comNome vertical classeNome="text-3xl" />
+          </h1>
+          <p className="text-muted-foreground text-xs mt-2">Gestão acadêmica orbital</p>
         </div>
 
         {/* ── CARREGANDO ── */}
         {status === "carregando" && (
-          <div className="bg-card rounded-2xl p-8 border border-border/30 text-center">
+          <div className="bg-card rounded-lg p-8 border border-border/30 text-center">
             <Loader2 className="w-10 h-10 text-[#ff8c42] animate-spin mx-auto mb-4" />
             <h2 className="text-foreground font-semibold text-base mb-1">Localizando convite...</h2>
             <p className="text-muted-foreground text-xs">Aguarde enquanto verificamos os dados do grupo.</p>
@@ -180,7 +177,7 @@ export function AceitarConviteGrupo() {
 
         {/* ── INVÁLIDO OU EXPIRADO ── */}
         {status === "invalido" && (
-          <div className="bg-card rounded-2xl p-8 border border-[#ef4444]/20 text-center">
+          <div className="bg-card rounded-lg p-8 border border-[#ef4444]/20 text-center">
             <div className="w-16 h-16 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-8 h-8 text-[#ef4444]" />
             </div>
@@ -192,7 +189,7 @@ export function AceitarConviteGrupo() {
               <button
                 type="button"
                 onClick={() => navigate("/login")}
-                className="w-full py-2.5 bg-background rounded-xl border border-border/30 text-muted-foreground hover:text-foreground transition-colors text-sm cursor-pointer"
+                className="w-full py-2.5 bg-background rounded-lg border border-border/30 text-muted-foreground hover:text-foreground transition-colors text-sm cursor-pointer"
               >
                 Ir para o login
               </button>
@@ -202,7 +199,7 @@ export function AceitarConviteGrupo() {
 
         {/* ── CONVITE PESSOAL DE OUTRA CONTA (OU SEM SESSÃO) ── */}
         {status === "restrito" && (
-          <div className="bg-card rounded-2xl p-8 border border-primary/30 text-center">
+          <div className="bg-card rounded-lg p-8 border border-primary/30 text-center">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <ShieldCheck className="w-8 h-8 text-primary" />
             </div>
@@ -211,7 +208,7 @@ export function AceitarConviteGrupo() {
             <button
               type="button"
               onClick={irParaLoginERetornar}
-              className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-primary/90"
+              className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-primary/90"
             >
               <LogIn className="w-4 h-4" />
               <span>{estaAutenticado ? "Entrar com outra conta" : "Fazer login"}</span>
@@ -221,7 +218,7 @@ export function AceitarConviteGrupo() {
 
         {/* ── JÁ É MEMBRO DO GRUPO ── */}
         {status === "ja_membro" && (
-          <div className="bg-card rounded-2xl p-8 border border-[#ff8c42]/30 text-center">
+          <div className="bg-card rounded-lg p-8 border border-[#ff8c42]/30 text-center">
             <div className="w-16 h-16 rounded-full bg-[#ff8c42]/10 flex items-center justify-center mx-auto mb-4">
               <UserCheck className="w-8 h-8 text-[#ff8c42]" />
             </div>
@@ -232,7 +229,7 @@ export function AceitarConviteGrupo() {
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="w-full py-3 bg-[#ff8c42] text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-[#ff8c42]/90"
+              className="w-full py-3 bg-[#ff8c42] text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-[#ff8c42]/90"
             >
               <span>Acessar o sistema</span>
               <ArrowRight className="w-4 h-4" />
@@ -242,7 +239,7 @@ export function AceitarConviteGrupo() {
 
         {/* ── SUCESSO ── */}
         {status === "sucesso" && (
-          <div className="bg-card rounded-2xl p-8 border border-[#10b981]/20 text-center">
+          <div className="bg-card rounded-lg p-8 border border-[#10b981]/20 text-center">
             <div className="w-16 h-16 rounded-full bg-[#10b981]/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8 text-[#10b981]" />
             </div>
@@ -253,7 +250,7 @@ export function AceitarConviteGrupo() {
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="w-full py-3 bg-[#ff8c42] text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-[#ff8c42]/90"
+              className="w-full py-3 bg-[#ff8c42] text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-[#ff8c42]/90"
             >
               <span>Acessar o grupo</span>
               <ArrowRight className="w-4 h-4" />
@@ -263,11 +260,11 @@ export function AceitarConviteGrupo() {
 
         {/* ── VISUALIZAÇÃO E CONFIRMAÇÃO DO CONVITE ── */}
         {status === "visualizacao" && convite && (
-          <div className="bg-card rounded-2xl border border-border/30 overflow-hidden shadow-2xl">
+          <div className="bg-card rounded-lg border border-border/30 overflow-hidden shadow-2xl">
             {/* Cabeçalho do Card */}
             <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-[#ff8c42] flex items-center justify-center shrink-0">
                   <Users className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -280,14 +277,14 @@ export function AceitarConviteGrupo() {
             {/* Conteúdo do Card */}
             <div className="p-6 space-y-5">
               {mensagemErro && (
-                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{mensagemErro}</span>
                 </div>
               )}
 
               {/* Destaque do Nome do Grupo */}
-              <div className="p-5 bg-background rounded-xl border border-border/40 text-center">
+              <div className="p-5 bg-background rounded-lg border border-border/40 text-center">
                 <p className="text-xs uppercase tracking-wider text-[#ff8c42] font-semibold mb-1">
                   Grupo de Pesquisa
                 </p>
@@ -304,7 +301,7 @@ export function AceitarConviteGrupo() {
                       <ShieldCheck className="w-4 h-4 text-[#ff8c42]" />
                       Função atribuída:
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#ff8c42]/10 text-[#ff8c42] border border-[#ff8c42]/20">
+                    <span className="px-2.5 py-0.5 rounded-md text-xs font-medium bg-[#ff8c42]/10 text-[#ff8c42] border border-[#ff8c42]/20">
                       {convite.cargo}
                     </span>
                   </div>
@@ -342,7 +339,7 @@ export function AceitarConviteGrupo() {
                     type="button"
                     onClick={handleAceitarConvite}
                     disabled={submetendo}
-                    className="w-full py-3.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-[#ff8c42]/20"
+                    className="w-full py-3.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-[#ff8c42]/20"
                   >
                     {submetendo ? (
                       <>
@@ -358,13 +355,13 @@ export function AceitarConviteGrupo() {
                   </button>
                 ) : (
                   <div className="space-y-3">
-                    <div className="p-3 bg-background rounded-xl border border-border/40 text-xs text-muted-foreground text-center">
+                    <div className="p-3 bg-background rounded-lg border border-border/40 text-xs text-muted-foreground text-center">
                       Você precisa estar autenticado com sua conta para confirmar e entrar neste grupo.
                     </div>
                     <button
                       type="button"
                       onClick={() => navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`)}
-                      className="w-full py-3.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#ff8c42]/20"
+                      className="w-full py-3.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#ff8c42]/20"
                     >
                       <LogIn className="w-5 h-5" />
                       <span>Fazer login para entrar</span>

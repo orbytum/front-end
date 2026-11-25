@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { LoginService } from "../services/auth/LoginService";
 import { AuthService } from "../services/auth/AuthService";
-import { Eye, EyeOff, LogIn, Orbit } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { LogoOrbytum } from "../components/LogoOrbytum";
 
 export function Login() {
   const navigate = useNavigate();
@@ -70,18 +71,13 @@ export function Login() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="relative">
-              <div className="w-14 h-14 rounded-full bg-[#ff8c42] flex items-center justify-center">
-                <Orbit className="w-7 h-7 text-white" />
-              </div>
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-foreground tracking-wider">ORBYTUM</h1>
+          <h1>
+            <LogoOrbytum tamanho={64} comNome vertical classeNome="text-4xl" />
+          </h1>
         </div>
 
         {/* Card */}
-        <div className="bg-card rounded-2xl p-8 border border-border/30">
+        <div className="bg-card rounded-lg p-8 border border-border/30">
           <h2 className="text-foreground text-xl font-semibold mb-2">Login</h2>
           <p className="text-muted-foreground text-sm mb-6">Informe seu email e senha</p>
 
@@ -94,7 +90,7 @@ export function Login() {
                 value={formulario.usuario}
                 onChange={(e) => setFormulario({ ...formulario, usuario: e.target.value })}
                 placeholder="email@example.com"
-                className="w-full px-4 py-3 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                className="w-full px-4 py-3 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
               />
             </div>
 
@@ -107,7 +103,7 @@ export function Login() {
                   value={formulario.senha}
                   onChange={(e) => setFormulario({ ...formulario, senha: e.target.value })}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 pr-12 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
+                  className="w-full px-4 py-3 pr-12 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors"
                 />
                 <button
                   type="button"
@@ -126,7 +122,7 @@ export function Login() {
             {/* Enviar */}
             <button
               type="submit"
-              className="w-full py-3 bg-[#ff8c42] text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#ff8c42] text-white rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
             >
               <LogIn className="w-5 h-5" />
               Entrar
@@ -145,7 +141,7 @@ export function Login() {
           {["Administrador", "Líder", "Pesquisador", "Colaborador"].map((funcao) => (
             <span
               key={funcao}
-              className="px-3 py-1 rounded-full text-xs text-muted-foreground bg-card/60 border border-border/20"
+              className="px-3 py-1 rounded-md text-xs text-muted-foreground bg-card/60 border border-border/20"
             >
               {funcao}
             </span>

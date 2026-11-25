@@ -374,7 +374,7 @@ export function Calendario() {
   if (!grupoAtual) {
     return (
       <div className="h-full flex items-center justify-center p-6">
-        <div className="bg-card border border-border/30 rounded-2xl p-8 max-w-md text-center">
+        <div className="bg-card border border-border/30 rounded-lg p-8 max-w-md text-center">
           <CalendarIcon className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
           <h2 className="text-foreground font-semibold mb-2">Nenhum grupo selecionado</h2>
           <p className="text-muted-foreground text-sm">
@@ -388,28 +388,14 @@ export function Calendario() {
   return (
     <div className="h-full overflow-auto p-6">
       {/* Cabeçalho */}
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h1 className="text-foreground mb-2">Calendário</h1>
-          <p className="text-muted-foreground">
-            Atividades e lembretes do grupo <strong className="text-foreground">{grupoAtual.nome}</strong>
-          </p>
-        </div>
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start empty:hidden">
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={carregar}
-            disabled={carregando}
-            title="Recarregar calendário"
-            className="p-3 bg-card border border-border/30 rounded-xl text-muted-foreground hover:text-foreground hover:border-[#ff8c42]/50 transition-colors disabled:opacity-50"
-          >
-            <RefreshCw className={`w-5 h-5 ${carregando ? "animate-spin" : ""}`} />
-          </button>
           <button
             onClick={exportarCalendario}
             disabled={!grupoId || exportando}
             title="Baixar os lembretes do grupo em formato .ics"
-            className="px-5 py-3 disabled:opacity-50 bg-card border border-border/30 text-foreground rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap hover:border-[#ff8c42]/50"
+            className="px-5 py-3 disabled:opacity-50 bg-card border border-border/30 text-foreground rounded-lg transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap hover:border-[#ff8c42]/50"
           >
             {exportando ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -422,7 +408,7 @@ export function Calendario() {
             onClick={abrirAssinatura}
             disabled={!grupoId || carregandoAssinatura}
             title="Sincronizar a agenda do grupo com Google Calendar ou Outlook"
-            className="px-5 py-3 disabled:opacity-50 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
+            className="px-5 py-3 disabled:opacity-50 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
           >
             {carregandoAssinatura ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -431,11 +417,19 @@ export function Calendario() {
             )}
             Assinar agenda
           </button>
+          <button
+            onClick={carregar}
+            disabled={carregando}
+            title="Recarregar calendário"
+            className="p-3 bg-card border border-border/30 rounded-lg text-muted-foreground hover:text-foreground hover:border-[#ff8c42]/50 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-5 h-5 ${carregando ? "animate-spin" : ""}`} />
+          </button>
         </div>
       </div>
 
       {assinaturaAberta && (
-        <div className="mb-6 bg-card border border-border/30 rounded-2xl p-5 space-y-4">
+        <div className="mb-6 bg-card border border-border/30 rounded-lg p-5 space-y-4">
           <div>
             <h2 className="text-foreground font-semibold mb-1">Sincronizar com agenda externa</h2>
             <p className="text-muted-foreground text-sm">
@@ -449,11 +443,11 @@ export function Calendario() {
               value={urlAssinatura}
               onFocus={(e) => e.target.select()}
               aria-label="Link de assinatura da agenda"
-              className="flex-1 px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm font-mono"
+              className="flex-1 px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm font-mono"
             />
             <button
               onClick={copiarAssinatura}
-              className="px-4 py-2 bg-primary/15 text-primary hover:bg-primary/25 rounded-xl text-sm font-medium inline-flex items-center justify-center gap-2"
+              className="px-4 py-2 bg-primary/15 text-primary hover:bg-primary/25 rounded-lg text-sm font-medium inline-flex items-center justify-center gap-2"
             >
               {copiado ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copiado ? "Copiado" : "Copiar link"}
@@ -464,7 +458,7 @@ export function Calendario() {
               href={linkGoogle}
               target="_blank"
               rel="noreferrer"
-              className="px-4 py-2 bg-background border border-border/40 hover:border-primary/50 rounded-xl text-sm text-foreground inline-flex items-center gap-2"
+              className="px-4 py-2 bg-background border border-border/40 hover:border-primary/50 rounded-lg text-sm text-foreground inline-flex items-center gap-2"
             >
               <ExternalLink className="w-4 h-4" />
               Adicionar ao Google Calendar
@@ -473,7 +467,7 @@ export function Calendario() {
               href={linkOutlook}
               target="_blank"
               rel="noreferrer"
-              className="px-4 py-2 bg-background border border-border/40 hover:border-primary/50 rounded-xl text-sm text-foreground inline-flex items-center gap-2"
+              className="px-4 py-2 bg-background border border-border/40 hover:border-primary/50 rounded-lg text-sm text-foreground inline-flex items-center gap-2"
             >
               <ExternalLink className="w-4 h-4" />
               Adicionar ao Outlook
@@ -483,7 +477,7 @@ export function Calendario() {
       )}
 
       {erro && (
-        <div className="mb-6 flex items-center gap-3 p-4 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444] text-sm">
+        <div className="mb-6 flex items-center gap-3 p-4 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444] text-sm">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span className="flex-1">{erro}</span>
           <button onClick={carregar} title="Tentar novamente" className="p-1 hover:opacity-70">
@@ -495,7 +489,7 @@ export function Calendario() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Calendário */}
         <div className="xl:col-span-2">
-          <div className="bg-card rounded-2xl border border-border/30 overflow-hidden">
+          <div className="bg-card rounded-lg border border-border/30 overflow-hidden">
             <div className="p-6 border-b border-border/30 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <h2 className="text-foreground">
@@ -578,7 +572,7 @@ export function Calendario() {
                         type="button"
                         key={dia}
                         onClick={() => setDiaSelecionado(selecionado ? null : chave)}
-                        className={`min-h-[96px] p-2 rounded-xl border text-left transition-all duration-200 ${
+                        className={`min-h-[96px] p-2 rounded-lg border text-left transition-all duration-200 ${
                           selecionado
                             ? "border-[#ff8c42] bg-[#ff8c42]/10"
                             : ehHoje
@@ -633,9 +627,8 @@ export function Calendario() {
           </div>
         </div>
 
-        {/* Próximos 30 dias / itens do dia */}
         <div className="xl:col-span-1">
-          <div className="bg-card rounded-2xl border border-border/30 overflow-hidden">
+          <div className="bg-card rounded-lg border border-border/30 overflow-hidden">
             <div className="p-5 border-b border-border/30">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -676,7 +669,7 @@ export function Calendario() {
                   return (
                     <div
                       key={item.chave}
-                      className={`p-4 rounded-xl border ${config.borda} ${config.fundo}`}
+                      className={`p-4 rounded-lg border ${config.borda} ${config.fundo}`}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`w-10 h-10 rounded-lg bg-background flex flex-col items-center justify-center flex-shrink-0 ${config.cor}`}>
@@ -692,7 +685,7 @@ export function Calendario() {
                               {item.titulo}
                             </h4>
                             <span
-                              className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] border bg-background/40 flex items-center gap-1 ${config.borda} ${config.cor}`}
+                              className={`shrink-0 px-2 py-0.5 rounded-md text-[11px] border bg-background/40 flex items-center gap-1 ${config.borda} ${config.cor}`}
                             >
                               <Icone className="w-3 h-3" />
                               {item.origem === "LEMBRETE"

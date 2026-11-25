@@ -30,7 +30,7 @@ function PlanetaProjeto({
         onClick={() => onClick?.(projeto)}
         whileHover={{ scale: 1.2 }}
         transition={{ type: 'spring', stiffness: 300 }}
-        className="relative w-16 h-16 bg-background rounded-2xl border border-border/40 flex items-center justify-center cursor-pointer"
+        className="relative w-16 h-16 bg-background rounded-lg border border-border/40 flex items-center justify-center cursor-pointer"
         title={`Abrir projeto: ${projeto.titulo}`}
         aria-label={`Abrir projeto ${projeto.titulo}`}
       >
@@ -109,7 +109,6 @@ export function SolarSystem({
           )
         )}
 
-        {/* Núcleo Central - Grupo de Pesquisa */}
         <motion.div
           className="relative"
           initial={{ scale: 0 }}
@@ -124,12 +123,8 @@ export function SolarSystem({
               <div className="text-primary-foreground/90 text-sm">Pesquisa</div>
             </div>
           </div>
-          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-sm text-primary whitespace-nowrap font-medium">
-            Núcleo Central
-          </div>
         </motion.div>
 
-        {/* Partículas de fundo para efeito espacial */}
         {Array.from({ length: 40 }).map((_, i) => (
           <motion.div
             key={i}
@@ -163,7 +158,7 @@ export function SolarSystem({
 
       {/* Estado vazio */}
       {!carregando && projetos.length === 0 && (
-        <div className="absolute bottom-8 right-8 max-w-xs bg-card/80 backdrop-blur-sm p-6 rounded-2xl border border-border/30 text-center">
+        <div className="absolute bottom-8 right-8 max-w-xs bg-card/80 backdrop-blur-sm p-6 rounded-lg border border-border/30 text-center">
           <Telescope className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <h3 className="text-foreground font-semibold mb-1">Nenhum projeto favorito</h3>
           <p className="text-sm text-muted-foreground">
@@ -171,33 +166,6 @@ export function SolarSystem({
           </p>
         </div>
       )}
-
-      {/* Legenda informativa */}
-      <div className="absolute bottom-8 left-8 bg-card/80 backdrop-blur-sm p-6 rounded-2xl border border-border/30">
-        <h3 className="text-primary mb-4">Projetos Favoritos</h3>
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-primary" />
-            <span>Centro: Grupo de Pesquisa</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-primary" fill="currentColor" />
-            <span>Planetas: projetos favoritos do grupo</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Título no topo */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center">
-        <motion.h1
-          className="text-foreground mb-2"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-        >
-          Sistema de Gestão Acadêmica
-        </motion.h1>
-      </div>
     </div>
   );
 }

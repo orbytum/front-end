@@ -43,6 +43,8 @@ import { Publicacoes } from "./Publicacoes";
 import { ProjetoCombobox } from "../components/ProjetoCombobox";
 import { AtividadesBoard } from "../components/AtividadesBoard";
 import { HttpError } from "../utils/HttpError";
+import { useConfirmacao } from "../contexts/ConfirmacaoContext";
+import { Seletor } from "../components/Seletor";
 
 type TabId = "publicacoes" | "visao-geral" | "atividades";
 
@@ -53,9 +55,10 @@ interface MembroGrupo {
 }
 
 const inputClass =
-  "w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm disabled:opacity-50";
+  "w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm disabled:opacity-50";
 
 export function PainelDeProjetos() {
+  const confirmar = useConfirmacao();
   const { grupoAtual, carregandoGrupos } = useGrupo();
   const projetoService = useMemo(() => new ProjetoService(), []);
   const grupoService = useMemo(() => new GrupoService(), []);
@@ -295,13 +298,12 @@ export function PainelDeProjetos() {
   };
 
   const handleFinalizarProjeto = async (projeto: ProjetoResponse) => {
-    if (
-      !window.confirm(
-        `Deseja finalizar o projeto "${projeto.titulo}"? Ele será marcado como concluído.`
-      )
-    ) {
-      return;
-    }
+    const confirmado = await confirmar({
+      titulo: "Finalizar projeto",
+      mensagem: `Deseja finalizar o projeto "${projeto.titulo}"? Ele será marcado como encerrado.`,
+      textoConfirmar: "Finalizar",
+    });
+    if (!confirmado) return;
     setAcaoError("");
     try {
       const atualizado = await projetoService.finalizarProjeto(projeto.id);
@@ -317,7 +319,13 @@ export function PainelDeProjetos() {
   };
 
   const handleRemoverProjeto = async (projeto: ProjetoResponse) => {
-    if (!window.confirm(`Deseja realmente excluir o projeto "${projeto.titulo}"?`)) return;
+    const confirmado = await confirmar({
+      titulo: "Excluir projeto",
+      mensagem: `Deseja realmente excluir o projeto "${projeto.titulo}"?`,
+      textoConfirmar: "Excluir",
+      perigo: true,
+    });
+    if (!confirmado) return;
     setAcaoError("");
     try {
       await projetoService.removerProjeto(projeto.id);
@@ -380,7 +388,13 @@ export function PainelDeProjetos() {
 
   const handleRemoverParticipante = async (participante: ParticipanteProjetoResponse) => {
     if (!projetoSelecionado) return;
-    if (!window.confirm(`Remover "${participante.nome}" deste projeto?`)) return;
+    const confirmado = await confirmar({
+      titulo: "Remover participante",
+      mensagem: `Remover "${participante.nome}" deste projeto?`,
+      textoConfirmar: "Remover",
+      perigo: true,
+    });
+    if (!confirmado) return;
     setErroParticipantes("");
     try {
       await projetoService.removerParticipante(projetoSelecionado.id, participante.usuarioId);
@@ -400,8 +414,7 @@ export function PainelDeProjetos() {
 
   return (
     <div className="h-full overflow-auto p-6 space-y-6">
-      {/* Cabeçalho do Painel & Seletor de Projeto */}
-      <div className="bg-card rounded-2xl p-6 border border-border/30 space-y-5">
+      <div className="bg-card rounded-lg p-6 border border-border/30 space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex-1">
             <div className="mb-1">
@@ -424,7 +437,7 @@ export function PainelDeProjetos() {
               type="button"
               onClick={carregarProjetos}
               disabled={carregandoProjetos}
-              className="p-2.5 bg-background hover:bg-border/30 border border-border/40 rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              className="p-2.5 bg-background hover:bg-border/30 border border-border/40 rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               title="Recarregar projetos"
             >
               <RefreshCw className={`w-4 h-4 ${carregandoProjetos ? "animate-spin" : ""}`} />
@@ -433,7 +446,7 @@ export function PainelDeProjetos() {
               <button
                 type="button"
                 onClick={abrirNovoProjeto}
-                className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
+                className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Novo Projeto</span>
@@ -442,12 +455,11 @@ export function PainelDeProjetos() {
           </div>
         </div>
 
-        {/* Detalhes rápidos do Projeto Selecionado */}
         {projetoSelecionado && (
           <div className="pt-4 border-t border-border/20 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-wrap text-xs text-muted-foreground">
               <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border font-semibold ${obterCorStatusBadge(
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md border font-semibold ${obterCorStatusBadge(
                   projetoSelecionado.status
                 )}`}
               >
@@ -456,7 +468,7 @@ export function PainelDeProjetos() {
                   projetoSelecionado.status}
               </span>
               {projetoSelecionado.isInicial && (
-                <span className="px-2.5 py-1 rounded-full bg-[#4a9eff]/10 text-[#4a9eff] border border-[#4a9eff]/30 font-medium">
+                <span className="px-2.5 py-1 rounded-md bg-[#4a9eff]/10 text-[#4a9eff] border border-[#4a9eff]/30 font-medium">
                   Projeto Inicial
                 </span>
               )}
@@ -540,7 +552,7 @@ export function PainelDeProjetos() {
       </div>
 
       {acaoError && (
-        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center justify-between text-sm text-[#ef4444]">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{acaoError}</span>
@@ -555,7 +567,6 @@ export function PainelDeProjetos() {
         </div>
       )}
 
-      {/* Se houver projeto selecionado, exibe Abas e Conteúdo */}
       {projetoSelecionado ? (
         <div className="space-y-6">
           {/* Navegação por Abas */}
@@ -608,13 +619,13 @@ export function PainelDeProjetos() {
             )}
 
             {abaAtiva === "visao-geral" && (
-              <div className="bg-card rounded-2xl p-6 border border-border/30 space-y-4">
+              <div className="bg-card rounded-lg p-6 border border-border/30 space-y-4">
                 <div className="flex items-center gap-2 text-foreground font-bold text-lg">
                   <Info className="w-5 h-5 text-[#ff8c42]" />
                   <span>Informações do Projeto</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div className="bg-background rounded-xl p-4 border border-border/30">
+                  <div className="bg-background rounded-lg p-4 border border-border/30">
                     <span className="text-xs text-muted-foreground block mb-1">
                       Título do Projeto
                     </span>
@@ -622,7 +633,7 @@ export function PainelDeProjetos() {
                       {projetoSelecionado.titulo}
                     </span>
                   </div>
-                  <div className="bg-background rounded-xl p-4 border border-border/30">
+                  <div className="bg-background rounded-lg p-4 border border-border/30">
                     <span className="text-xs text-muted-foreground block mb-1">
                       Status do Projeto
                     </span>
@@ -631,7 +642,7 @@ export function PainelDeProjetos() {
                         projetoSelecionado.status}
                     </span>
                   </div>
-                  <div className="bg-background rounded-xl p-4 border border-border/30">
+                  <div className="bg-background rounded-lg p-4 border border-border/30">
                     <span className="text-xs text-muted-foreground block mb-1">
                       Líder do Projeto
                     </span>
@@ -639,7 +650,7 @@ export function PainelDeProjetos() {
                       {projetoSelecionado.liderProjetoNome || "Não definido"}
                     </span>
                   </div>
-                  <div className="bg-background rounded-xl p-4 border border-border/30">
+                  <div className="bg-background rounded-lg p-4 border border-border/30">
                     <span className="text-xs text-muted-foreground block mb-1">
                       Assunto / Descrição
                     </span>
@@ -647,7 +658,7 @@ export function PainelDeProjetos() {
                       {projetoSelecionado.assunto || "Sem assunto definido"}
                     </span>
                   </div>
-                  <div className="bg-background rounded-xl p-4 border border-border/30">
+                  <div className="bg-background rounded-lg p-4 border border-border/30">
                     <span className="text-xs text-muted-foreground block mb-1">
                       Data de Registro
                     </span>
@@ -655,13 +666,13 @@ export function PainelDeProjetos() {
                       {formatarData(projetoSelecionado.dthRegistro)}
                     </span>
                   </div>
-                  <div className="bg-background rounded-xl p-4 border border-border/30">
+                  <div className="bg-background rounded-lg p-4 border border-border/30">
                     <span className="text-xs text-muted-foreground block mb-1">Projeto Inicial</span>
                     <span className="text-foreground">
                       {projetoSelecionado.isInicial ? "Sim" : "Não"}
                     </span>
                   </div>
-                  <div className="bg-background rounded-xl p-4 border border-border/30">
+                  <div className="bg-background rounded-lg p-4 border border-border/30">
                     <span className="text-xs text-muted-foreground block mb-1">Favorito</span>
                     <span className="text-foreground">
                       {projetoSelecionado.isFavorito ? "Sim" : "Não"}
@@ -686,7 +697,7 @@ export function PainelDeProjetos() {
         </div>
       ) : (
         /* Estado Vazio de Projeto */
-        <div className="text-center py-20 bg-card rounded-2xl border border-border/30 p-6 space-y-3">
+        <div className="text-center py-20 bg-card rounded-lg border border-border/30 p-6 space-y-3">
           <FolderKanban className="w-16 h-16 text-muted-foreground/40 mx-auto" />
           <h3 className="text-foreground font-semibold text-lg">
             Nenhum projeto selecionado
@@ -700,7 +711,7 @@ export function PainelDeProjetos() {
             <button
               type="button"
               onClick={abrirNovoProjeto}
-              className="mt-2 px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm inline-flex items-center gap-2 cursor-pointer"
+              className="mt-2 px-5 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm inline-flex items-center gap-2 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Criar primeiro projeto</span>
@@ -712,10 +723,10 @@ export function PainelDeProjetos() {
       {/* Modal de Projeto */}
       {projetoModalAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden max-h-[90vh] flex flex-col">
+          <div className="bg-card rounded-lg w-full max-w-lg border border-border/40 overflow-hidden max-h-[90vh] flex flex-col">
             <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-[#ff8c42] flex items-center justify-center">
                   <FolderKanban className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -740,7 +751,7 @@ export function PainelDeProjetos() {
 
             <div className="p-6 overflow-y-auto">
               {erroProjeto && (
-                <div className="mb-4 p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="mb-4 p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{erroProjeto}</span>
                 </div>
@@ -754,6 +765,7 @@ export function PainelDeProjetos() {
                   <input
                     type="text"
                     value={formTitulo}
+                    maxLength={100}
                     onChange={(e) => setFormTitulo(e.target.value)}
                     disabled={salvandoProjeto}
                     className={inputClass}
@@ -779,7 +791,7 @@ export function PainelDeProjetos() {
                   <label className="block text-sm text-muted-foreground mb-1.5">
                     Status <span className="text-[#ff8c42]">*</span>
                   </label>
-                  <select
+                  <Seletor
                     value={formStatus}
                     onChange={(e) => setFormStatus(e.target.value)}
                     disabled={salvandoProjeto}
@@ -792,7 +804,7 @@ export function PainelDeProjetos() {
                         </option>
                       )
                     )}
-                  </select>
+                  </Seletor>
                   {!editandoProjeto && (
                     <p className="text-[11px] text-muted-foreground mt-1">
                       Projetos podem ser criados como Planejado ou Em Andamento.
@@ -805,7 +817,7 @@ export function PainelDeProjetos() {
                     <label className="block text-sm text-muted-foreground mb-1.5">
                       Líder do projeto
                     </label>
-                    <select
+                    <Seletor
                       value={formLiderProjetoId}
                       onChange={(e) => setFormLiderProjetoId(e.target.value)}
                       disabled={salvandoProjeto}
@@ -819,7 +831,7 @@ export function PainelDeProjetos() {
                             {m.nome}
                           </option>
                         ))}
-                    </select>
+                    </Seletor>
                     <p className="text-[11px] text-muted-foreground mt-1">
                       O líder do projeto gerencia atividades, publicações e aprovações do projeto.
                     </p>
@@ -844,14 +856,14 @@ export function PainelDeProjetos() {
                     type="button"
                     onClick={() => setProjetoModalAberto(false)}
                     disabled={salvandoProjeto}
-                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-lg text-sm transition-colors cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={salvandoProjeto}
-                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
                     {salvandoProjeto ? (
                       <>
@@ -872,10 +884,10 @@ export function PainelDeProjetos() {
       {/* Modal de Participantes */}
       {participantesModalAberto && projetoSelecionado && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-card rounded-2xl w-full max-w-2xl border border-border/40 overflow-hidden max-h-[90vh] flex flex-col">
+          <div className="bg-card rounded-lg w-full max-w-2xl border border-border/40 overflow-hidden max-h-[90vh] flex flex-col">
             <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#4a9eff] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-[#4a9eff] flex items-center justify-center">
                   <Users className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -894,19 +906,19 @@ export function PainelDeProjetos() {
 
             <div className="p-6 overflow-y-auto space-y-5">
               {erroParticipantes && (
-                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{erroParticipantes}</span>
                 </div>
               )}
 
-              <div className="bg-background rounded-xl border border-border/30 p-4 space-y-3">
+              <div className="bg-background rounded-lg border border-border/30 p-4 space-y-3">
                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <UserPlus className="w-4 h-4 text-[#ff8c42]" />
                   <span>Adicionar participante</span>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <select
+                  <Seletor
                     value={novoParticipanteId}
                     onChange={(e) => setNovoParticipanteId(e.target.value)}
                     disabled={adicionandoParticipante}
@@ -918,8 +930,8 @@ export function PainelDeProjetos() {
                         {m.nome}
                       </option>
                     ))}
-                  </select>
-                  <select
+                  </Seletor>
+                  <Seletor
                     value={novoNivel}
                     onChange={(e) => setNovoNivel(e.target.value as NivelMembro)}
                     disabled={adicionandoParticipante}
@@ -930,12 +942,12 @@ export function PainelDeProjetos() {
                         {NivelMembroLabels[n]}
                       </option>
                     ))}
-                  </select>
+                  </Seletor>
                   <button
                     type="button"
                     onClick={handleAdicionarParticipante}
                     disabled={adicionandoParticipante}
-                    className="px-4 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="px-4 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
                     {adicionandoParticipante ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -961,7 +973,7 @@ export function PainelDeProjetos() {
                   {participantes.map((p) => (
                     <div
                       key={p.usuarioId}
-                      className="flex items-center justify-between gap-3 bg-background rounded-xl border border-border/30 p-3"
+                      className="flex items-center justify-between gap-3 bg-background rounded-lg border border-border/30 p-3"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-full bg-[#4a9eff]/20 text-[#4a9eff] flex items-center justify-center font-semibold text-sm shrink-0">
@@ -973,7 +985,7 @@ export function PainelDeProjetos() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-card border border-border/40 text-muted-foreground flex items-center gap-1">
+                        <span className="text-[11px] px-2 py-0.5 rounded-md bg-card border border-border/40 text-muted-foreground flex items-center gap-1">
                           {p.nivel === "LIDER" && <Crown className="w-3 h-3" />}
                           {p.nivel ? NivelMembroLabels[p.nivel] : "Pesquisador"}
                         </span>

@@ -23,6 +23,7 @@ import { GestaoConvitesCadastro } from "./pages/GestaoConvitesCadastro";
 import { CriarAdminInicial } from "./pages/CriarAdminInicial";
 import { UserOnlyRoute } from "./components/UserOnlyRoute";
 import { AdminOnlyRoute } from "./components/AdminOnlyRoute";
+import { Usuarios } from "./pages/Usuarios";
 
 export const router = createBrowserRouter([
   {
@@ -159,6 +160,14 @@ export const router = createBrowserRouter([
         element: (
           <AdminOnlyRoute>
             <Navigate to="/grupos" replace />
+          </AdminOnlyRoute>
+        ),
+      },
+      {
+        path: "usuarios",
+        element: (
+          <AdminOnlyRoute>
+            <Usuarios />
           </AdminOnlyRoute>
         ),
       },

@@ -25,20 +25,23 @@ import { nivelEhLider } from "../models/dto/NivelMembro";
 import {
   SolicitacaoResponse,
   SolicitacaoStatusLabels,
+  STATUS_SOLICITACAO_APROVADA,
   TIPOS_SOLICITACAO_CRIAVEIS,
   TipoSolicitacaoLabels,
   podeAvaliarSolicitacao,
   podemConcluirOuEncerrar,
 } from "../models/dto/solicitacoes/Solicitacao";
 import { HttpError } from "../utils/HttpError";
+import { useConfirmacao } from "../contexts/ConfirmacaoContext";
+import { Seletor } from "../components/Seletor";
 
 const inputClass =
-  "w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm disabled:opacity-50";
+  "w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm disabled:opacity-50";
 
 const labelClass = "text-xs text-muted-foreground block mb-1.5";
 
 const selectClass =
-  "w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm";
+  "w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm";
 
 const NA = "\u2014";
 
@@ -81,7 +84,7 @@ function obterRotuloTipo(isInterna: boolean) {
 }
 
 function formatarValor(valor: number | null | undefined): string {
-  if (valor == null) return NA;
+  if (valor == null) return "";
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor);
 }
 
@@ -91,6 +94,7 @@ function formatarData(data: string | null | undefined): string {
 }
 
 export function Solicitacoes() {
+  const confirmar = useConfirmacao();
   const { grupoAtual } = useGrupo();
   const solicitacaoService = useMemo(() => new SolicitacaoService(), []);
   const projetoService = useMemo(() => new ProjetoService(), []);
@@ -202,8 +206,9 @@ export function Solicitacoes() {
     return correspondeBusca && correspondeStatus;
   });
 
+  // Mesma regra da tela de Recursos Financeiros: aprovadas pelo administrador
   const totalValorAprovado = solicitacoes
-    .filter((s) => s.status === "CONCLUIDA")
+    .filter((s) => STATUS_SOLICITACAO_APROVADA.has(s.status))
     .reduce((soma, s) => soma + (s.valor ?? 0), 0);
 
   const estatisticas = {
@@ -235,18 +240,35 @@ export function Solicitacoes() {
   };
 
   const handleAprovar = (id: number) => executarAcao(id, (i) => solicitacaoService.aprovar(i));
-  const handleRejeitar = (id: number) => {
-    if (!window.confirm("Tem certeza que deseja rejeitar esta solicitacao?")) return;
+  const handleRejeitar = async (id: number) => {
+    const confirmado = await confirmar({
+      titulo: "Rejeitar solicitação",
+      mensagem: "Tem certeza que deseja rejeitar esta solicitação?",
+      textoConfirmar: "Rejeitar",
+      perigo: true,
+    });
+    if (!confirmado) return;
     executarAcao(id, (i) => solicitacaoService.rejeitar(i));
   };
   const handleConcluir = (id: number) => executarAcao(id, (i) => solicitacaoService.concluir(i));
-  const handleEncerrar = (id: number) => {
-    if (!window.confirm("Tem certeza que deseja encerrar esta solicitacao?")) return;
+  const handleEncerrar = async (id: number) => {
+    const confirmado = await confirmar({
+      titulo: "Encerrar solicitação",
+      mensagem: "Tem certeza que deseja encerrar esta solicitação?",
+      textoConfirmar: "Encerrar",
+    });
+    if (!confirmado) return;
     executarAcao(id, (i) => solicitacaoService.encerrar(i));
   };
 
   const handleRemover = async (id: number) => {
-    if (!window.confirm("Tem certeza que deseja excluir esta solicitacao?")) return;
+    const confirmado = await confirmar({
+      titulo: "Excluir solicitação",
+      mensagem: "Tem certeza que deseja excluir esta solicitação?",
+      textoConfirmar: "Excluir",
+      perigo: true,
+    });
+    if (!confirmado) return;
     setAcaoId(id);
     try {
       await solicitacaoService.remover(id);
@@ -366,294 +388,232 @@ export function Solicitacoes() {
   const ocupado = acaoId !== null;
 
   return (
-    <div className="h-full overflow-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-foreground mb-2">Solicitações de Recursos</h1>
-          <p className="text-muted-foreground">
-            {isAdmin
-              ? "Decida as solicitações de verbas e materiais aprovadas pelos líderes dos grupos"
-              : "Solicite verbas e materiais para os projetos e acompanhe a aprovação"}
-          </p>
-        </div>
-        <button
-          onClick={() => carregarSolicitacoes()}
-          className="p-3 bg-card rounded-xl border border-border/30 hover:bg-card/80 transition-colors"
-          title="Recarregar"
-        >
-          <RefreshCw className="w-5 h-5 text-muted-foreground" />
-        </button>
-      </div>
-
-      <div className="flex items-start gap-3 bg-card rounded-xl p-4 border border-border/30 mb-6 text-sm text-muted-foreground">
-        <Info className="w-5 h-5 text-[#4a9eff] shrink-0 mt-0.5" />
+    <div className="h-full overflow-auto p-5">
+      <div className="flex items-start gap-2.5 bg-card rounded-lg px-3.5 py-2.5 border border-border/30 mb-4 text-xs text-muted-foreground">
+        <Info className="w-4 h-4 text-[#4a9eff] shrink-0 mt-px" />
         <p>
-          O líder do projeto cria a solicitação, o Líder do grupo aprova e a encaminha ao administrador, que dá a
-          decisão final. Solicitações criadas pelo próprio Líder do grupo seguem direto para o administrador.
+          Solicitações devem ser aprovadas pelo líder do grupo antes de seres encaminhadas para a administração da instituição.
         </p>
       </div>
 
       {erro && (
-        <div className="bg-destructive/20 text-destructive p-4 rounded-xl mb-6 border border-destructive/30">
+        <div className="bg-destructive/20 text-destructive px-4 py-3 rounded-lg mb-4 border border-destructive/30 text-sm">
           <p className="font-medium">{erro}</p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        <div className="bg-card rounded-xl p-4 border border-border/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">Total</span>
-            <FileText className="w-5 h-5 text-[#4a9eff]" />
+      {/* Indicadores */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
+        {[
+          { rotulo: "Total", valor: estatisticas.total, icone: <FileText className="w-4 h-4 text-[#4a9eff]" /> },
+          { rotulo: "Aguardando líder", valor: estatisticas.pendentes, icone: <AlertCircle className="w-4 h-4 text-muted-foreground" /> },
+          { rotulo: "Aguardando admin.", valor: estatisticas.aguardandoAdmin, icone: <Hourglass className="w-4 h-4 text-[#4a9eff]" /> },
+          { rotulo: "Concluídas", valor: estatisticas.concluidas, icone: <CheckCircle className="w-4 h-4 text-[#10b981]" /> },
+          { rotulo: "Valor aprovado", valor: formatarValor(totalValorAprovado), icone: <DollarSign className="w-4 h-4 text-[#10b981]" /> },
+        ].map((indicador) => (
+          <div key={indicador.rotulo} className="bg-card rounded-lg px-3.5 py-2.5 border border-border/30 min-w-0">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              {indicador.icone}
+              <span className="truncate">{indicador.rotulo}</span>
+            </div>
+            <div className="text-foreground text-lg font-bold mt-0.5 truncate">{indicador.valor}</div>
           </div>
-          <div className="text-foreground text-2xl font-bold">{estatisticas.total}</div>
-        </div>
-
-        <div className="bg-card rounded-xl p-4 border border-border/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">Aguardando líder</span>
-            <AlertCircle className="w-5 h-5 text-muted-foreground" />
-          </div>
-          <div className="text-foreground text-2xl font-bold">{estatisticas.pendentes}</div>
-        </div>
-
-        <div className="bg-card rounded-xl p-4 border border-border/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">Aguardando administrador</span>
-            <Hourglass className="w-5 h-5 text-[#4a9eff]" />
-          </div>
-          <div className="text-foreground text-2xl font-bold">{estatisticas.aguardandoAdmin}</div>
-        </div>
-
-        <div className="bg-card rounded-xl p-4 border border-border/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">Concluidas</span>
-            <CheckCircle className="w-5 h-5 text-[#10b981]" />
-          </div>
-          <div className="text-foreground text-2xl font-bold">{estatisticas.concluidas}</div>
-        </div>
-
-        <div className="bg-card rounded-xl p-4 border border-border/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">Valor Aprovado</span>
-            <DollarSign className="w-5 h-5 text-[#10b981]" />
-          </div>
-          <div className="text-foreground text-lg font-bold">{formatarValor(totalValorAprovado)}</div>
-        </div>
+        ))}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
+      {/* Busca, filtro e ações */}
+      <div className="flex flex-col md:flex-row gap-3 mb-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Buscar solicitacoes..."
+            placeholder="Buscar solicitações..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-10 pr-4 py-2.5 bg-card rounded-lg border border-border/30 text-foreground text-sm placeholder-muted-foreground focus:outline-none focus:border-primary/50"
           />
         </div>
 
-        <select
+        <Seletor
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-2.5 bg-card rounded-lg border border-border/30 text-foreground text-sm focus:outline-none focus:border-primary/50"
         >
           <option value="all">Todos os Status</option>
           <option value="PENDENTE">Aguardando líder do grupo</option>
           <option value="AGUARDANDO_ADMINISTRADOR">Aguardando administrador</option>
           <option value="EM_ANDAMENTO">Em Andamento</option>
-          <option value="CONCLUIDA">Concluidas</option>
+          <option value="CONCLUIDA">Concluídas</option>
           <option value="REJEITADA">Rejeitadas</option>
           <option value="ENCERRADA">Encerradas</option>
-        </select>
+        </Seletor>
 
-        {podeCriar && (
+        <div className="flex gap-3">
           <button
-            onClick={abrirModalCriar}
-            className="px-6 py-3 bg-primary text-primary-foreground rounded-xl transition-all duration-300 flex items-center gap-2 font-medium"
+            onClick={() => carregarSolicitacoes()}
+            className="p-2.5 bg-card rounded-lg border border-border/30 hover:bg-border/20 transition-colors cursor-pointer"
+            title="Recarregar"
           >
-            <Plus className="w-5 h-5" />
-            <span>Nova Solicitação</span>
+            <RefreshCw className={`w-4 h-4 text-muted-foreground ${carregando ? "animate-spin" : ""}`} />
           </button>
-        )}
+
+          {podeCriar && (
+            <button
+              onClick={abrirModalCriar}
+              className="flex-1 md:flex-none px-4 py-2.5 bg-primary text-primary-foreground rounded-lg transition-colors hover:bg-primary/90 flex items-center justify-center gap-2 text-sm font-medium cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Nova Solicitação</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {carregando && (
         <div className="text-center py-8">
           <div className="w-8 h-8 border-4 border-[#ff8c42] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Carregando solicitacoes...</p>
+          <p className="text-muted-foreground text-sm">Carregando solicitações...</p>
         </div>
       )}
 
       {!carregando && (
-        <div className="space-y-4">
-          {solicitacoesFiltradas.map((solicitacao) => (
-            <div
-              key={solicitacao.id}
-              className="bg-card rounded-2xl p-6 border border-border/30 transition-all duration-300"
-            >
-              <div className="flex flex-col lg:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className={`p-3 rounded-xl ${obterCorTipo(solicitacao.isInterna)}`}>
-                      {obterIconeTipo(solicitacao.isInterna)}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-foreground font-semibold">{solicitacao.titulo}</h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${obterCorTipo(solicitacao.isInterna)}`}>
-                          {obterRotuloTipo(solicitacao.isInterna)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">{solicitacao.justificativa}</p>
+        <div className="space-y-2">
+          {solicitacoesFiltradas.map((solicitacao) => {
+            // Linha de metadados: só o que existe, separado por "·"
+            const metadados = [
+              solicitacao.usuarioNome && `Por ${solicitacao.usuarioNome}`,
+              solicitacao.projetoTitulo,
+              isAdmin && solicitacao.grupoNome,
+              solicitacao.materialNome &&
+                `${solicitacao.materialNome}${solicitacao.quantidade ? ` × ${solicitacao.quantidade}` : ""}`,
+              !solicitacao.materialNome && solicitacao.quantidade && `Qtd. ${solicitacao.quantidade}`,
+              `Solicitada em ${formatarData(solicitacao.dthSolicitacao)}`,
+              solicitacao.aprovadorLiderNome &&
+                `Aprovada por ${solicitacao.aprovadorLiderNome} em ${formatarData(solicitacao.dthAprovacaoLider)}`,
+              solicitacao.dthResposta && `Respondida em ${formatarData(solicitacao.dthResposta)}`,
+            ].filter(Boolean) as string[];
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                        <div>
-                          <span className="text-xs text-muted-foreground">Solicitante</span>
-                          <p className="text-sm text-foreground">{solicitacao.usuarioNome ?? NA}</p>
-                        </div>
-                        <div>
-                          <span className="text-xs text-muted-foreground">Projeto</span>
-                          <p className="text-sm text-foreground">{solicitacao.projetoTitulo ?? NA}</p>
-                        </div>
-                        {isAdmin && (
-                          <div>
-                            <span className="text-xs text-muted-foreground">Grupo</span>
-                            <p className="text-sm text-foreground">{solicitacao.grupoNome ?? NA}</p>
-                          </div>
-                        )}
-                        {solicitacao.aprovadorLiderNome && (
-                          <div>
-                            <span className="text-xs text-muted-foreground">Aprovada pelo líder</span>
-                            <p className="text-sm text-foreground">
-                              {solicitacao.aprovadorLiderNome} em {formatarData(solicitacao.dthAprovacaoLider)}
-                            </p>
-                          </div>
-                        )}
-                        <div>
-                          <span className="text-xs text-muted-foreground">Valor</span>
-                          <p className="text-sm text-[#ff8c42] font-semibold">{formatarValor(solicitacao.valor)}</p>
-                        </div>
-                        {solicitacao.quantidade && (
-                          <div>
-                            <span className="text-xs text-muted-foreground">Quantidade</span>
-                            <p className="text-sm text-foreground">{solicitacao.quantidade}</p>
-                          </div>
-                        )}
-                        {solicitacao.materialNome && (
-                          <div>
-                            <span className="text-xs text-muted-foreground">Material</span>
-                            <p className="text-sm text-foreground">{solicitacao.materialNome}</p>
-                          </div>
-                        )}
-                      </div>
+            return (
+              <div
+                key={solicitacao.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => abrirDetalhe(solicitacao.id)}
+                onKeyDown={(e) => {
+                  if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+                    e.preventDefault();
+                    abrirDetalhe(solicitacao.id);
+                  }
+                }}
+                title="Ver detalhes da solicitação"
+                className="bg-card rounded-lg px-4 py-3 border border-border/30 hover:border-primary/40 focus-visible:outline-none focus-visible:border-primary/60 transition-colors cursor-pointer"
+              >
+                <div className="flex items-start gap-3 min-w-0">
+                  <div
+                    className={`p-2 rounded-lg shrink-0 [&>svg]:w-4 [&>svg]:h-4 ${obterCorTipo(solicitacao.isInterna)}`}
+                    title={obterRotuloTipo(solicitacao.isInterna)}
+                  >
+                    {obterIconeTipo(solicitacao.isInterna)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <h3 className="text-foreground text-sm font-semibold truncate" title={solicitacao.titulo}>
+                        {solicitacao.titulo}
+                      </h3>
+                      <span
+                        className={`shrink-0 px-2 py-0.5 rounded-md text-[11px] font-medium ${obterCorTipo(solicitacao.isInterna)}`}
+                      >
+                        {obterRotuloTipo(solicitacao.isInterna)}
+                      </span>
                     </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate" title={metadados.join(" · ")}>
+                      {metadados.join(" · ")}
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-3 shrink-0">
+                    <span className="text-sm font-semibold text-primary whitespace-nowrap">
+                      {formatarValor(solicitacao.valor)}
+                    </span>
+                    <span
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap [&>svg]:w-3.5 [&>svg]:h-3.5 ${obterCorStatus(solicitacao.status)}`}
+                    >
+                      {obterIconeStatus(solicitacao.status)}
+                      {SolicitacaoStatusLabels[solicitacao.status] ?? solicitacao.status}
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-start lg:items-end gap-3 lg:min-w-[180px]">
-                  <div className={`flex items-center gap-2 px-3 py-2 rounded-full ${obterCorStatus(solicitacao.status)}`}>
-                    {obterIconeStatus(solicitacao.status)}
-                    <span className="text-sm font-medium">{SolicitacaoStatusLabels[solicitacao.status] ?? solicitacao.status}</span>
-                  </div>
-
-                  <div className="text-xs text-muted-foreground">
-                    Solicitado em:<br />
-                    <span className="text-foreground font-medium">
-                      {formatarData(solicitacao.dthSolicitacao)}
-                    </span>
-                  </div>
-
-                  {solicitacao.dthResposta && (
-                    <div className="text-xs text-muted-foreground">
-                      Respondido em:<br />
-                      <span className="text-foreground font-medium">
-                        {formatarData(solicitacao.dthResposta)}
-                      </span>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={() => abrirDetalhe(solicitacao.id)}
-                    className="px-4 py-2 bg-[#4a9eff]/20 text-[#4a9eff] rounded-lg hover:bg-[#4a9eff]/30 transition-colors text-xs font-medium"
-                  >
-                    Ver detalhes
-                  </button>
-
+                <div
+                  className="flex flex-wrap items-center gap-2 mt-2.5 pt-2.5 pl-11 border-t border-border/20 empty:hidden cursor-default"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {podeAvaliarSolicitacao(solicitacao.status, perfil) && (
-                    <div className="flex gap-2">
+                    <>
                       <button
                         onClick={() => handleAprovar(solicitacao.id)}
                         disabled={ocupado}
-                        className="px-4 py-2 bg-[#10b981]/20 text-[#10b981] rounded-lg hover:bg-[#10b981]/30 transition-colors text-xs font-medium disabled:opacity-50"
+                        className="px-2.5 py-1.5 bg-[#10b981]/15 text-[#10b981] rounded-lg hover:bg-[#10b981]/25 transition-colors text-xs font-medium disabled:opacity-50 cursor-pointer"
                       >
                         {solicitacao.status === "PENDENTE" ? "Aprovar e encaminhar" : "Aprovar"}
                       </button>
                       <button
                         onClick={() => handleRejeitar(solicitacao.id)}
                         disabled={ocupado}
-                        className="px-4 py-2 bg-[#ef4444]/20 text-[#ef4444] rounded-lg hover:bg-[#ef4444]/30 transition-colors text-xs font-medium disabled:opacity-50"
+                        className="px-2.5 py-1.5 bg-[#ef4444]/15 text-[#ef4444] rounded-lg hover:bg-[#ef4444]/25 transition-colors text-xs font-medium disabled:opacity-50 cursor-pointer"
                       >
                         Rejeitar
                       </button>
-                    </div>
+                    </>
+                  )}
+
+                  {podeConcluir(solicitacao) && (
+                    <button
+                      onClick={() => handleConcluir(solicitacao.id)}
+                      disabled={ocupado}
+                      className="px-2.5 py-1.5 bg-[#10b981]/15 text-[#10b981] rounded-lg hover:bg-[#10b981]/25 transition-colors text-xs font-medium disabled:opacity-50 cursor-pointer"
+                    >
+                      Concluir
+                    </button>
+                  )}
+                  {podeEncerrar(solicitacao) && (
+                    <button
+                      onClick={() => handleEncerrar(solicitacao.id)}
+                      disabled={ocupado}
+                      className="px-2.5 py-1.5 bg-[#7c3aed]/15 text-[#7c3aed] rounded-lg hover:bg-[#7c3aed]/25 transition-colors text-xs font-medium disabled:opacity-50 cursor-pointer"
+                    >
+                      Encerrar
+                    </button>
                   )}
 
                   {podeAlterar(solicitacao) && (
-                    <div className="flex gap-2">
+                    <span className="flex items-center gap-1 ml-auto">
                       <button
                         onClick={() => abrirEdicao(solicitacao)}
                         disabled={ocupado}
-                        className="px-4 py-2 bg-muted-foreground/20 text-muted-foreground rounded-lg hover:bg-muted-foreground/30 transition-colors text-xs font-medium disabled:opacity-50"
+                        className="p-1.5 rounded-lg text-primary hover:bg-primary/15 transition-colors disabled:opacity-50 cursor-pointer"
+                        title="Editar"
                       >
-                        <Pencil className="w-4 h-4 inline" />
-                        Editar
+                        <Pencil className="w-4 h-4" />
                       </button>
-                    </div>
-                  )}
-
-                  {(podeConcluir(solicitacao) || podeEncerrar(solicitacao)) && (
-                    <div className="flex gap-2">
-                      {podeConcluir(solicitacao) && (
-                        <button
-                          onClick={() => handleConcluir(solicitacao.id)}
-                          disabled={ocupado}
-                          className="px-4 py-2 bg-[#10b981]/20 text-[#10b981] rounded-lg hover:bg-[#10b981]/30 transition-colors text-xs font-medium disabled:opacity-50"
-                        >
-                          Concluir
-                        </button>
-                      )}
-                      {podeEncerrar(solicitacao) && (
-                        <button
-                          onClick={() => handleEncerrar(solicitacao.id)}
-                          disabled={ocupado}
-                          className="px-4 py-2 bg-[#7c3aed]/20 text-[#7c3aed] rounded-lg hover:bg-[#7c3aed]/30 transition-colors text-xs font-medium disabled:opacity-50"
-                        >
-                          Encerrar
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {podeAlterar(solicitacao) && (
-                    <button
-                      onClick={() => handleRemover(solicitacao.id)}
-                      disabled={ocupado}
-                      className="px-4 py-2 bg-destructive/20 text-destructive rounded-lg hover:bg-destructive/30 transition-colors text-xs font-medium disabled:opacity-50"
-                    >
-                      <Trash2 className="w-4 h-4 inline" />
-                      Excluir
-                    </button>
+                      <button
+                        onClick={() => handleRemover(solicitacao.id)}
+                        disabled={ocupado}
+                        className="p-1.5 rounded-lg text-[#ef4444] hover:bg-[#ef4444]/15 transition-colors disabled:opacity-50 cursor-pointer"
+                        title="Excluir"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </span>
                   )}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {!carregando && solicitacoesFiltradas.length === 0 && (
-        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+        <div className="text-center py-12 bg-card rounded-lg border border-border/30">
           <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground text-lg mb-2">
             {solicitacoes.length === 0
@@ -663,7 +623,7 @@ export function Solicitacoes() {
           {solicitacoes.length === 0 && podeCriar && (
             <button
               onClick={abrirModalCriar}
-              className="mt-4 px-6 py-3 bg-[#ff8c42]/20 text-[#ff8c42] rounded-xl transition-colors"
+              className="mt-4 px-6 py-3 bg-[#ff8c42]/20 text-[#ff8c42] rounded-lg transition-colors"
             >
               <Plus className="w-5 h-5 inline" />
               Criar primeira solicitacao
@@ -674,19 +634,19 @@ export function Solicitacoes() {
 
       {modalCriarAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card rounded-2xl p-8 border border-border/30 w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
+          <div className="bg-card rounded-lg p-8 border border-border/30 w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-foreground text-lg font-semibold">Nova Solicitacao</h2>
               <button
                 onClick={() => setModalCriarAberto(false)}
-                className="p-2 rounded-xl hover:bg-destructive/20 transition-colors"
+                className="p-2 rounded-lg hover:bg-destructive/20 transition-colors"
               >
                 <X className="w-5 h-5 text-foreground" />
               </button>
             </div>
 
             {erroForm && (
-              <div className="bg-destructive/20 text-destructive p-3 rounded-xl mb-4">
+              <div className="bg-destructive/20 text-destructive p-3 rounded-lg mb-4">
                 {erroForm}
               </div>
             )}
@@ -697,6 +657,7 @@ export function Solicitacoes() {
                 <input
                   type="text"
                   value={formTitulo}
+                  maxLength={100}
                   onChange={(e) => setFormTitulo(e.target.value)}
                   className={inputClass}
                   placeholder="Ex.: Verba para participacao em conferencia"
@@ -708,6 +669,7 @@ export function Solicitacoes() {
                 <label className={labelClass}>Descricao *</label>
                 <textarea
                   value={formDescricao}
+                  maxLength={1000}
                   onChange={(e) => setFormDescricao(e.target.value)}
                   className={`${inputClass} min-h-[80px]`}
                   placeholder="Descreva detalhadamente a solicitacao"
@@ -730,7 +692,7 @@ export function Solicitacoes() {
 
               <div>
                 <label className={labelClass}>Projeto *</label>
-                <select
+                <Seletor
                   value={String(formProjetoId)}
                   onChange={(e) => setFormProjetoId(e.target.value ? Number(e.target.value) : "")}
                   className={selectClass}
@@ -742,12 +704,12 @@ export function Solicitacoes() {
                       {p.titulo}
                     </option>
                   ))}
-                </select>
+                </Seletor>
               </div>
 
               <div>
                 <label className={labelClass}>Tipo *</label>
-                <select
+                <Seletor
                   value={formTipo}
                   onChange={(e) => setFormTipo(e.target.value)}
                   className={selectClass}
@@ -758,7 +720,7 @@ export function Solicitacoes() {
                       {TipoSolicitacaoLabels[tipo]}
                     </option>
                   ))}
-                </select>
+                </Seletor>
               </div>
 
               <div>
@@ -790,14 +752,14 @@ export function Solicitacoes() {
                 <button
                   type="button"
                   onClick={() => setModalCriarAberto(false)}
-                  className="flex-1 py-3 bg-background rounded-xl border border-border/30 text-foreground"
+                  className="flex-1 py-3 bg-background rounded-lg border border-border/30 text-foreground"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={salvando}
-                  className="flex-1 py-3 bg-[#ff8c42] text-white rounded-xl disabled:opacity-50 transition-opacity"
+                  className="flex-1 py-3 bg-[#ff8c42] text-white rounded-lg disabled:opacity-50 transition-opacity"
                 >
                   {salvando ? "Salvando..." : "Criar Solicitacao"}
                 </button>
@@ -809,19 +771,19 @@ export function Solicitacoes() {
 
       {edicaoAberta && editando && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card rounded-2xl p-8 border border-border/30 w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
+          <div className="bg-card rounded-lg p-8 border border-border/30 w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-foreground text-lg font-semibold">Editar Solicitacao</h2>
               <button
                 onClick={() => setEdicaoAberta(false)}
-                className="p-2 rounded-xl hover:bg-destructive/20 transition-colors"
+                className="p-2 rounded-lg hover:bg-destructive/20 transition-colors"
               >
                 <X className="w-5 h-5 text-foreground" />
               </button>
             </div>
 
             {erroEdicao && (
-              <div className="bg-destructive/20 text-destructive p-3 rounded-xl mb-4">
+              <div className="bg-destructive/20 text-destructive p-3 rounded-lg mb-4">
                 {erroEdicao}
               </div>
             )}
@@ -832,6 +794,7 @@ export function Solicitacoes() {
                 <input
                   type="text"
                   value={formEditTitulo}
+                  maxLength={100}
                   onChange={(e) => setFormEditTitulo(e.target.value)}
                   className={inputClass}
                   required
@@ -842,6 +805,7 @@ export function Solicitacoes() {
                 <label className={labelClass}>Descrição *</label>
                 <textarea
                   value={formEditDescricao}
+                  maxLength={1000}
                   onChange={(e) => setFormEditDescricao(e.target.value)}
                   className={`${inputClass} min-h-[80px]`}
                   rows={3}
@@ -889,14 +853,14 @@ export function Solicitacoes() {
                 <button
                   type="button"
                   onClick={() => setEdicaoAberta(false)}
-                  className="flex-1 py-3 bg-background rounded-xl border border-border/30 text-foreground"
+                  className="flex-1 py-3 bg-background rounded-lg border border-border/30 text-foreground"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={salvandoEdicao}
-                  className="flex-1 py-3 bg-[#ff8c42] text-white rounded-xl disabled:opacity-50 transition-opacity"
+                  className="flex-1 py-3 bg-[#ff8c42] text-white rounded-lg disabled:opacity-50 transition-opacity"
                 >
                   {salvandoEdicao ? "Salvando..." : "Salvar Alteracoes"}
                 </button>
@@ -908,12 +872,12 @@ export function Solicitacoes() {
 
       {detalheAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card rounded-2xl p-8 border border-border/30 w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
+          <div className="bg-card rounded-lg p-6 border border-border/30 w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-foreground text-lg font-semibold">Detalhes da Solicitacao</h2>
+              <h2 className="text-foreground text-lg font-semibold">Detalhes da Solicitação</h2>
               <button
                 onClick={() => setDetalheAberto(false)}
-                className="p-2 rounded-xl hover:bg-destructive/20 transition-colors"
+                className="p-2 rounded-lg hover:bg-destructive/20 transition-colors"
               >
                 <X className="w-5 h-5 text-foreground" />
               </button>
@@ -928,7 +892,7 @@ export function Solicitacoes() {
 
             {!carregandoDetalhe && solicitacaoDetalhe && (
               <div className="space-y-4">
-                <div className={`flex items-center gap-2 px-3 py-2 rounded-full w-fit ${obterCorStatus(solicitacaoDetalhe.status)}`}>
+                <div className={`flex items-center gap-2 px-3 py-2 rounded-md w-fit ${obterCorStatus(solicitacaoDetalhe.status)}`}>
                   {obterIconeStatus(solicitacaoDetalhe.status)}
                   <span className="text-sm font-medium">
                     {SolicitacaoStatusLabels[solicitacaoDetalhe.status] ?? solicitacaoDetalhe.status}
@@ -970,7 +934,7 @@ export function Solicitacoes() {
                   </div>
                   <div>
                     <span className={labelClass}>Aprovada pelo administrador</span>
-                    <p className="text-sm text-foreground">{solicitacaoDetalhe.isAprovada ? "Sim" : "Nao"}</p>
+                    <p className="text-sm text-foreground">{solicitacaoDetalhe.isAprovada ? "Sim" : "Não"}</p>
                   </div>
                   <div>
                     <span className={labelClass}>Solicitado em</span>
