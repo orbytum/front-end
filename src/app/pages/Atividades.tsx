@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { ListTodo, Loader2, RefreshCw, FolderKanban } from "lucide-react";
+import { ListTodo, Loader2, FolderKanban } from "lucide-react";
 import { useGrupo } from "../contexts/GrupoContext";
 import { ProjetoService } from "../services/projetos/ProjetoService";
 import { AuthService } from "../services/auth/AuthService";
@@ -50,27 +50,9 @@ export function Atividades() {
 
   return (
     <div className="h-full overflow-auto p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-foreground text-2xl font-bold mb-1">Atividades</h1>
-          <p className="text-muted-foreground text-sm">
-            Acompanhe e gerencie as atividades dos projetos do grupo
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={carregarProjetos}
-          disabled={carregandoProjetos}
-          className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer self-start sm:self-auto"
-          title="Recarregar projetos"
-        >
-          <RefreshCw className={`w-4 h-4 ${carregandoProjetos ? "animate-spin" : ""}`} />
-        </button>
-      </div>
-
-      <div className="bg-card rounded-2xl p-5 border border-border/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-card rounded-lg p-5 border border-border/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-[#ff8c42]/15 flex items-center justify-center text-[#ff8c42] shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-[#ff8c42]/15 flex items-center justify-center text-[#ff8c42] shrink-0">
             <FolderKanban className="w-5 h-5" />
           </div>
           <ProjetoCombobox
@@ -96,13 +78,14 @@ export function Atividades() {
           projeto={projetoSelecionado}
           nivel={grupoAtual?.nivel ?? null}
           isAdmin={isAdmin}
+          onRecarregar={carregarProjetos}
           onProjetoAtualizado={(atualizado) => {
             setProjetos((prev) => prev.map((p) => (p.id === atualizado.id ? atualizado : p)));
             setProjetoSelecionado(atualizado);
           }}
         />
       ) : (
-        <div className="text-center py-20 bg-card rounded-2xl border border-border/30 space-y-3">
+        <div className="text-center py-20 bg-card rounded-lg border border-border/30 space-y-3">
           <ListTodo className="w-16 h-16 text-muted-foreground/40 mx-auto" />
           <h3 className="text-foreground font-semibold text-lg">Nenhum projeto disponível</h3>
           <p className="text-muted-foreground text-sm max-w-md mx-auto">

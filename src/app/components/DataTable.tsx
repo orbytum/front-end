@@ -6,6 +6,7 @@ import {
   ChevronsRight,
   Inbox,
 } from "lucide-react";
+import { Seletor } from "./Seletor";
 
 export type ColumnAlign = "left" | "center" | "right";
 
@@ -126,7 +127,7 @@ export function DataTable<T>({
 
   return (
     <div
-      className={`bg-card rounded-2xl border border-border/30 overflow-hidden ${className}`}
+      className={`bg-card rounded-lg border border-border/30 overflow-hidden ${className}`}
     >
       {/* Table Header / Action Bar */}
       {(title || actions) && (
@@ -218,7 +219,7 @@ export function DataTable<T>({
             {pageSizeOptions && pageSizeOptions.length > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Exibir:</span>
-                <select
+                <Seletor
                   value={currentLimit}
                   onChange={(e) => handlePageSizeChange(Number(e.target.value))}
                   className="bg-background border border-border/40 rounded-lg px-2.5 py-1 text-xs text-foreground focus:outline-none focus:border-[#ff8c42]/60 cursor-pointer"
@@ -228,7 +229,7 @@ export function DataTable<T>({
                       {opt} por pág.
                     </option>
                   ))}
-                </select>
+                </Seletor>
               </div>
             )}
           </div>

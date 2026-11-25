@@ -25,6 +25,7 @@ import {
 import { proximaOcorrencia } from "../utils/Recorrencia";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "../components/DateInput";
+import { Seletor } from "../components/Seletor";
 
 type StatusLembrete = "Agendado" | "Próximo" | "Encerrado";
 
@@ -389,11 +390,6 @@ export function Lembretes() {
 
   return (
     <div className="h-full overflow-auto p-6">
-      {/* Cabeçalho */}
-      <div className="mb-6">
-        <h1 className="text-foreground mb-2">Lembretes</h1>
-        <p className="text-muted-foreground">Editais, reuniões, apresentações e workshops do grupo</p>
-      </div>
 
       {/* Estatísticas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -401,7 +397,7 @@ export function Lembretes() {
           const config = CONFIG_TIPO[tipo];
           const Icone = config.icone;
           return (
-            <div key={tipo} className="bg-card rounded-xl p-4 border border-border/30">
+            <div key={tipo} className="bg-card rounded-lg p-4 border border-border/30">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-muted-foreground text-sm">{tipo}s</span>
                 <Icone className={`w-5 h-5 ${config.cor}`} />
@@ -423,13 +419,13 @@ export function Lembretes() {
             placeholder="Buscar lembretes..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
-        <div className="flex items-center gap-2 px-4 py-3 bg-card rounded-xl border border-border/30">
+        <div className="flex items-center gap-2 px-4 py-3 bg-card rounded-lg border border-border/30">
           <Filter className="w-4 h-4 text-muted-foreground" />
-          <select
+          <Seletor
             value={filtroTipo}
             onChange={(e) => alterarTipo(e.target.value as "all" | TipoLembrete)}
             className="bg-transparent text-foreground focus:outline-none text-sm"
@@ -439,12 +435,12 @@ export function Lembretes() {
             <option value="Reunião">Reuniões</option>
             <option value="Apresentação">Apresentações</option>
             <option value="Workshop">Workshops</option>
-          </select>
+          </Seletor>
         </div>
 
-        <div className="flex items-center gap-2 px-4 py-3 bg-card rounded-xl border border-border/30">
+        <div className="flex items-center gap-2 px-4 py-3 bg-card rounded-lg border border-border/30">
           <FolderKanban className="w-4 h-4 text-muted-foreground" />
-          <select
+          <Seletor
             value={filtroProjetoId}
             onChange={(e) => alterarProjeto(e.target.value === "all" ? "all" : Number(e.target.value))}
             className="bg-transparent text-foreground focus:outline-none text-sm max-w-[180px]"
@@ -455,14 +451,14 @@ export function Lembretes() {
                 {projeto.titulo}
               </option>
             ))}
-          </select>
+          </Seletor>
         </div>
 
         {podeCriar && (
           <button
             onClick={abrirModalCriar}
             disabled={!grupoId}
-            className="px-6 py-3 disabled:opacity-50 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
+            className="px-6 py-3 disabled:opacity-50 bg-[#ff8c42] text-white rounded-lg transition-all duration-300 flex items-center gap-2 font-medium whitespace-nowrap"
           >
             <Plus className="w-5 h-5" />
             Novo Lembrete
@@ -471,7 +467,7 @@ export function Lembretes() {
       </div>
 
       {erro && (
-        <div className="mb-6 flex items-center gap-3 p-4 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444] text-sm">
+        <div className="mb-6 flex items-center gap-3 p-4 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444] text-sm">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span className="flex-1">{erro}</span>
           <button onClick={carregarLembretes} title="Recarregar" className="p-1 hover:opacity-70">
@@ -496,7 +492,7 @@ export function Lembretes() {
               <div className="flex items-center gap-3 mb-4">
                 <h2 className={`font-semibold ${cor}`}>{rotulo}</h2>
                 <div className="flex-1 h-px bg-border/30" />
-                <span className="text-xs text-muted-foreground bg-card px-2 py-0.5 rounded-full border border-border/30">
+                <span className="text-xs text-muted-foreground bg-card px-2 py-0.5 rounded-md border border-border/30">
                   {itens.length}
                 </span>
               </div>
@@ -508,11 +504,11 @@ export function Lembretes() {
                   return (
                     <div
                       key={lembrete.id}
-                      className={`bg-card rounded-2xl p-6 border transition-all duration-300 ${ chave === "Encerrado" ? "border-border/20 opacity-70" : "border-border/30" }`}
+                      className={`bg-card rounded-lg p-6 border transition-all duration-300 ${ chave === "Encerrado" ? "border-border/20 opacity-70" : "border-border/30" }`}
                     >
                       <div className="flex items-start gap-4">
                         {/* Ícone do tipo */}
-                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${config.fundo}`}>
+                        <div className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${config.fundo}`}>
                           <Icone className={`w-5 h-5 ${config.cor}`} />
                         </div>
 
@@ -522,15 +518,15 @@ export function Lembretes() {
                             <h3 className="text-foreground font-semibold leading-snug">{lembrete.titulo}</h3>
                             <div className="flex items-center gap-2 shrink-0">
                               {lembrete.recorrencia !== "Nenhuma" && (
-                                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-border/30 text-muted-foreground">
+                                <span className="flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-border/30 text-muted-foreground">
                                   <Repeat className="w-3 h-3" />
                                   {lembrete.recorrencia}
                                 </span>
                               )}
-                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${config.fundo} ${config.cor}`}>
+                              <span className={`px-2.5 py-0.5 rounded-md text-xs font-medium ${config.fundo} ${config.cor}`}>
                                 {lembrete.tipo}
                               </span>
-                              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-border/30 text-muted-foreground">
+                              <span className="flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-border/30 text-muted-foreground">
                                 <FolderKanban className="w-3 h-3" />
                                 {lembrete.projetoNome || "Grupo inteiro"}
                               </span>
@@ -653,7 +649,7 @@ export function Lembretes() {
           Carregando lembretes...
         </div>
       ) : filtrados.length === 0 && (
-        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+        <div className="text-center py-12 bg-card rounded-lg border border-border/30">
           <Bell className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">
             {grupoId ? "Nenhum lembrete encontrado" : "Selecione um grupo de pesquisa para ver os lembretes"}
@@ -690,7 +686,7 @@ export function Lembretes() {
       {/* Confirmação de exclusão */}
       {excluindo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-card rounded-2xl border border-border/30 p-6">
+          <div className="w-full max-w-sm bg-card rounded-lg border border-border/30 p-6">
             <h2 className="text-foreground font-semibold mb-2">Excluir lembrete</h2>
             <p className="text-muted-foreground text-sm mb-6">
               Deseja excluir "{excluindo.titulo}"? Essa ação não pode ser desfeita.
@@ -699,14 +695,14 @@ export function Lembretes() {
               <button
                 onClick={() => setExcluindo(null)}
                 disabled={salvando}
-                className="flex-1 py-2.5 rounded-xl border border-border/30 text-muted-foreground hover:text-foreground transition-colors"
+                className="flex-1 py-2.5 rounded-lg border border-border/30 text-muted-foreground hover:text-foreground transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={confirmarExclusao}
                 disabled={salvando}
-                className="flex-1 py-2.5 bg-[#ef4444] text-white rounded-xl font-medium disabled:opacity-50"
+                className="flex-1 py-2.5 bg-[#ef4444] text-white rounded-lg font-medium disabled:opacity-50"
               >
                 Excluir
               </button>
@@ -718,7 +714,7 @@ export function Lembretes() {
       {/* Modal */}
       {mostrarModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-card rounded-2xl border border-border/30 p-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg bg-card rounded-lg border border-border/30 p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-foreground font-semibold">{editando ? "Editar Lembrete" : "Novo Lembrete"}</h2>
               <button
@@ -735,9 +731,10 @@ export function Lembretes() {
                 <input
                   type="text"
                   value={formulario.titulo}
+                  maxLength={100}
                   onChange={(e) => setFormulario({ ...formulario, titulo: e.target.value })}
                   placeholder="Título do lembrete"
-                  className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
+                  className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
 
@@ -745,14 +742,15 @@ export function Lembretes() {
                 <label className="block text-sm text-muted-foreground mb-1.5 font-normal">Descrição</label>
                 <textarea
                   value={formulario.descricao}
+                  maxLength={1000}
                   onChange={(e) => setFormulario({ ...formulario, descricao: e.target.value })}
                   placeholder="Detalhes do lembrete"
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50 resize-none"
+                  className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50 resize-none"
                 />
               </div>
 
-              <div className="space-y-3 p-3.5 bg-background rounded-xl border border-border/30">
+              <div className="space-y-3 p-3.5 bg-background rounded-lg border border-border/30">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <FolderKanban className="w-4 h-4 text-[#ff8c42]" />
                   Escopo do lembrete
@@ -785,10 +783,10 @@ export function Lembretes() {
                     <label className="block text-xs text-muted-foreground mb-1.5">
                       Projeto *
                     </label>
-                    <select
+                    <Seletor
                       value={formulario.projetoId}
                       onChange={(e) => setFormulario({ ...formulario, projetoId: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50 text-sm"
+                      className="w-full px-4 py-2.5 bg-card rounded-lg border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50 text-sm"
                     >
                       <option value="">Selecione o projeto</option>
                       {projetosCriaveis.map((projeto) => (
@@ -796,7 +794,7 @@ export function Lembretes() {
                           {projeto.titulo}
                         </option>
                       ))}
-                    </select>
+                    </Seletor>
                   </div>
                 )}
 
@@ -810,23 +808,23 @@ export function Lembretes() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-muted-foreground mb-1.5 font-normal">Tipo</label>
-                  <select
+                  <Seletor
                     value={formulario.tipo}
                     onChange={(e) => setFormulario({ ...formulario, tipo: e.target.value as TipoLembrete })}
-                    className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
+                    className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
                   >
                     {TIPOS_LEMBRETE.map((t) => <option key={t}>{t}</option>)}
-                  </select>
+                  </Seletor>
                 </div>
                 <div>
                   <label className="block text-sm text-muted-foreground mb-1.5 font-normal">Recorrência</label>
-                  <select
+                  <Seletor
                     value={formulario.recorrencia}
                     onChange={(e) => setFormulario({ ...formulario, recorrencia: e.target.value as TipoRecorrencia })}
-                    className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
+                    className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
                   >
                     {TIPOS_RECORRENCIA.map((r) => <option key={r}>{r}</option>)}
-                  </select>
+                  </Seletor>
                 </div>
               </div>
 
@@ -836,7 +834,7 @@ export function Lembretes() {
                   type="datetime-local"
                   value={formulario.dataHora}
                   onChange={(v) => setFormulario({ ...formulario, dataHora: v })}
-                  className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
+                  className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
 
@@ -847,7 +845,7 @@ export function Lembretes() {
                   value={formulario.local}
                   onChange={(e) => setFormulario({ ...formulario, local: e.target.value })}
                   placeholder="Sala, auditório ou online"
-                  className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
+                  className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
 
@@ -858,7 +856,7 @@ export function Lembretes() {
                   value={formulario.link}
                   onChange={(e) => setFormulario({ ...formulario, link: e.target.value })}
                   placeholder="https://meet.google.com/..."
-                  className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
+                  className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
                 />
               </div>
             </div>
@@ -868,14 +866,14 @@ export function Lembretes() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setMostrarModal(false)}
-                className="flex-1 py-2.5 rounded-xl border border-border/30 text-muted-foreground hover:text-foreground hover:border-border/60 transition-colors"
+                className="flex-1 py-2.5 rounded-lg border border-border/30 text-muted-foreground hover:text-foreground hover:border-border/60 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={salvarLembrete}
                 disabled={salvando}
-                className="flex-1 py-2.5 bg-[#ff8c42] text-white rounded-xl font-medium transition-all disabled:opacity-50"
+                className="flex-1 py-2.5 bg-[#ff8c42] text-white rounded-lg font-medium transition-all disabled:opacity-50"
               >
                 {salvando ? "Salvando..." : editando ? "Salvar Alterações" : "Criar Lembrete"}
               </button>

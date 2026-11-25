@@ -30,6 +30,7 @@ import {
   nivelEhLider,
 } from "../models/dto/NivelMembro";
 import { DateInput } from "../components/DateInput";
+import { Seletor } from "../components/Seletor";
 
 export interface PublicacoesProps {
   projetoId?: number;
@@ -416,30 +417,21 @@ export function Publicacoes({
     <div className="space-y-6">
       {/* Notificação de Sucesso Local */}
       {mensagemSucesso && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-4 py-3 rounded-xl flex items-center gap-3 animate-in fade-in">
+        <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-4 py-3 rounded-lg flex items-center gap-3 animate-in fade-in">
           <CheckCircle2 className="w-5 h-5 shrink-0" />
           <span className="text-sm font-medium">{mensagemSucesso}</span>
         </div>
       )}
 
-      {/* Cabeçalho (exibido apenas se ocultarCabecalho for false) */}
       {!ocultarCabecalho && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">
-              Publicações {projetoTitulo ? `- ${projetoTitulo}` : ""}
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Repositório de publicações
-            </p>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-4 empty:hidden">
           {podeGerenciar && (
             <button
               onClick={() => {
                 setErroCriacao(null);
                 setMostrarModalCriacao(true);
               }}
-              className="px-5 py-2.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm"
+              className="px-5 py-2.5 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm"
             >
               <Plus className="w-5 h-5" />
               Nova Publicação
@@ -448,7 +440,6 @@ export function Publicacoes({
         </div>
       )}
 
-      {/* Se o cabeçalho for ocultado, exibimos a barra de ação superior simples */}
       {ocultarCabecalho && (
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -457,7 +448,7 @@ export function Publicacoes({
               Publicações do Projeto
             </h2>
             {totalElementos > 0 && (
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#ff8c42]/10 text-[#ff8c42]">
+              <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-[#ff8c42]/10 text-[#ff8c42]">
                 {totalElementos}
               </span>
             )}
@@ -468,7 +459,7 @@ export function Publicacoes({
                 setErroCriacao(null);
                 setMostrarModalCriacao(true);
               }}
-              className="px-4 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm text-sm"
+              className="px-4 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0 shadow-sm text-sm"
             >
               <Plus className="w-4 h-4" />
               Nova Publicação
@@ -480,7 +471,7 @@ export function Publicacoes({
       {/* Barra de Filtros */}
       <form
         onSubmit={handleBuscar}
-        className="bg-card rounded-2xl p-4 border border-border/30 shadow-xs space-y-4"
+        className="bg-card rounded-lg p-4 border border-border/30 shadow-xs space-y-4"
       >
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           {/* Busca por título */}
@@ -491,7 +482,7 @@ export function Publicacoes({
               placeholder="Filtrar por título..."
               value={termoBusca}
               onChange={(e) => setTermoBusca(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
+              className="w-full pl-10 pr-4 py-2 bg-background rounded-lg border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
             />
           </div>
 
@@ -504,7 +495,7 @@ export function Publicacoes({
               type="date"
               value={filtroDataInicio}
               onChange={setFiltroDataInicio}
-              className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
+              className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
             />
           </div>
 
@@ -517,7 +508,7 @@ export function Publicacoes({
               type="date"
               value={filtroDataFim}
               onChange={setFiltroDataFim}
-              className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
+              className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
             />
           </div>
 
@@ -525,7 +516,7 @@ export function Publicacoes({
           <div className="md:col-span-1 flex items-center gap-2">
             <button
               type="submit"
-              className="p-2 bg-[#ff8c42]/15 text-[#ff8c42] hover:bg-[#ff8c42]/25 rounded-xl transition-colors cursor-pointer flex items-center justify-center shrink-0 w-full"
+              className="p-2 bg-[#ff8c42]/15 text-[#ff8c42] hover:bg-[#ff8c42]/25 rounded-lg transition-colors cursor-pointer flex items-center justify-center shrink-0 w-full"
               title="Filtrar"
             >
               <Filter className="w-4 h-4" />
@@ -556,7 +547,7 @@ export function Publicacoes({
           </span>
         </div>
       ) : publicacoes.length === 0 ? (
-        <div className="text-center py-16 bg-card rounded-2xl border border-border/30 p-6">
+        <div className="text-center py-16 bg-card rounded-lg border border-border/30 p-6">
           <BookOpen className="w-14 h-14 text-muted-foreground/50 mx-auto mb-3" />
           <h3 className="text-foreground font-semibold text-lg mb-1">
             Nenhuma publicação encontrada
@@ -571,7 +562,7 @@ export function Publicacoes({
           {(termoBusca || filtroDataInicio || filtroDataFim) && (
             <button
               onClick={limparFiltros}
-              className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 rounded-xl text-sm transition-colors cursor-pointer"
+              className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 rounded-lg text-sm transition-colors cursor-pointer"
             >
               Limpar Filtros
             </button>
@@ -582,18 +573,18 @@ export function Publicacoes({
           {publicacoes.map((publicacao) => (
             <div
               key={publicacao.id}
-              className="bg-card rounded-2xl p-5 border border-border/30 shadow-xs flex flex-col justify-between hover:border-border/60 transition-all duration-200 group"
+              className="bg-card rounded-lg p-5 border border-border/30 shadow-xs flex flex-col justify-between hover:border-border/60 transition-all duration-200 group"
             >
               <div>
                 {/* Cabeçalho do Card */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#ff8c42]/10 text-[#ff8c42]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-[#ff8c42]/10 text-[#ff8c42]">
                       <FileText className="w-3.5 h-3.5" />
                       PDF
                     </span>
                     {(publicacao.projetoTitulo || projetoTitulo) && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-border/30 text-muted-foreground truncate max-w-[180px]">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-border/30 text-muted-foreground truncate max-w-[180px]">
                         <FolderKanban className="w-3 h-3 shrink-0" />
                         <span className="truncate">
                           {publicacao.projetoTitulo || projetoTitulo}
@@ -623,7 +614,7 @@ export function Publicacoes({
 
                 {/* Título & Descrição */}
                 {publicacao.tipo && (
-                  <span className="inline-block mb-2 px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary border border-primary/20">
+                  <span className="inline-block mb-2 px-2 py-0.5 rounded-md text-xs bg-primary/10 text-primary border border-primary/20">
                     {publicacao.tipo}
                   </span>
                 )}
@@ -703,7 +694,7 @@ export function Publicacoes({
       {/* Modal de Criação de Publicação */}
       {mostrarModalCriacao && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-lg bg-card rounded-2xl border border-border/30 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg bg-card rounded-lg border border-border/30 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-lg font-bold text-foreground">
@@ -720,7 +711,7 @@ export function Publicacoes({
             </div>
 
             {erroCriacao && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-xs flex items-center gap-2">
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{erroCriacao}</span>
               </div>
@@ -736,9 +727,10 @@ export function Publicacoes({
                   required
                   placeholder="Ex: Análise de Algoritmos Distribuídos"
                   value={novoTitulo}
+                  maxLength={100}
                   onChange={(e) => setNovoTitulo(e.target.value)}
                   disabled={salvando}
-                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
+                  className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
                 />
               </div>
 
@@ -751,23 +743,23 @@ export function Publicacoes({
                   rows={3}
                   placeholder="Breve resumo da publicação científica..."
                   value={novaDescricao}
+                  maxLength={1000}
                   onChange={(e) => setNovaDescricao(e.target.value)}
                   disabled={salvando}
-                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm resize-none"
+                  className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm resize-none"
                 />
               </div>
 
-              {/* REQ-088: tipo, data da publicação e link */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-foreground mb-1.5">
                     Tipo *
                   </label>
-                  <select
+                  <Seletor
                     value={novoTipo}
                     onChange={(e) => setNovoTipo(e.target.value)}
                     disabled={salvando}
-                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                    className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   >
                     {TIPOS_PUBLICACAO.map((t) => (
                       <option key={t} value={t}>
@@ -777,7 +769,7 @@ export function Publicacoes({
                     {!TIPOS_PUBLICACAO.includes(novoTipo as (typeof TIPOS_PUBLICACAO)[number]) && (
                       <option value={novoTipo}>{novoTipo}</option>
                     )}
-                  </select>
+                  </Seletor>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-foreground mb-1.5">
@@ -787,7 +779,7 @@ export function Publicacoes({
                     type="date"
                     value={novaDataPublicacao}
                     onChange={setNovaDataPublicacao}
-                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                    className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />
                 </div>
               </div>
@@ -803,7 +795,7 @@ export function Publicacoes({
                   value={novoLink}
                   onChange={(e) => setNovoLink(e.target.value)}
                   disabled={salvando}
-                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                  className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                 />
               </div>
 
@@ -813,7 +805,7 @@ export function Publicacoes({
                   Projeto *
                 </label>
                 {projetoId ? (
-                  <div className="w-full px-3.5 py-2.5 bg-muted/40 rounded-xl border border-border/40 text-foreground text-sm font-medium flex items-center gap-2">
+                  <div className="w-full px-3.5 py-2.5 bg-muted/40 rounded-lg border border-border/40 text-foreground text-sm font-medium flex items-center gap-2">
                     <FolderKanban className="w-4 h-4 text-[#ff8c42]" />
                     <span>{projetoTitulo || `Projeto #${projetoId}`}</span>
                   </div>
@@ -826,7 +818,7 @@ export function Publicacoes({
                     value={novoProjetoId}
                     onChange={(e) => setNovoProjetoId(e.target.value)}
                     disabled={salvando}
-                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
+                    className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 text-sm"
                   />
                 )}
               </div>
@@ -841,7 +833,7 @@ export function Publicacoes({
                 </label>
 
                 {!arquivoPdf ? (
-                  <label className="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-border/50 hover:border-[#ff8c42]/60 rounded-xl cursor-pointer bg-background/50 hover:bg-background transition-colors group">
+                  <label className="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-border/50 hover:border-[#ff8c42]/60 rounded-lg cursor-pointer bg-background/50 hover:bg-background transition-colors group">
                     <UploadCloud className="w-8 h-8 text-muted-foreground group-hover:text-[#ff8c42] transition-colors mb-2" />
                     <span className="text-sm font-medium text-foreground">
                       Clique para selecionar o PDF
@@ -861,7 +853,7 @@ export function Publicacoes({
                     />
                   </label>
                 ) : (
-                  <div className="flex items-center justify-between p-3 bg-background rounded-xl border border-border/40">
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg border border-border/40">
                     <div className="flex items-center gap-2.5 truncate">
                       <FileText className="w-5 h-5 text-[#ff8c42] shrink-0" />
                       <div className="truncate text-left">
@@ -891,14 +883,14 @@ export function Publicacoes({
                   type="button"
                   onClick={() => setMostrarModalCriacao(false)}
                   disabled={salvando}
-                  className="px-4 py-2 rounded-xl border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-lg border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={salvando}
-                  className="px-5 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {salvando ? (
                     <>
@@ -918,7 +910,7 @@ export function Publicacoes({
       {/* Modal de Edição de Publicação */}
       {publicacaoParaEditar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-lg bg-card rounded-2xl border border-border/30 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg bg-card rounded-lg border border-border/30 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-foreground">Editar Publicação</h2>
               <button
@@ -931,7 +923,7 @@ export function Publicacoes({
             </div>
 
             {erroEdicao && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-xs flex items-center gap-2">
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{erroEdicao}</span>
               </div>
@@ -946,9 +938,10 @@ export function Publicacoes({
                   type="text"
                   required
                   value={editTitulo}
+                  maxLength={100}
                   onChange={(e) => setEditTitulo(e.target.value)}
                   disabled={salvandoEdicao}
-                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
+                  className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60"
                 />
               </div>
 
@@ -960,23 +953,23 @@ export function Publicacoes({
                   required
                   rows={3}
                   value={editDescricao}
+                  maxLength={1000}
                   onChange={(e) => setEditDescricao(e.target.value)}
                   disabled={salvandoEdicao}
-                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60 resize-none"
+                  className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/60 resize-none"
                 />
               </div>
 
-              {/* REQ-088: tipo, data da publicação e link */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-foreground mb-1.5">
                     Tipo *
                   </label>
-                  <select
+                  <Seletor
                     value={editTipo}
                     onChange={(e) => setEditTipo(e.target.value)}
                     disabled={salvandoEdicao}
-                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                    className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   >
                     {TIPOS_PUBLICACAO.map((t) => (
                       <option key={t} value={t}>
@@ -986,7 +979,7 @@ export function Publicacoes({
                     {!TIPOS_PUBLICACAO.includes(editTipo as (typeof TIPOS_PUBLICACAO)[number]) && (
                       <option value={editTipo}>{editTipo}</option>
                     )}
-                  </select>
+                  </Seletor>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-foreground mb-1.5">
@@ -996,7 +989,7 @@ export function Publicacoes({
                     type="date"
                     value={editDataPublicacao}
                     onChange={setEditDataPublicacao}
-                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                    className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />
                 </div>
               </div>
@@ -1012,7 +1005,7 @@ export function Publicacoes({
                   value={editLink}
                   onChange={(e) => setEditLink(e.target.value)}
                   disabled={salvandoEdicao}
-                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                  className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                 />
               </div>
 
@@ -1040,14 +1033,14 @@ export function Publicacoes({
                   type="button"
                   onClick={() => setPublicacaoParaEditar(null)}
                   disabled={salvandoEdicao}
-                  className="px-4 py-2 rounded-xl border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-lg border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={salvandoEdicao}
-                  className="px-5 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-2 bg-[#ff8c42] hover:bg-[#ff8c42]/90 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {salvandoEdicao ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
                   Salvar alterações
@@ -1061,8 +1054,8 @@ export function Publicacoes({
       {/* Modal de Confirmação de Inativação */}
       {publicacaoParaInativar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-md bg-card rounded-2xl border border-border/30 p-6 shadow-2xl space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-500 mx-auto">
+          <div className="w-full max-w-md bg-card rounded-lg border border-border/30 p-6 shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-lg bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-500 mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
 
@@ -1082,7 +1075,7 @@ export function Publicacoes({
                 type="button"
                 onClick={() => setPublicacaoParaInativar(null)}
                 disabled={inativando}
-                className="flex-1 py-2 rounded-xl border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
+                className="flex-1 py-2 rounded-lg border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1090,7 +1083,7 @@ export function Publicacoes({
                 type="button"
                 onClick={handleConfirmarInativacao}
                 disabled={inativando}
-                className="flex-1 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 {inativando ? (
                   <>

@@ -22,6 +22,10 @@ import {
   XCircle,
   Check,
   ThumbsDown,
+  AlignLeft,
+  FolderKanban,
+  CalendarPlus,
+  CalendarCheck,
 } from "lucide-react";
 import { AtividadeService } from "../services/atividades/AtividadeService";
 import { ProjetoService } from "../services/projetos/ProjetoService";
@@ -43,12 +47,16 @@ import {
 } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "./DateInput";
+import { useConfirmacao } from "../contexts/ConfirmacaoContext";
+import { Seletor } from "./Seletor";
 
 interface AtividadesBoardProps {
   projeto: ProjetoResponse | null;
   nivel: NivelMembro | null;
   isAdmin?: boolean;
   onProjetoAtualizado?: (projeto: ProjetoResponse) => void;
+  /** Chamado junto com o recarregamento das atividades (ex.: a página recarrega a lista de projetos). */
+  onRecarregar?: () => void;
 }
 
 interface MembroGrupo {
@@ -64,6 +72,7 @@ interface ColunaConfig {
   icon: typeof Circle;
   badge: string;
   header: string;
+  border: string;
 }
 
 const COLUNAS: ColunaConfig[] = [
@@ -73,6 +82,7 @@ const COLUNAS: ColunaConfig[] = [
     icon: ShieldCheck,
     badge: "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/30",
     header: "text-[#f59e0b]",
+    border: "border-[#f59e0b]"
   },
   {
     status: "PENDENTE",
@@ -80,6 +90,7 @@ const COLUNAS: ColunaConfig[] = [
     icon: Circle,
     badge: "bg-muted text-muted-foreground border-border/40",
     header: "text-muted-foreground",
+    border: "border-muted-foreground"
   },
   {
     status: "EM_ANDAMENTO",
@@ -87,6 +98,7 @@ const COLUNAS: ColunaConfig[] = [
     icon: Clock,
     badge: "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/30",
     header: "text-[#f59e0b]",
+    border: "border-[#f59e0b]"
   },
   {
     status: "AGUARDANDO_CONFIRMACAO",
@@ -94,6 +106,7 @@ const COLUNAS: ColunaConfig[] = [
     icon: Hourglass,
     badge: "bg-[#4a9eff]/15 text-[#4a9eff] border-[#4a9eff]/30",
     header: "text-[#4a9eff]",
+    border: "border-[#4a9eff]"
   },
   {
     status: "CONCLUIDA",
@@ -101,6 +114,7 @@ const COLUNAS: ColunaConfig[] = [
     icon: CheckCircle2,
     badge: "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30",
     header: "text-[#10b981]",
+    border: "border-[#10b981]"
   },
   {
     status: "ENCERRADA",
@@ -108,6 +122,7 @@ const COLUNAS: ColunaConfig[] = [
     icon: Archive,
     badge: "bg-[#7c3aed]/15 text-[#7c3aed] border-[#7c3aed]/30",
     header: "text-[#7c3aed]",
+    border: "border-[#7c3aed]"
   },
   {
     status: "REJEITADA",
@@ -115,11 +130,12 @@ const COLUNAS: ColunaConfig[] = [
     icon: XCircle,
     badge: "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/30",
     header: "text-[#ef4444]",
+    border: "border-[#ef4444]"
   },
 ];
 
 const inputClass =
-  "w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm disabled:opacity-50";
+  "w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm disabled:opacity-50";
 
 function paraInputDateTime(iso?: string | null): string {
   if (!iso) return "";
@@ -133,7 +149,22 @@ function formatarData(iso?: string | null): string {
   return data.toLocaleDateString("pt-BR");
 }
 
-export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtualizado }: AtividadesBoardProps) {
+/** No card o título é resumido; o completo aparece ao passar o mouse e no modal de detalhes. */
+const LIMITE_TITULO_CARD = 40;
+
+function resumirTitulo(titulo: string): string {
+  return titulo.length > LIMITE_TITULO_CARD ? `${titulo.slice(0, LIMITE_TITULO_CARD).trimEnd()}...` : titulo;
+}
+
+function formatarDataHora(iso?: string | null): string | null {
+  if (!iso) return null;
+  const data = new Date(iso);
+  if (isNaN(data.getTime())) return iso;
+  return data.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+}
+
+export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtualizado, onRecarregar }: AtividadesBoardProps) {
+  const confirmar = useConfirmacao();
   const atividadeService = useMemo(() => new AtividadeService(), []);
   const projetoService = useMemo(() => new ProjetoService(), []);
   const grupoService = useMemo(() => new GrupoService(), []);
@@ -165,6 +196,24 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
   const [atividadeParaRejeitar, setAtividadeParaRejeitar] = useState<AtividadeResponse | null>(null);
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [rejeitando, setRejeitando] = useState(false);
+  // Modal de detalhes: guarda só o id, para refletir as atualizações da lista
+  const [detalheId, setDetalheId] = useState<number | null>(null);
+  const detalhe = detalheId != null ? atividades.find((a) => a.id === detalheId) ?? null : null;
+
+  // Trocar de projeto fecha os detalhes
+  useEffect(() => {
+    setDetalheId(null);
+  }, [projeto?.id]);
+
+  // Esc fecha os detalhes, exceto quando há um modal de confirmação por cima (ele trata o próprio Esc)
+  useEffect(() => {
+    if (detalheId == null) return;
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !document.querySelector('[role="alertdialog"]')) setDetalheId(null);
+    };
+    window.addEventListener("keydown", aoTeclar);
+    return () => window.removeEventListener("keydown", aoTeclar);
+  }, [detalheId]);
 
   const usuarioEmail = (authService.getUserEmail() || "").toLowerCase();
   const isLiderProjeto = !!projeto?.liderProjetoId && participantes.some(
@@ -183,6 +232,15 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     || (nivelPodeEscrever(nivel) && !isColaboradorProjeto && !!euNoProjeto);
   const podeMoverStatus = podeCriarAtividade;
   const podeRegistrarImpedimento = podeCriarAtividade;
+
+  const permissoesDe = (atividade: AtividadeResponse) => {
+    const proximo = proximoStatusAtividade(atividade.status);
+    // o pesquisador conclui sozinho; só encerrar exige o líder do grupo ou do projeto
+    const exigeCoordenacao = proximo === "ENCERRADA";
+    const podeAvancar = !!proximo && podeMoverStatus && (!exigeCoordenacao || podeGerenciar);
+    const emAprovacao = atividade.status?.toUpperCase() === "AGUARDANDO_APROVACAO";
+    return { proximo, podeAvancar, emAprovacao };
+  };
 
   const atividadesEmAndamento = useMemo(
     () => atividades.filter((a) => a.status?.toUpperCase() === "EM_ANDAMENTO"),
@@ -337,6 +395,13 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
           dthPrazo: formPrazo,
         });
         setAtividades((prev) => [...prev, criada]);
+        // A API muda o projeto Planejado para Em Andamento ao receber uma atividade
+        if (projeto.status?.toUpperCase() === "PLANEJADO") {
+          projetoService
+            .buscarProjetoPorId(projeto.id)
+            .then((atualizado) => onProjetoAtualizado?.(atualizado))
+            .catch(() => {});
+        }
       }
       setModalAberto(false);
     } catch (err) {
@@ -414,7 +479,13 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
   };
 
   const handleRemover = async (atividade: AtividadeResponse) => {
-    if (!window.confirm(`Deseja realmente excluir a atividade "${atividade.titulo}"?`)) return;
+    const confirmado = await confirmar({
+      titulo: "Excluir atividade",
+      mensagem: `Deseja realmente excluir a atividade "${atividade.titulo}"?`,
+      textoConfirmar: "Excluir",
+      perigo: true,
+    });
+    if (!confirmado) return;
 
     setActionError("");
     try {
@@ -451,7 +522,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
 
   if (!projeto) {
     return (
-      <div className="bg-card rounded-2xl p-12 border border-border/30 text-center space-y-3">
+      <div className="bg-card rounded-lg p-12 border border-border/30 text-center space-y-3">
         <ListTodo className="w-12 h-12 text-muted-foreground/40 mx-auto" />
         <h3 className="text-foreground font-semibold text-base">Nenhum projeto selecionado</h3>
         <p className="text-muted-foreground text-sm max-w-sm mx-auto">
@@ -473,13 +544,13 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="px-3 py-1.5 rounded-xl bg-background border border-border/40 text-muted-foreground">
+          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/40 text-muted-foreground">
             Total: <strong className="text-foreground">{total}</strong>
           </span>
-          <span className="px-3 py-1.5 rounded-xl bg-background border border-border/40 text-muted-foreground">
+          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/40 text-muted-foreground">
             Abertas: <strong className="text-[#f59e0b]">{abertas}</strong>
           </span>
-          <span className="px-3 py-1.5 rounded-xl bg-background border border-border/40 text-muted-foreground">
+          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/40 text-muted-foreground">
             Atrasadas: <strong className="text-[#ef4444]">{atrasadas}</strong>
           </span>
         </div>
@@ -487,10 +558,13 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={carregar}
+            onClick={() => {
+              carregar();
+              onRecarregar?.();
+            }}
             disabled={loading}
-            className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            title="Recarregar atividades"
+            className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            title={onRecarregar ? "Recarregar projetos e atividades" : "Recarregar atividades"}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </button>
@@ -498,7 +572,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
             <button
               type="button"
               onClick={() => abrirNovaAtividade(false)}
-              className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Nova Atividade</span>
@@ -508,7 +582,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
       </div>
 
       {(actionError || error) && (
-        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center justify-between text-sm text-[#ef4444]">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{actionError || error}</span>
@@ -531,33 +605,28 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
           <Loader2 className="w-8 h-8 text-[#ff8c42] animate-spin" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7 gap-1">
           {COLUNAS.map((coluna) => {
             const itens = atividades.filter((a) => a.status?.toUpperCase() === coluna.status);
             const Icone = coluna.icon;
             return (
               <div
                 key={coluna.status}
-                className="bg-background/60 rounded-2xl border border-border/30 flex flex-col min-h-[160px]"
+                className="bg-background/60 border-b-4 rounded-lg border border-border/30 flex flex-col min-h-[160px] max-h-[60vh]"
               >
-                <div className="flex items-center justify-between px-3.5 py-3 border-b border-border/30">
-                  <div className={`flex items-center gap-2 text-sm font-semibold ${coluna.header}`}>
+                <div className="flex items-center justify-between px-2 py-3 border-b border-border/30">
+                  <div className={`flex items-center gap-1 text-sm font-semibold ${coluna.header}`}>
                     <Icone className="w-4 h-4" />
-                    <span>{coluna.label}</span>
+                    <span className="text-xs">{coluna.label}</span>
                   </div>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-card border border-border/40 text-muted-foreground">
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-card border border-border/40 text-muted-foreground">
                     {itens.length}
                   </span>
                 </div>
 
-                <div className="p-2.5 space-y-2.5 flex-1">
+                <div className="p-2.5 space-y-2.5 flex-1 min-h-0 overflow-y-auto overscroll-contain">
                   {itens.map((atividade) => {
-                    const proximo = proximoStatusAtividade(atividade.status);
-                    // o pesquisador conclui sozinho; só encerrar exige o líder do grupo ou do projeto
-                    const exigeCoordenacao = proximo === "ENCERRADA";
-                    const podeAvancar = !!proximo && podeMoverStatus && (!exigeCoordenacao || podeGerenciar);
-                    const emAprovacao =
-                      atividade.status?.toUpperCase() === "AGUARDANDO_APROVACAO";
+                    const { proximo, podeAvancar, emAprovacao } = permissoesDe(atividade);
                     const pai = atividade.atividadePaiId
                       ? atividades.find((a) => a.id === atividade.atividadePaiId)
                       : null;
@@ -565,11 +634,24 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                     return (
                       <div
                         key={atividade.id}
-                        className="bg-card rounded-xl border border-border/30 p-3 space-y-2.5"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setDetalheId(atividade.id)}
+                        onKeyDown={(e) => {
+                          if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+                            e.preventDefault();
+                            setDetalheId(atividade.id);
+                          }
+                        }}
+                        className="bg-card border-b-4 rounded-lg border  p-3 space-y-2.5 cursor-pointer hover:border-primary/40 focus-visible:outline-none focus-visible:border-primary/60 transition-colors"
+                        title="Ver detalhes da atividade"
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className="text-foreground text-sm font-semibold leading-snug">
-                            {atividade.titulo}
+                          <h4
+                            className="text-foreground text-sm font-semibold leading-snug break-words"
+                            title={atividade.titulo.length > LIMITE_TITULO_CARD ? atividade.titulo : undefined}
+                          >
+                            {resumirTitulo(atividade.titulo)}
                           </h4>
                           {atividade.isAtrasada && (
                             <span
@@ -615,9 +697,10 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 pt-1 border-t border-border/20">
+                        <div className="pt-1 border-t border-border/20 space-y-1.5" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex flex-col gap-1.5 empty:hidden">
                           {emAprovacao && atividade.podeSerAprovada && (
-                            <>
+                            <div className="flex items-center gap-1.5">
                               <button
                                 type="button"
                                 onClick={() => handleAprovar(atividade)}
@@ -645,7 +728,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                               >
                                 <ThumbsDown className="w-3.5 h-3.5" />
                               </button>
-                            </>
+                            </div>
                           )}
 
                           {!emAprovacao && podeAvancar && (
@@ -653,7 +736,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                               type="button"
                               onClick={() => handleAvancarStatus(atividade)}
                               disabled={avancandoId === atividade.id}
-                              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-[#ff8c42]/10 hover:bg-[#ff8c42]/20 text-[#ff8c42] text-[11px] font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                              className="w-full flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-semibold transition-colors cursor-pointer disabled:opacity-50"
                               title={`Avançar para ${AtividadeStatusLabels[proximo!]}`}
                             >
                               {avancandoId === atividade.id ? (
@@ -672,14 +755,16 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                               type="button"
                               onClick={() => handleAvancarStatus(atividade, "CONCLUIDA")}
                               disabled={avancandoId === atividade.id}
-                              className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-[#10b981]/10 hover:bg-[#10b981]/20 text-[#10b981] text-[11px] font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                              className="w-full flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-[#10b981]/10 hover:bg-[#10b981]/20 text-[#10b981] text-[11px] font-semibold transition-colors cursor-pointer disabled:opacity-50"
                               title="Concluir sem pedir confirmação"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               <span>Concluir</span>
                             </button>
                           )}
+                          </div>
 
+                          <div className="flex items-center justify-end gap-1.5 empty:hidden">
                           {podeRegistrarImpedimento &&
                             atividade.status?.toUpperCase() === "EM_ANDAMENTO" && (
                               <button
@@ -712,6 +797,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                               </button>
                             </>
                           )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -729,12 +815,306 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
         </div>
       )}
 
+      {detalhe && !modalAberto && !atividadeParaRejeitar && !finalizarAberto && (() => {
+        const coluna = COLUNAS.find((c) => c.status === detalhe.status?.toUpperCase());
+        const IconeStatus = coluna?.icon ?? Circle;
+        const { proximo, podeAvancar, emAprovacao } = permissoesDe(detalhe);
+        const pai = detalhe.atividadePaiId ? atividades.find((a) => a.id === detalhe.atividadePaiId) : null;
+        const impedimentos = atividades.filter((a) => a.atividadePaiId === detalhe.id);
+        const ocupado = avancandoId === detalhe.id;
+        const temAcoes =
+          (emAprovacao && detalhe.podeSerAprovada) ||
+          (!emAprovacao && podeAvancar) ||
+          (podeMoverStatus && detalhe.status?.toUpperCase() === "EM_ANDAMENTO") ||
+          podeGerenciar;
+
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setDetalheId(null);
+            }}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="detalhe-atividade-titulo"
+              className="bg-card rounded-lg w-full max-w-3xl border border-border/40 shadow-2xl my-auto"
+            >
+              <div className="p-6 pb-4 flex items-start justify-between gap-4 border-b border-border/30">
+                <div className="min-w-0 space-y-2">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-semibold ${
+                      coluna?.badge ?? "bg-muted text-muted-foreground border-border/40"
+                    }`}
+                  >
+                    <IconeStatus className="w-3.5 h-3.5" />
+                    {coluna?.label ?? detalhe.status}
+                  </span>
+                  <h3 id="detalhe-atividade-titulo" className="text-foreground text-xl font-semibold leading-snug break-words">
+                    {detalhe.titulo}
+                  </h3>
+                  {projeto && (
+                    <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <FolderKanban className="w-3.5 h-3.5" />
+                      no projeto <span className="text-foreground font-medium">{projeto.titulo}</span>
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDetalheId(null)}
+                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-border/20 transition-colors cursor-pointer shrink-0"
+                  title="Fechar"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {detalhe.isAtrasada && (
+                <div className="mx-6 mt-4 px-3 py-2 rounded-lg bg-[#ef4444]/10 border border-[#ef4444]/25 text-xs text-[#ef4444] flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  Esta atividade está atrasada: o prazo era {formatarData(detalhe.dthPrazo)}.
+                </div>
+              )}
+
+              {actionError && (
+                <div className="mx-6 mt-4 px-3 py-2 rounded-lg bg-[#ef4444]/10 border border-[#ef4444]/25 text-xs text-[#ef4444] flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {actionError}
+                </div>
+              )}
+
+              <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2 space-y-6 min-w-0">
+                  <section>
+                    <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
+                      <AlignLeft className="w-4 h-4 text-muted-foreground" />
+                      Descrição
+                    </h4>
+                    {detalhe.descricao ? (
+                      <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words leading-relaxed bg-background/60 border border-border/30 rounded-lg p-3">
+                        {detalhe.descricao}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">Sem descrição.</p>
+                    )}
+                  </section>
+
+                  {detalhe.status?.toUpperCase() === "REJEITADA" && detalhe.motivoRejeicao && (
+                    <section>
+                      <h4 className="flex items-center gap-2 text-sm font-semibold text-[#ef4444] mb-2">
+                        <XCircle className="w-4 h-4" />
+                        Motivo da rejeição
+                      </h4>
+                      <p className="text-sm text-[#ef4444] whitespace-pre-wrap break-words bg-[#ef4444]/10 border border-[#ef4444]/25 rounded-lg p-3">
+                        {detalhe.motivoRejeicao}
+                      </p>
+                    </section>
+                  )}
+
+                  {pai && (
+                    <section>
+                      <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
+                        <GitBranch className="w-4 h-4 text-[#7c3aed]" />
+                        Impedimento de
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => setDetalheId(pai.id)}
+                        className="w-full text-left px-3 py-2.5 rounded-lg bg-[#7c3aed]/10 border border-[#7c3aed]/25 text-sm text-foreground hover:border-[#7c3aed]/50 transition-colors cursor-pointer"
+                      >
+                        {pai.titulo}
+                      </button>
+                    </section>
+                  )}
+
+                  <section>
+                    <h4 className="flex items-center justify-between gap-2 text-sm font-semibold text-foreground mb-2">
+                      <span className="flex items-center gap-2">
+                        <Flag className="w-4 h-4 text-[#7c3aed]" />
+                        Impedimentos
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-background border border-border/40 text-muted-foreground">
+                          {impedimentos.length}
+                        </span>
+                      </span>
+                    </h4>
+                    {impedimentos.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic">Nenhum impedimento registrado.</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {impedimentos.map((imp) => {
+                          const colunaImp = COLUNAS.find((c) => c.status === imp.status?.toUpperCase());
+                          return (
+                            <li key={imp.id}>
+                              <button
+                                type="button"
+                                onClick={() => setDetalheId(imp.id)}
+                                className="w-full text-left px-3 py-2.5 rounded-lg bg-background/60 border border-border/30 hover:border-primary/40 transition-colors cursor-pointer flex items-center justify-between gap-3"
+                              >
+                                <span className="min-w-0">
+                                  <span className="block text-sm text-foreground truncate">{imp.titulo}</span>
+                                  <span className="block text-[11px] text-muted-foreground truncate">
+                                    {imp.responsavelNome || "Sem responsável"} · {formatarData(imp.dthPrazo)}
+                                  </span>
+                                </span>
+                                <span
+                                  className={`shrink-0 px-2 py-0.5 rounded-md border text-[11px] font-medium ${
+                                    colunaImp?.badge ?? "bg-muted text-muted-foreground border-border/40"
+                                  }`}
+                                >
+                                  {colunaImp?.label ?? imp.status}
+                                </span>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </section>
+                </div>
+
+                <aside className="space-y-5">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Responsável</p>
+                      <div className="flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center justify-center shrink-0">
+                          {(detalhe.responsavelNome || "?").trim().charAt(0).toUpperCase()}
+                        </span>
+                        <span className="text-sm text-foreground truncate">
+                          {detalhe.responsavelNome || "Sem responsável"}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Prazo de entrega</p>
+                      <p
+                        className={`flex items-center gap-2 text-sm ${
+                          detalhe.isAtrasada ? "text-[#ef4444] font-medium" : "text-foreground"
+                        }`}
+                      >
+                        <Calendar className="w-4 h-4 shrink-0" />
+                        {formatarDataHora(detalhe.dthPrazo) ?? "Sem prazo"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Criada em</p>
+                      <p className="flex items-center gap-2 text-sm text-foreground">
+                        <CalendarPlus className="w-4 h-4 shrink-0 text-muted-foreground" />
+                        {formatarDataHora(detalhe.dthRegistro) ?? "—"}
+                      </p>
+                    </div>
+                    {detalhe.dthConclusao && (
+                      <div>
+                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Concluída em</p>
+                        <p className="flex items-center gap-2 text-sm text-[#10b981]">
+                          <CalendarCheck className="w-4 h-4 shrink-0" />
+                          {formatarDataHora(detalhe.dthConclusao)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {temAcoes && (
+                    <div className="pt-4 border-t border-border/30 space-y-2">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Ações</p>
+
+                      {emAprovacao && detalhe.podeSerAprovada && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleAprovar(detalhe)}
+                            disabled={ocupado}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[#10b981]/10 hover:bg-[#10b981]/20 text-[#10b981] text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            {ocupado ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                            Aprovar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAtividadeParaRejeitar(detalhe);
+                              setMotivoRejeicao("");
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[#ef4444]/10 hover:bg-[#ef4444]/20 text-[#ef4444] text-sm font-medium transition-colors cursor-pointer"
+                          >
+                            <ThumbsDown className="w-4 h-4" />
+                            Rejeitar
+                          </button>
+                        </>
+                      )}
+
+                      {!emAprovacao && podeAvancar && (
+                        <button
+                          type="button"
+                          onClick={() => handleAvancarStatus(detalhe)}
+                          disabled={ocupado}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                          {ocupado ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+                          {AtividadeStatusLabels[proximo!]}
+                        </button>
+                      )}
+
+                      {podeMoverStatus && detalhe.status?.toUpperCase() === "EM_ANDAMENTO" && (
+                        <button
+                          type="button"
+                          onClick={() => handleAvancarStatus(detalhe, "CONCLUIDA")}
+                          disabled={ocupado}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[#10b981]/10 hover:bg-[#10b981]/20 text-[#10b981] text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          Concluir
+                        </button>
+                      )}
+
+                      {podeRegistrarImpedimento && detalhe.status?.toUpperCase() === "EM_ANDAMENTO" && (
+                        <button
+                          type="button"
+                          onClick={() => abrirNovaAtividade(true, detalhe.id)}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-background hover:bg-[#7c3aed]/10 border border-border/40 text-[#7c3aed] text-sm font-medium transition-colors cursor-pointer"
+                        >
+                          <Flag className="w-4 h-4" />
+                          Registrar impedimento
+                        </button>
+                      )}
+
+                      {podeGerenciar && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => abrirEdicao(detalhe)}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-background hover:bg-border/20 border border-border/40 text-foreground text-sm font-medium transition-colors cursor-pointer"
+                          >
+                            <Pencil className="w-4 h-4 text-primary" />
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemover(detalhe)}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-background hover:bg-[#ef4444]/10 border border-border/40 text-[#ef4444] text-sm font-medium transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Excluir
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </aside>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {modalAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden max-h-[90vh] flex flex-col">
+          <div className="bg-card rounded-lg w-full max-w-lg border border-border/40 overflow-hidden max-h-[90vh] flex flex-col">
             <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-[#ff8c42] flex items-center justify-center">
                   {modoImpedimento ? (
                     <Flag className="w-5 h-5 text-white" />
                   ) : (
@@ -767,7 +1147,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
 
             <div className="p-6 overflow-y-auto">
               {formError && (
-                <div className="mb-4 p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="mb-4 p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{formError}</span>
                 </div>
@@ -781,6 +1161,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                   <input
                     type="text"
                     value={formTitulo}
+                    maxLength={100}
                     onChange={(e) => setFormTitulo(e.target.value)}
                     disabled={salvando}
                     className={inputClass}
@@ -794,6 +1175,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                   </label>
                   <textarea
                     value={formDescricao}
+                    maxLength={1000}
                     onChange={(e) => setFormDescricao(e.target.value)}
                     disabled={salvando}
                     rows={3}
@@ -807,7 +1189,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                     <label className="block text-sm text-muted-foreground mb-1.5">
                       Atividade impedida <span className="text-[#ff8c42]">*</span>
                     </label>
-                    <select
+                    <Seletor
                       value={formAtividadePaiId}
                       onChange={(e) => setFormAtividadePaiId(e.target.value)}
                       disabled={salvando}
@@ -819,7 +1201,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                           {a.titulo}
                         </option>
                       ))}
-                    </select>
+                    </Seletor>
                   </div>
                 )}
 
@@ -827,7 +1209,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                   <label className="block text-sm text-muted-foreground mb-1.5">
                     Responsável <span className="text-[#ff8c42]">*</span>
                   </label>
-                  <select
+                  <Seletor
                     value={formResponsavelId}
                     onChange={(e) => setFormResponsavelId(e.target.value)}
                     disabled={salvando || carregandoResponsaveis}
@@ -841,7 +1223,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                         {r.nome}
                       </option>
                     ))}
-                  </select>
+                  </Seletor>
                   {modoImpedimento ? (
                     <p className="text-[11px] text-muted-foreground mt-1">
                       Impedimentos podem ser atribuídos a qualquer membro do grupo.
@@ -878,14 +1260,14 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                     type="button"
                     onClick={() => setModalAberto(false)}
                     disabled={salvando}
-                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-lg text-sm transition-colors cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={salvando}
-                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
                     {salvando ? (
                       <>
@@ -905,9 +1287,9 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
 
       {atividadeParaRejeitar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-card rounded-2xl w-full max-w-md border border-border/40 overflow-hidden">
+          <div className="bg-card rounded-lg w-full max-w-md border border-border/40 overflow-hidden">
             <div className="p-6 border-b border-border/30 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#ef4444] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[#ef4444] flex items-center justify-center">
                 <ThumbsDown className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -938,7 +1320,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                     setMotivoRejeicao("");
                   }}
                   disabled={rejeitando}
-                  className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                  className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-lg text-sm transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -946,7 +1328,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                   type="button"
                   onClick={confirmarRejeicao}
                   disabled={rejeitando}
-                  className="px-5 py-2.5 bg-[#ef4444] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2.5 bg-[#ef4444] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {rejeitando ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsDown className="w-4 h-4" />}
                   <span>Confirmar rejeição</span>
@@ -959,9 +1341,9 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
 
       {finalizarAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-card rounded-2xl w-full max-w-md border border-border/40 overflow-hidden">
+          <div className="bg-card rounded-lg w-full max-w-md border border-border/40 overflow-hidden">
             <div className="p-6 border-b border-border/30 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#10b981] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[#10b981] flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -981,7 +1363,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                   type="button"
                   onClick={() => setFinalizarAberto(false)}
                   disabled={finalizando}
-                  className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                  className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-lg text-sm transition-colors cursor-pointer"
                 >
                   Agora não
                 </button>
@@ -989,7 +1371,7 @@ export function AtividadesBoard({ projeto, nivel, isAdmin = false, onProjetoAtua
                   type="button"
                   onClick={handleFinalizarProjeto}
                   disabled={finalizando}
-                  className="px-5 py-2.5 bg-[#10b981] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2.5 bg-[#10b981] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {finalizando ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

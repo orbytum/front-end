@@ -19,7 +19,6 @@ import {
   Link as LinkIcon,
   Search,
   Filter,
-  ChevronDown,
   Shield,
 } from "lucide-react";
 import { DataTable, Column } from "../components/DataTable";
@@ -30,8 +29,11 @@ import { HttpError } from "../utils/HttpError";
 import { ConviteCadastroDetalhe } from "../models/dto/convites/ConviteCadastroDetalhe";
 import { ConviteCadastroPaginadoResponse } from "../models/dto/convites/ListarConvitesCadastro";
 import { formatarTelefone, MENSAGEM_TELEFONE_INVALIDO, PADRAO_TELEFONE } from "../utils/Telefone";
+import { useConfirmacao } from "../contexts/ConfirmacaoContext";
+import { Seletor } from "../components/Seletor";
 
 export function GestaoConvitesCadastro() {
+  const confirmar = useConfirmacao();
   const navigate = useNavigate();
   const conviteService = new ConviteService();
   const authService = new AuthService();
@@ -192,15 +194,19 @@ export function GestaoConvitesCadastro() {
   };
 
   const handleRevoke = async (id: number) => {
-    if (!window.confirm("Deseja realmente revogar este convite? Ele não poderá mais ser utilizado.")) {
-      return;
-    }
+    const confirmado = await confirmar({
+      titulo: "Revogar convite",
+      mensagem: "Deseja realmente revogar este convite? Ele não poderá mais ser utilizado.",
+      textoConfirmar: "Revogar",
+      perigo: true,
+    });
+    if (!confirmado) return;
     setRevokingId(id);
     try {
       await conviteService.revogarCadastro(id);
       await carregarConvites();
     } catch (err) {
-      alert(err instanceof HttpError ? (err.response?.mensagem || err.message) : "Erro ao revogar convite.");
+      setError(err instanceof HttpError ? (err.response?.mensagem || err.message) : "Erro ao revogar convite.");
     } finally {
       setRevokingId(null);
     }
@@ -233,7 +239,7 @@ export function GestaoConvitesCadastro() {
   if (!isAdmin) {
     return (
       <div className="h-full flex items-center justify-center p-6">
-        <div className="bg-card rounded-2xl p-8 max-w-md w-full border border-[#ef4444]/30 text-center">
+        <div className="bg-card rounded-lg p-8 max-w-md w-full border border-[#ef4444]/30 text-center">
           <div className="w-16 h-16 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-4">
             <ShieldAlert className="w-8 h-8 text-[#ef4444]" />
           </div>
@@ -243,7 +249,7 @@ export function GestaoConvitesCadastro() {
           </p>
           <button
             onClick={() => navigate("/login")}
-            className="w-full py-2.5 bg-background rounded-xl border border-border/40 text-foreground hover:border-[#ff8c42]/60 transition-colors text-sm font-medium cursor-pointer"
+            className="w-full py-2.5 bg-background rounded-lg border border-border/40 text-foreground hover:border-[#ff8c42]/60 transition-colors text-sm font-medium cursor-pointer"
           >
             Fazer login com outra conta
           </button>
@@ -259,7 +265,7 @@ export function GestaoConvitesCadastro() {
       align: "left",
       render: (c) => (
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-background border border-border/40 flex items-center justify-center text-[#ff8c42] shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-background border border-border/40 flex items-center justify-center text-[#ff8c42] shrink-0">
             <Mail className="w-4 h-4" />
           </div>
           <div>
@@ -297,7 +303,7 @@ export function GestaoConvitesCadastro() {
       align: "center",
       render: (c) => (
         <span
-          className={`px-3 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1.5 ${ c.ativo ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30" : "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/30" }`}
+          className={`px-3 py-1 rounded-md text-xs font-medium border inline-flex items-center gap-1.5 ${ c.ativo ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30" : "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/30" }`}
         >
           <span
             className={`w-1.5 h-1.5 rounded-full ${ c.ativo ? "bg-[#10b981]" : "bg-[#ef4444]" }`}
@@ -358,29 +364,11 @@ export function GestaoConvitesCadastro() {
   ];
 
   return (
-    <div className="h-full overflow-auto p-6 space-y-6">
+    <div className="h-full overflow-auto p-6 space-y-3">
       {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-foreground text-2xl font-bold mb-1">
-            Gestão de Convites de Cadastro
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Gere e acompanhe convites para novos usuários se cadastrarem na plataforma
-          </p>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 empty:hidden">
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={carregarConvites}
-            disabled={loading}
-            className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            title="Recarregar lista"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          </button>
-
           <button
             type="button"
             onClick={() => {
@@ -393,7 +381,7 @@ export function GestaoConvitesCadastro() {
               setAdminError("");
               setAdminSuccess(false);
             }}
-            className="px-4 py-2.5 bg-card hover:bg-border/40 border border-[#ff8c42]/40 text-[#ff8c42] rounded-xl font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2.5 bg-card hover:bg-border/40 border border-[#ff8c42]/40 text-[#ff8c42] rounded-lg font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
           >
             <Shield className="w-4 h-4" />
             <span>Novo Administrador</span>
@@ -406,23 +394,31 @@ export function GestaoConvitesCadastro() {
               setGeneratedLink("");
               setModalError("");
             }}
-            className="px-4 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Novo Convite</span>
           </button>
+          <button
+            type="button"
+            onClick={carregarConvites}
+            disabled={loading}
+            className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            title="Recarregar lista"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
         </div>
       </div>
 
-      {/* Cards de Métricas com filtro interativo */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div
-          className={`bg-card rounded-2xl p-6 border transition-all cursor-pointer select-none ${ statusFilter === "todos" ? "border-[#ff8c42] " : "border-border/30 hover:border-border/60 " }`}
+          className={`bg-card rounded-lg p-6 border transition-all cursor-pointer select-none ${ statusFilter === "todos" ? "border-[#ff8c42] " : "border-border/30 hover:border-border/60 " }`}
           title="Clique para exibir todos os convites"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#4a9eff] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[#4a9eff] flex items-center justify-center">
                 <MailPlus className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -435,12 +431,12 @@ export function GestaoConvitesCadastro() {
         </div>
 
         <div
-          className={`bg-card rounded-2xl p-6 border transition-all cursor-pointer select-none ${ statusFilter === "ativos" ? "border-[#10b981] " : "border-border/30 hover:border-border/60 " }`}
+          className={`bg-card rounded-lg p-6 border transition-all cursor-pointer select-none ${ statusFilter === "ativos" ? "border-[#10b981] " : "border-border/30 hover:border-border/60 " }`}
           title="Clique para filtrar apenas convites ativos e válidos"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#10b981] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[#10b981] flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -455,12 +451,12 @@ export function GestaoConvitesCadastro() {
         </div>
 
         <div
-          className={`bg-card rounded-2xl p-6 border transition-all cursor-pointer select-none ${ statusFilter === "inativos" ? "border-[#ef4444] " : "border-border/30 hover:border-border/60 " }`}
+          className={`bg-card rounded-lg p-6 border transition-all cursor-pointer select-none ${ statusFilter === "inativos" ? "border-[#ef4444] " : "border-border/30 hover:border-border/60 " }`}
           title="Clique para filtrar apenas convites inativos ou expirados"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#ef4444] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[#ef4444] flex items-center justify-center">
                 <Ban className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -475,9 +471,7 @@ export function GestaoConvitesCadastro() {
         </div>
       </div>
 
-      {/* Barra de Filtros (Email e Status) */}
-      <div className="bg-card rounded-2xl p-4 border border-border/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        {/* Campo de Busca por Email */}
+      <div className="bg-card rounded-lg p-4 border border-border/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -485,7 +479,7 @@ export function GestaoConvitesCadastro() {
             placeholder="Filtrar por e-mail do convidado..."
             value={emailFilter}
             onChange={(e) => setEmailFilter(e.target.value)}
-            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
+            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
           />
           {emailFilter && (
             <button
@@ -502,13 +496,13 @@ export function GestaoConvitesCadastro() {
         {/* Filtro por Status (Combobox) e Limpeza */}
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative min-w-[230px]">
-            <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <select
+            <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+            <Seletor
               value={statusFilter}
               onChange={(e) =>
                 handleStatusChange(e.target.value as "ativos" | "inativos" | "todos")
               }
-              className="w-full pl-10 pr-9 py-2.5 bg-background rounded-xl border border-border/30 text-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 appearance-none transition-colors cursor-pointer"
+              className="w-full pl-10 pr-3.5 py-2.5 bg-background rounded-lg border border-border/30 text-foreground text-sm focus:outline-none focus:border-primary/50 transition-colors cursor-pointer"
             >
               <option value="ativos" className="bg-card text-foreground">
                 Ativos ({paginatedData.totalAtivos})
@@ -519,8 +513,7 @@ export function GestaoConvitesCadastro() {
               <option value="todos" className="bg-card text-foreground">
                 Todos os status ({paginatedData.totalGeral})
               </option>
-            </select>
-            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            </Seletor>
           </div>
 
           {(emailFilter || statusFilter !== "ativos") && (
@@ -530,7 +523,7 @@ export function GestaoConvitesCadastro() {
                 setEmailFilter("");
                 handleStatusChange("ativos");
               }}
-              className="px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-background hover:bg-border/30 border border-border/30 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+              className="px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-background hover:bg-border/30 border border-border/30 rounded-lg transition-all cursor-pointer whitespace-nowrap"
               title="Redefinir filtros para o padrão (apenas ativos)"
             >
               Restaurar padrão
@@ -541,7 +534,7 @@ export function GestaoConvitesCadastro() {
 
       {/* Erro de carregamento */}
       {error && (
-        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center justify-between text-sm text-[#ef4444]">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
@@ -562,7 +555,7 @@ export function GestaoConvitesCadastro() {
             <h2 className="text-foreground font-semibold text-lg">
               Histórico de Convites de Cadastro
             </h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-border/40 text-muted-foreground font-normal">
+            <span className="text-xs px-2.5 py-0.5 rounded-md bg-border/40 text-muted-foreground font-normal">
               {paginatedData.totalElements}{" "}
               {paginatedData.totalElements === 1 ? "registro" : "registros"}
             </span>
@@ -603,11 +596,11 @@ export function GestaoConvitesCadastro() {
       {/* Modal / Diálogo para Gerar Novo Convite */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
+          <div className="bg-card rounded-lg w-full max-w-lg border border-border/40 overflow-hidden">
             {/* Modal Header */}
             <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-[#ff8c42] flex items-center justify-center">
                   <MailPlus className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -631,14 +624,14 @@ export function GestaoConvitesCadastro() {
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               {modalError && (
-                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{modalError}</span>
                 </div>
               )}
 
               {generatedLink ? (
-                <div className="p-5 bg-[#10b981]/10 border border-[#10b981]/30 rounded-xl space-y-3">
+                <div className="p-5 bg-[#10b981]/10 border border-[#10b981]/30 rounded-lg space-y-3">
                   <div className="flex items-center gap-2 text-[#10b981] font-semibold text-sm">
                     <CheckCircle2 className="w-5 h-5" />
                     <span>Convite gerado com sucesso!</span>
@@ -646,7 +639,7 @@ export function GestaoConvitesCadastro() {
                   <p className="text-xs text-muted-foreground">
                     O convite foi registrado e o email foi disparado. Você também pode copiar o link direto abaixo para encaminhar:
                   </p>
-                  <div className="flex items-center gap-2 bg-background p-2.5 rounded-xl border border-border/40">
+                  <div className="flex items-center gap-2 bg-background p-2.5 rounded-lg border border-border/40">
                     <LinkIcon className="w-4 h-4 text-[#ff8c42] shrink-0" />
                     <input
                       type="text"
@@ -680,7 +673,7 @@ export function GestaoConvitesCadastro() {
                     <button
                       type="button"
                       onClick={() => setModalOpen(false)}
-                      className="px-4 py-2 bg-background hover:bg-border/30 border border-border/40 text-foreground rounded-xl text-xs font-medium transition-colors cursor-pointer"
+                      className="px-4 py-2 bg-background hover:bg-border/30 border border-border/40 text-foreground rounded-lg text-xs font-medium transition-colors cursor-pointer"
                     >
                       Fechar
                     </button>
@@ -701,7 +694,7 @@ export function GestaoConvitesCadastro() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="usuario@exemplo.com"
                         disabled={creating}
-                        className="w-full py-2.5 pl-10 pr-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                        className="w-full py-2.5 pl-10 pr-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                       />
                     </div>
                   </div>
@@ -710,18 +703,18 @@ export function GestaoConvitesCadastro() {
                     <label className="block text-sm text-muted-foreground mb-1.5 font-normal">
                       Validade do convite
                     </label>
-                    <select
+                    <Seletor
                       value={diasValidade}
                       onChange={(e) => setDiasValidade(Number(e.target.value))}
                       disabled={creating}
-                      className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm cursor-pointer"
                     >
                       <option value={1}>1 dia</option>
                       <option value={3}>3 dias</option>
                       <option value={7}>7 dias (padrão)</option>
                       <option value={15}>15 dias</option>
                       <option value={30}>30 dias</option>
-                    </select>
+                    </Seletor>
                   </div>
 
                   <div className="pt-2 flex items-center justify-end gap-3">
@@ -729,14 +722,14 @@ export function GestaoConvitesCadastro() {
                       type="button"
                       onClick={() => setModalOpen(false)}
                       disabled={creating}
-                      className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                      className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-lg text-sm transition-colors cursor-pointer"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={creating}
-                      className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                      className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                     >
                       {creating ? (
                         <>
@@ -759,10 +752,10 @@ export function GestaoConvitesCadastro() {
       )}
       {adminModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
+          <div className="bg-card rounded-lg w-full max-w-lg border border-border/40 overflow-hidden">
             <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-[#ff8c42] flex items-center justify-center">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -781,14 +774,14 @@ export function GestaoConvitesCadastro() {
 
             <div className="p-6 space-y-4">
               {adminError && (
-                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{adminError}</span>
                 </div>
               )}
 
               {adminSuccess ? (
-                <div className="p-5 bg-[#10b981]/10 border border-[#10b981]/30 rounded-xl space-y-3">
+                <div className="p-5 bg-[#10b981]/10 border border-[#10b981]/30 rounded-lg space-y-3">
                   <div className="flex items-center gap-2 text-[#10b981] font-semibold text-sm">
                     <CheckCircle2 className="w-5 h-5" />
                     <span>Administrador cadastrado com sucesso!</span>
@@ -800,7 +793,7 @@ export function GestaoConvitesCadastro() {
                     <button
                       type="button"
                       onClick={() => setAdminModalOpen(false)}
-                      className="px-4 py-2 bg-[#ff8c42] text-white rounded-xl text-xs font-medium transition-colors cursor-pointer"
+                      className="px-4 py-2 bg-[#ff8c42] text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
                     >
                       Concluir
                     </button>
@@ -819,7 +812,7 @@ export function GestaoConvitesCadastro() {
                       onChange={(e) => setAdminNome(e.target.value)}
                       placeholder="Ex: João Silva"
                       disabled={cadastrandoAdmin}
-                      className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                      className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                     />
                   </div>
 
@@ -834,7 +827,7 @@ export function GestaoConvitesCadastro() {
                       onChange={(e) => setAdminEmail(e.target.value)}
                       placeholder="admin@organizacao.com"
                       disabled={cadastrandoAdmin}
-                      className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                      className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                     />
                   </div>
 
@@ -853,7 +846,7 @@ export function GestaoConvitesCadastro() {
                         onChange={(e) => setAdminTelefone(formatarTelefone(e.target.value))}
                         placeholder="(11) 98765-4321"
                         disabled={cadastrandoAdmin}
-                        className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                        className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                       />
                     </div>
 
@@ -868,7 +861,7 @@ export function GestaoConvitesCadastro() {
                         onChange={(e) => setAdminTitulo(e.target.value)}
                         placeholder="Ex: Doutor, Mestre"
                         disabled={cadastrandoAdmin}
-                        className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                        className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                       />
                     </div>
                   </div>
@@ -885,7 +878,7 @@ export function GestaoConvitesCadastro() {
                       onChange={(e) => setAdminSenha(e.target.value)}
                       placeholder="Mínimo 6 caracteres"
                       disabled={cadastrandoAdmin}
-                      className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                      className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                     />
                   </div>
 
@@ -894,14 +887,14 @@ export function GestaoConvitesCadastro() {
                       type="button"
                       onClick={() => setAdminModalOpen(false)}
                       disabled={cadastrandoAdmin}
-                      className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                      className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-lg text-sm transition-colors cursor-pointer"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={cadastrandoAdmin}
-                      className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                      className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                     >
                       {cadastrandoAdmin ? (
                         <>

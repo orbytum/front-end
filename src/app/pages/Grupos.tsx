@@ -26,8 +26,10 @@ import { AuthService } from "../services/auth/AuthService";
 import { HttpError } from "../utils/HttpError";
 import { GrupoDetalhe } from "../models/dto/grupos/GrupoDetalhe";
 import { GrupoPaginadoResponse } from "../models/dto/grupos/ListarGrupos";
+import { useConfirmacao } from "../contexts/ConfirmacaoContext";
 
 export function Grupos() {
+  const confirmar = useConfirmacao();
   const navigate = useNavigate();
   const grupoService = new GrupoService();
   const conviteService = new ConviteService();
@@ -154,9 +156,13 @@ export function Grupos() {
 
   const handleDelete = async (grupo: GrupoDetalhe) => {
     setActionError("");
-    if (!window.confirm(`Deseja realmente remover o grupo "${grupo.nome}"?`)) {
-      return;
-    }
+    const confirmado = await confirmar({
+      titulo: "Remover grupo",
+      mensagem: `Deseja realmente remover o grupo "${grupo.nome}"?`,
+      textoConfirmar: "Remover",
+      perigo: true,
+    });
+    if (!confirmado) return;
 
     setDeletingId(grupo.id);
     try {
@@ -265,7 +271,7 @@ export function Grupos() {
   if (!isAdmin) {
     return (
       <div className="h-full flex items-center justify-center p-6">
-        <div className="bg-card rounded-2xl p-8 max-w-md w-full border border-[#ef4444]/30 text-center">
+        <div className="bg-card rounded-lg p-8 max-w-md w-full border border-[#ef4444]/30 text-center">
           <div className="w-16 h-16 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-4">
             <ShieldAlert className="w-8 h-8 text-[#ef4444]" />
           </div>
@@ -275,7 +281,7 @@ export function Grupos() {
           </p>
           <button
             onClick={() => navigate("/login")}
-            className="w-full py-2.5 bg-background rounded-xl border border-border/40 text-foreground hover:border-[#ff8c42]/60 transition-colors text-sm font-medium cursor-pointer"
+            className="w-full py-2.5 bg-background rounded-lg border border-border/40 text-foreground hover:border-[#ff8c42]/60 transition-colors text-sm font-medium cursor-pointer"
           >
             Fazer login com outra conta
           </button>
@@ -291,7 +297,7 @@ export function Grupos() {
       align: "left",
       render: (g) => (
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-background border border-border/40 flex items-center justify-center text-[#ff8c42] shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-background border border-border/40 flex items-center justify-center text-[#ff8c42] shrink-0">
             <Users className="w-4 h-4" />
           </div>
           <div>
@@ -368,7 +374,7 @@ export function Grupos() {
       align: "center",
       render: (g) => (
         <span
-          className={`px-3 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1.5 ${g.isAtivo
+          className={`px-3 py-1 rounded-md text-xs font-medium border inline-flex items-center gap-1.5 ${g.isAtivo
             ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30"
             : "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/30"
             }`}
@@ -432,28 +438,11 @@ export function Grupos() {
   ];
 
   return (
-    <div className="h-full overflow-auto p-6 space-y-6">
+    <div className="h-full overflow-auto p-6 space-y-3">
       {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-foreground text-2xl font-bold mb-1">
-            Gestão de Grupos de Pesquisa
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Cadastre novos grupos, envie convites para líderes e acompanhe a equipe
-          </p>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 empty:hidden">
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={carregarGrupos}
-            disabled={loading}
-            className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            title="Recarregar lista"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          </button>
 
           <button
             type="button"
@@ -464,19 +453,28 @@ export function Grupos() {
               setNome("");
               setEmailLider("");
             }}
-            className="px-4 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Novo Grupo</span>
+          </button>
+          <button
+            type="button"
+            onClick={carregarGrupos}
+            disabled={loading}
+            className="p-2.5 bg-card hover:bg-border/30 border border-border/40 rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            title="Recarregar lista"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </button>
         </div>
       </div>
 
       {/* Cards de Métricas */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-card rounded-2xl p-6 border border-border/30">
+        <div className="bg-card rounded-lg p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-[#4a9eff] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-[#4a9eff] flex items-center justify-center">
               <Users className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -487,9 +485,9 @@ export function Grupos() {
           <span className="text-xs text-muted-foreground">Grupos cadastrados no sistema</span>
         </div>
 
-        <div className="bg-card rounded-2xl p-6 border border-border/30">
+        <div className="bg-card rounded-lg p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-[#10b981] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-[#10b981] flex items-center justify-center">
               <CheckCircle2 className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -502,9 +500,9 @@ export function Grupos() {
           <span className="text-xs text-[#10b981]">Em atividade</span>
         </div>
 
-        <div className="bg-card rounded-2xl p-6 border border-border/30">
+        <div className="bg-card rounded-lg p-6 border border-border/30">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-[#ff8c42] flex items-center justify-center">
               <UserCheck className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -519,7 +517,7 @@ export function Grupos() {
       </div>
 
       {/* Barra de Filtros */}
-      <div className="bg-card rounded-2xl p-4 border border-border/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-card rounded-lg p-4 border border-border/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         {/* Busca por Nome do Grupo */}
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -528,7 +526,7 @@ export function Grupos() {
             placeholder="Filtrar por nome do grupo..."
             value={nomeFilter}
             onChange={(e) => setNomeFilter(e.target.value)}
-            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
+            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
           />
           {nomeFilter && (
             <button
@@ -550,7 +548,7 @@ export function Grupos() {
             placeholder="Filtrar por líder, membro ou criador..."
             value={usuarioFilter}
             onChange={(e) => setUsuarioFilter(e.target.value)}
-            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
+            className="w-full pl-11 pr-10 py-2.5 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-[#ff8c42]/50 transition-colors"
           />
           {usuarioFilter && (
             <button
@@ -571,7 +569,7 @@ export function Grupos() {
               setNomeFilter("");
               setUsuarioFilter("");
             }}
-            className="px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-background hover:bg-border/30 border border-border/30 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+            className="px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-background hover:bg-border/30 border border-border/30 rounded-lg transition-all cursor-pointer whitespace-nowrap"
             title="Redefinir filtros"
           >
             Restaurar padrão
@@ -581,7 +579,7 @@ export function Grupos() {
 
       {/* Alerta de erro de ação (ex: remoção com usuários vinculados) */}
       {actionError && (
-        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center justify-between text-sm text-[#ef4444]">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{actionError}</span>
@@ -598,7 +596,7 @@ export function Grupos() {
 
       {/* Erro de carregamento */}
       {error && (
-        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-center justify-between text-sm text-[#ef4444]">
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-center justify-between text-sm text-[#ef4444]">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
@@ -620,7 +618,7 @@ export function Grupos() {
             <h2 className="text-foreground font-semibold text-lg">
               Lista de Grupos de Pesquisa
             </h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-border/40 text-muted-foreground font-normal">
+            <span className="text-xs px-2.5 py-0.5 rounded-md bg-border/40 text-muted-foreground font-normal">
               {paginatedData.totalElements}{" "}
               {paginatedData.totalElements === 1 ? "registro" : "registros"}
             </span>
@@ -659,14 +657,13 @@ export function Grupos() {
         }
       />
 
-      {/* Modal / Diálogo para Cadastrar Novo Grupo */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
+          <div className="bg-card rounded-lg w-full max-w-lg border border-border/40 overflow-hidden">
             {/* Modal Header */}
             <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-[#ff8c42] flex items-center justify-center">
                   <Users className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -690,14 +687,14 @@ export function Grupos() {
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               {modalError && (
-                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{modalError}</span>
                 </div>
               )}
 
               {createdGrupo ? (
-                <div className="p-5 bg-[#10b981]/10 border border-[#10b981]/30 rounded-xl space-y-3">
+                <div className="p-5 bg-[#10b981]/10 border border-[#10b981]/30 rounded-lg space-y-3">
                   <div className="flex items-center gap-2 text-[#10b981] font-semibold text-sm">
                     <CheckCircle2 className="w-5 h-5" />
                     <span>Grupo criado e convite de Líder enviado com sucesso!</span>
@@ -709,7 +706,7 @@ export function Grupos() {
                     <button
                       type="button"
                       onClick={() => setModalOpen(false)}
-                      className="px-4 py-2 bg-[#ff8c42] text-white rounded-xl text-xs font-medium transition-colors cursor-pointer"
+                      className="px-4 py-2 bg-[#ff8c42] text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
                     >
                       Concluir
                     </button>
@@ -728,7 +725,7 @@ export function Grupos() {
                       onChange={(e) => setNome(e.target.value)}
                       placeholder="Ex: Laboratório de Inteligência Artificial"
                       disabled={creating}
-                      className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                      className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                     />
                   </div>
 
@@ -745,12 +742,12 @@ export function Grupos() {
                         onChange={(e) => setEmailLider(e.target.value)}
                         placeholder="lider@universidade.edu.br"
                         disabled={creating}
-                        className="w-full py-2.5 pl-10 pr-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                        className="w-full py-2.5 pl-10 pr-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="p-3 bg-background rounded-xl border border-border/30 text-xs text-muted-foreground space-y-1">
+                  <div className="p-3 bg-background rounded-lg border border-border/30 text-xs text-muted-foreground space-y-1">
                     <p className="text-foreground font-medium flex items-center gap-1.5">
                       <AlertTriangle className="w-3.5 h-3.5 text-[#ff8c42]" />
                       Convite com perfil de Líder
@@ -765,14 +762,14 @@ export function Grupos() {
                       type="button"
                       onClick={() => setModalOpen(false)}
                       disabled={creating}
-                      className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                      className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-lg text-sm transition-colors cursor-pointer"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={creating}
-                      className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                      className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                     >
                       {creating ? (
                         <>
@@ -796,10 +793,10 @@ export function Grupos() {
 
       {editModalOpen && editingGrupo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
+          <div className="bg-card rounded-lg w-full max-w-lg border border-border/40 overflow-hidden">
             <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#ff8c42] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-[#ff8c42] flex items-center justify-center">
                   <Pencil className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -818,7 +815,7 @@ export function Grupos() {
 
             <div className="p-6 space-y-4">
               {editError && (
-                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{editError}</span>
                 </div>
@@ -835,11 +832,11 @@ export function Grupos() {
                     value={editNome}
                     onChange={(e) => setEditNome(e.target.value)}
                     disabled={updating}
-                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm"
                   />
                 </div>
 
-                <div className="flex items-center gap-3 p-3 bg-background rounded-xl border border-border/30">
+                <div className="flex items-center gap-3 p-3 bg-background rounded-lg border border-border/30">
                   <input
                     type="checkbox"
                     id="editIsAtivo"
@@ -858,14 +855,14 @@ export function Grupos() {
                     type="button"
                     onClick={() => setEditModalOpen(false)}
                     disabled={updating}
-                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-lg text-sm transition-colors cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={updating}
-                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2.5 bg-[#ff8c42] text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
                     {updating ? (
                       <>
@@ -885,10 +882,10 @@ export function Grupos() {
 
       {liderModalOpen && selectedGrupoLider && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-card rounded-2xl w-full max-w-lg border border-border/40 overflow-hidden">
+          <div className="bg-card rounded-lg w-full max-w-lg border border-border/40 overflow-hidden">
             <div className="p-6 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                   <Send className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
@@ -907,14 +904,14 @@ export function Grupos() {
 
             <div className="p-6 space-y-4">
               {liderError && (
-                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#ef4444]">
+                <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#ef4444]">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{liderError}</span>
                 </div>
               )}
 
               {liderSucesso && (
-                <div className="p-3 bg-[#10b981]/10 border border-[#10b981]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#10b981]">
+                <div className="p-3 bg-[#10b981]/10 border border-[#10b981]/30 rounded-lg flex items-start gap-2.5 text-xs text-[#10b981]">
                   <UserCheck className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{liderSucesso}</span>
                 </div>
@@ -937,7 +934,7 @@ export function Grupos() {
                     onChange={(e) => setLiderEmail(e.target.value)}
                     placeholder="lider@universidade.edu.br"
                     disabled={convidandoLider}
-                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
                   />
                 </div>
 
@@ -953,7 +950,7 @@ export function Grupos() {
                     value={liderDiasValidade}
                     onChange={(e) => setLiderDiasValidade(Number(e.target.value))}
                     disabled={convidandoLider}
-                    className="w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
+                    className="w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground focus:outline-none focus:border-primary/60 transition-colors text-sm"
                   />
                 </div>
 
@@ -962,14 +959,14 @@ export function Grupos() {
                     type="button"
                     onClick={() => setLiderModalOpen(false)}
                     disabled={convidandoLider}
-                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-xl text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-background hover:bg-border/20 border border-border/40 text-muted-foreground hover:text-foreground rounded-lg text-sm transition-colors cursor-pointer"
                   >
                     {liderSucesso ? "Fechar" : "Cancelar"}
                   </button>
                   <button
                     type="submit"
                     disabled={convidandoLider}
-                    className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
                     {convidandoLider ? (
                       <>

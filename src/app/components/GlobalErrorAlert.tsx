@@ -34,8 +34,8 @@ export function GlobalErrorAlert() {
 
   return (
     <div className="fixed top-4 right-4 z-50 max-w-md w-full sm:w-96 animate-in fade-in slide-in-from-top-4 duration-300">
-      <div className="bg-card border border-[#ef4444]/40 rounded-2xl p-4 shadow-2xl flex items-start gap-3 text-foreground backdrop-blur-md">
-        <div className="w-9 h-9 rounded-xl bg-[#ef4444]/15 border border-[#ef4444]/30 flex items-center justify-center text-[#ef4444] shrink-0 mt-0.5">
+      <div className="bg-card border border-[#ef4444]/40 rounded-lg p-4 shadow-2xl flex items-start gap-3 text-foreground backdrop-blur-md">
+        <div className="w-9 h-9 rounded-lg bg-[#ef4444]/15 border border-[#ef4444]/30 flex items-center justify-center text-[#ef4444] shrink-0 mt-0.5">
           <AlertTriangle className="w-5 h-5" />
         </div>
 

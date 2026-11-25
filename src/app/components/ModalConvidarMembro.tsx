@@ -5,6 +5,7 @@ import {
   NivelMembro,
   NivelMembroLabels,
 } from "../models/dto/NivelMembro";
+import { Seletor } from "./Seletor";
 
 interface ModalConvidarMembroProps {
   isOpen: boolean;
@@ -155,11 +156,11 @@ export function ModalConvidarMembro({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-card border border-border/50 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+      <div className="bg-card border border-border/50 rounded-lg w-full max-w-lg overflow-hidden shadow-2xl">
         {/* Header */}
         <div className="px-6 py-5 border-b border-border/40 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
               <Users className="w-5 h-5" />
             </div>
             <div>
@@ -169,14 +170,14 @@ export function ModalConvidarMembro({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-background transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-background transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Abas */}
-        <div className="flex border-b border-border/40 bg-background/50 p-1.5 gap-1 mx-6 mt-5 rounded-xl border">
+        <div className="flex border-b border-border/40 bg-background/50 p-1.5 gap-1 mx-6 mt-5 rounded-lg border">
           <button
             type="button"
             onClick={() => {
@@ -214,13 +215,13 @@ export function ModalConvidarMembro({
         {/* Conteúdo */}
         <div className="p-6 space-y-4">
           {erro && (
-            <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl text-[#ef4444] text-xs">
+            <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-lg text-[#ef4444] text-xs">
               {erro}
             </div>
           )}
 
           {sucessoMsg && (
-            <div className="p-3 bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-xl text-[#22c55e] text-xs break-words">
+            <div className="p-3 bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-lg text-[#22c55e] text-xs break-words">
               {sucessoMsg}
             </div>
           )}
@@ -230,15 +231,14 @@ export function ModalConvidarMembro({
             <label className="block text-xs text-muted-foreground mb-1.5 font-medium">
               Perfil de acesso do convidado *
             </label>
-            <select
+            <Seletor
               value={nivelConvidado}
               onChange={(e) => setNivelConvidado(e.target.value as NivelMembro)}
-              className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60 cursor-pointer"
+              className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60 cursor-pointer"
             >
               <option value="PESQUISADOR">{NivelMembroLabels.PESQUISADOR}</option>
               <option value="COLABORADOR">{NivelMembroLabels.COLABORADOR}</option>
-              {/* O Líder é convidado pelo botão "Convidar Líder" da gestão de grupos */}
-            </select>
+            </Seletor>
             <p className="text-[10px] text-muted-foreground mt-1">
               Colaboradores possuem acesso somente leitura ao grupo.
             </p>
@@ -261,7 +261,7 @@ export function ModalConvidarMembro({
                     max="60"
                     value={diasValidadeLink}
                     onChange={(e) => setDiasValidadeLink(Number(e.target.value))}
-                    className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                    className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />
                 </div>
                 <div>
@@ -274,7 +274,7 @@ export function ModalConvidarMembro({
                     max="100"
                     value={limiteUsoLink}
                     onChange={(e) => setLimiteUsoLink(Number(e.target.value))}
-                    className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                    className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />
                 </div>
               </div>
@@ -284,7 +284,7 @@ export function ModalConvidarMembro({
                   type="button"
                   onClick={handleGerarLink}
                   disabled={loading}
-                  className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                  className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (
                     <>
@@ -308,12 +308,12 @@ export function ModalConvidarMembro({
                       type="text"
                       readOnly
                       value={linkGerado}
-                      className="flex-1 px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-xs select-all focus:outline-none"
+                      className="flex-1 px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-xs select-all focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={handleCopiarLink}
-                      className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-semibold hover:bg-primary/90 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-semibold hover:bg-primary/90 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
                     >
                       {copiado ? (
                         <>
@@ -346,7 +346,7 @@ export function ModalConvidarMembro({
                   value={emailsInput}
                   onChange={(e) => setEmailsInput(e.target.value)}
                   placeholder="usuario1@empresa.com, usuario2@empresa.com"
-                  className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm placeholder-muted-foreground/60 focus:outline-none focus:border-primary/60 resize-none"
+                  className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm placeholder-muted-foreground/60 focus:outline-none focus:border-primary/60 resize-none"
                 />
                 <span className="text-[10px] text-muted-foreground mt-1 block">
                   Você pode colar múltiplos e-mails separados por vírgula. Cada um receberá seu convite individual. E-mails não cadastrados no sistema serão ignorados.
@@ -363,14 +363,14 @@ export function ModalConvidarMembro({
                   max="60"
                   value={diasValidadeEmail}
                   onChange={(e) => setDiasValidadeEmail(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                  className="w-full px-4 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading || !emailsInput.trim()}
-                className="w-full py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loading ? (
                   <>

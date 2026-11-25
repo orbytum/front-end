@@ -38,6 +38,7 @@ import {
 } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "../components/DateInput";
+import { Seletor } from "../components/Seletor";
 
 type Aba = "publicadas" | "aprovacoes";
 
@@ -387,28 +388,21 @@ export function Noticias() {
   };
 
   return (
-    <div className="h-full overflow-auto p-6 space-y-6">
+    <div className="h-full overflow-auto p-6 space-y-3">
       {mensagemSucesso && (
-        <div className="bg-[#10b981]/10 border border-[#10b981]/30 text-[#10b981] px-4 py-3 rounded-xl flex items-center gap-3">
+        <div className="bg-[#10b981]/10 border border-[#10b981]/30 text-[#10b981] px-4 py-3 rounded-lg flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 shrink-0" />
           <span className="text-sm font-medium">{mensagemSucesso}</span>
         </div>
       )}
 
       {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-foreground text-2xl font-bold mb-1">Notícias</h1>
-          <p className="text-muted-foreground text-sm">
-            Cadastre, filtre e acompanhe as notícias do grupo
-            {grupoAtual ? ` "${grupoAtual.nome}"` : ""}
-          </p>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 empty:hidden">
         {podeCriarNoticia && (
           <button
             onClick={abrirModalCriacao}
             disabled={!grupoAtual?.id}
-            className="px-5 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0"
+            className="px-5 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium cursor-pointer shrink-0"
           >
             <Plus className="w-5 h-5" />
             Nova Notícia
@@ -456,7 +450,7 @@ export function Noticias() {
             setPaginaAtual(1);
             carregar();
           }}
-          className="bg-card rounded-2xl p-4 border border-border/30 space-y-4"
+          className="bg-card rounded-lg p-4 border border-border/30 space-y-4"
         >
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
             <div className="md:col-span-4 relative">
@@ -466,15 +460,15 @@ export function Noticias() {
                 placeholder="Filtrar por assunto..."
                 value={termoAssunto}
                 onChange={(e) => setTermoAssunto(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                className="w-full pl-10 pr-4 py-2 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
               />
             </div>
 
             <div className="md:col-span-3">
-              <select
+              <Seletor
                 value={filtroProjetoId}
                 onChange={(e) => setFiltroProjetoId(e.target.value === "all" ? "all" : Number(e.target.value))}
-                className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
               >
                 <option value="all">Todos os projetos</option>
                 {projetos.map((projeto) => (
@@ -482,7 +476,7 @@ export function Noticias() {
                     {projeto.titulo}
                   </option>
                 ))}
-              </select>
+              </Seletor>
             </div>
 
             <div className="md:col-span-2 flex items-center gap-2">
@@ -491,7 +485,7 @@ export function Noticias() {
                 type="date"
                 value={filtroDataInicio}
                 onChange={setFiltroDataInicio}
-                className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
               />
             </div>
 
@@ -501,7 +495,7 @@ export function Noticias() {
                 type="date"
                 value={filtroDataFim}
                 onChange={setFiltroDataFim}
-                className="w-full px-3 py-2 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                className="w-full px-3 py-2 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
               />
             </div>
 
@@ -509,7 +503,7 @@ export function Noticias() {
               <button
                 type="submit"
                 title="Filtrar"
-                className="p-2 w-full bg-primary/15 text-primary hover:bg-primary/25 rounded-xl transition-colors cursor-pointer flex items-center justify-center"
+                className="p-2 w-full bg-primary/15 text-primary hover:bg-primary/25 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
               >
                 <Filter className="w-4 h-4" />
               </button>
@@ -535,9 +529,9 @@ export function Noticias() {
       )}
 
       {aba === "aprovacoes" && (
-        <div className="bg-card rounded-2xl p-4 border border-border/30 flex items-center gap-2">
+        <div className="bg-card rounded-lg p-4 border border-border/30 flex items-center gap-2">
           <FolderKanban className="w-4 h-4 text-muted-foreground" />
-          <select
+          <Seletor
             value={filtroProjetoId}
             onChange={(e) => setFiltroProjetoId(e.target.value === "all" ? "all" : Number(e.target.value))}
             className="bg-transparent text-foreground focus:outline-none text-sm"
@@ -554,7 +548,7 @@ export function Noticias() {
                   {projeto.titulo}
                 </option>
               ))}
-          </select>
+          </Seletor>
         </div>
       )}
 
@@ -565,7 +559,7 @@ export function Noticias() {
           <span className="text-muted-foreground text-sm">Carregando notícias...</span>
         </div>
       ) : !grupoAtual?.id ? (
-        <div className="text-center py-16 bg-card rounded-2xl border border-border/30 p-6">
+        <div className="text-center py-16 bg-card rounded-lg border border-border/30 p-6">
           <Newspaper className="w-14 h-14 text-muted-foreground/50 mx-auto mb-3" />
           <h3 className="text-foreground font-semibold text-lg mb-1">Nenhum grupo selecionado</h3>
           <p className="text-muted-foreground text-sm">
@@ -573,7 +567,7 @@ export function Noticias() {
           </p>
         </div>
       ) : noticias.length === 0 ? (
-        <div className="text-center py-16 bg-card rounded-2xl border border-border/30 p-6">
+        <div className="text-center py-16 bg-card rounded-lg border border-border/30 p-6">
           <Newspaper className="w-14 h-14 text-muted-foreground/50 mx-auto mb-3" />
           <h3 className="text-foreground font-semibold text-lg mb-1">
             {aba === "aprovacoes" ? "Nenhuma notícia aguardando aprovação" : "Nenhuma notícia encontrada"}
@@ -588,7 +582,7 @@ export function Noticias() {
           {aba === "publicadas" && (termoAssunto || filtroDataInicio || filtroDataFim) && (
             <button
               onClick={limparFiltros}
-              className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 rounded-xl text-sm transition-colors cursor-pointer"
+              className="px-4 py-2 bg-border/20 text-foreground hover:bg-border/30 rounded-lg text-sm transition-colors cursor-pointer"
             >
               Limpar Filtros
             </button>
@@ -601,23 +595,23 @@ export function Noticias() {
             return (
               <div
                 key={noticia.id}
-                className="bg-card rounded-2xl p-5 border border-border/30 flex flex-col justify-between hover:border-border/60 transition-all duration-200"
+                className="bg-card rounded-lg p-5 border border-border/30 flex flex-col justify-between hover:border-border/60 transition-all duration-200"
               >
                 <div>
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${STATUS_BADGE[status]}`}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border ${STATUS_BADGE[status]}`}
                       >
                         {NoticiaStatusLabels[status]}
                       </span>
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-border/30 text-muted-foreground truncate max-w-[150px]">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-border/30 text-muted-foreground truncate max-w-[150px]">
                         {noticia.assunto}
                       </span>
                       {(noticia.projetos || []).map((projeto) => (
                         <span
                           key={projeto.id}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#4a9eff]/10 text-[#4a9eff] border border-[#4a9eff]/25 truncate max-w-[160px]"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-[#4a9eff]/10 text-[#4a9eff] border border-[#4a9eff]/25 truncate max-w-[160px]"
                         >
                           <FolderKanban className="w-3 h-3 shrink-0" />
                           <span className="truncate">{projeto.titulo}</span>
@@ -746,7 +740,7 @@ export function Noticias() {
       {/* Modal de Criação / Edição */}
       {modalAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-2xl bg-card rounded-2xl border border-border/30 p-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-2xl bg-card rounded-lg border border-border/30 p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-foreground">
                 {editando ? "Editar Notícia" : "Nova Notícia"}
@@ -761,14 +755,13 @@ export function Noticias() {
             </div>
 
             {erroForm && (
-              <div className="mb-4 p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl text-[#ef4444] text-xs flex items-center gap-2">
+              <div className="mb-4 p-3 bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-lg text-[#ef4444] text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{erroForm}</span>
               </div>
             )}
 
             <form onSubmit={submeterFormulario} className="space-y-4">
-              {/* Link + importação automática (REQ-079) */}
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">
                   Link / Referência
@@ -782,14 +775,14 @@ export function Noticias() {
                       value={formReferencia}
                       onChange={(e) => setFormReferencia(e.target.value)}
                       disabled={salvando}
-                      className="w-full pl-10 pr-4 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={buscarDadosDoLink}
                     disabled={salvando || buscandoLink}
-                    className="px-4 py-2.5 bg-primary/15 text-primary hover:bg-primary/25 disabled:opacity-50 rounded-xl text-sm font-medium transition-colors cursor-pointer flex items-center gap-2 shrink-0"
+                    className="px-4 py-2.5 bg-primary/15 text-primary hover:bg-primary/25 disabled:opacity-50 rounded-lg text-sm font-medium transition-colors cursor-pointer flex items-center gap-2 shrink-0"
                   >
                     {buscandoLink ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -811,9 +804,10 @@ export function Noticias() {
                   required
                   placeholder="Título da notícia"
                   value={formTitulo}
+                  maxLength={100}
                   onChange={(e) => setFormTitulo(e.target.value)}
                   disabled={salvando}
-                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                  className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                 />
               </div>
 
@@ -826,7 +820,7 @@ export function Noticias() {
                   value={formConteudo}
                   onChange={(e) => setFormConteudo(e.target.value)}
                   disabled={salvando}
-                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm resize-none"
+                  className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm resize-none"
                 />
               </div>
 
@@ -839,7 +833,7 @@ export function Noticias() {
                   value={formAssunto}
                   onChange={(e) => setFormAssunto(e.target.value)}
                   disabled={salvando}
-                  className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
+                  className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm"
                 />
               </div>
 
@@ -851,7 +845,7 @@ export function Noticias() {
                   Sem projetos marcados, a notícia é pública e todo o grupo a vê. Com projetos marcados, só os
                   participantes desses projetos e o líder do grupo a veem.
                 </p>
-                <div className="max-h-36 overflow-y-auto rounded-xl border border-border/40 bg-background p-2 space-y-1">
+                <div className="max-h-36 overflow-y-auto rounded-lg border border-border/40 bg-background p-2 space-y-1">
                   {projetos.length === 0 && (
                     <p className="text-xs text-muted-foreground px-2 py-1">
                       Nenhum projeto disponível neste grupo.
@@ -895,7 +889,7 @@ export function Noticias() {
                     value={formDataInicio}
                     onChange={setFormDataInicio}
                     disabled={salvando}
-                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                    className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />
                 </div>
                 <div>
@@ -907,7 +901,7 @@ export function Noticias() {
                     value={formDataFim}
                     onChange={setFormDataFim}
                     disabled={salvando}
-                    className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
+                    className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground text-sm focus:outline-none focus:border-primary/60"
                   />
                   <p className="text-[11px] text-muted-foreground mt-1.5">
                     Se não informado, a notícia expira após o prazo padrão ao ser aprovada.
@@ -920,14 +914,14 @@ export function Noticias() {
                   type="button"
                   onClick={() => setModalAberto(false)}
                   disabled={salvando}
-                  className="px-4 py-2 rounded-xl border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-lg border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={salvando}
-                  className="px-5 py-2 bg-primary hover:bg-primary/90 disabled:opacity-60 text-primary-foreground rounded-xl text-sm font-medium transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-2 bg-primary hover:bg-primary/90 disabled:opacity-60 text-primary-foreground rounded-lg text-sm font-medium transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {salvando ? (
                     <>
@@ -949,8 +943,8 @@ export function Noticias() {
       {/* Modal de Rejeição */}
       {noticiaParaRejeitar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-card rounded-2xl border border-border/30 p-6 space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b] mx-auto">
+          <div className="w-full max-w-md bg-card rounded-lg border border-border/30 p-6 space-y-4">
+            <div className="w-12 h-12 rounded-lg bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b] mx-auto">
               <ThumbsDown className="w-6 h-6" />
             </div>
             <div className="text-center space-y-1">
@@ -966,7 +960,7 @@ export function Noticias() {
               value={motivoRejeicao}
               onChange={(e) => setMotivoRejeicao(e.target.value)}
               disabled={rejeitando}
-              className="w-full px-3.5 py-2.5 bg-background rounded-xl border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm resize-none"
+              className="w-full px-3.5 py-2.5 bg-background rounded-lg border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 text-sm resize-none"
             />
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
@@ -976,7 +970,7 @@ export function Noticias() {
                   setMotivoRejeicao("");
                 }}
                 disabled={rejeitando}
-                className="flex-1 py-2 rounded-xl border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
+                className="flex-1 py-2 rounded-lg border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
@@ -984,7 +978,7 @@ export function Noticias() {
                 type="button"
                 onClick={confirmarRejeicao}
                 disabled={rejeitando}
-                className="flex-1 py-2 bg-[#f59e0b] hover:bg-[#f59e0b]/90 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 py-2 bg-[#f59e0b] hover:bg-[#f59e0b]/90 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 {rejeitando ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmar"}
               </button>
@@ -996,8 +990,8 @@ export function Noticias() {
       {/* Modal de Remoção */}
       {noticiaParaRemover && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-card rounded-2xl border border-border/30 p-6 space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-[#ef4444]/15 border border-[#ef4444]/30 flex items-center justify-center text-[#ef4444] mx-auto">
+          <div className="w-full max-w-md bg-card rounded-lg border border-border/30 p-6 space-y-4">
+            <div className="w-12 h-12 rounded-lg bg-[#ef4444]/15 border border-[#ef4444]/30 flex items-center justify-center text-[#ef4444] mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
             <div className="text-center space-y-1">
@@ -1012,7 +1006,7 @@ export function Noticias() {
                 type="button"
                 onClick={() => setNoticiaParaRemover(null)}
                 disabled={removendo}
-                className="flex-1 py-2 rounded-xl border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
+                className="flex-1 py-2 rounded-lg border border-border/40 text-muted-foreground hover:text-foreground hover:bg-border/20 text-sm transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1020,7 +1014,7 @@ export function Noticias() {
                 type="button"
                 onClick={confirmarRemocao}
                 disabled={removendo}
-                className="flex-1 py-2 bg-[#ef4444] hover:bg-[#ef4444]/90 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 py-2 bg-[#ef4444] hover:bg-[#ef4444]/90 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 {removendo ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmar"}
               </button>

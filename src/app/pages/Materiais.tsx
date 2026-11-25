@@ -21,14 +21,16 @@ import {
 import { nivelEhLider } from "../models/dto/NivelMembro";
 import { HttpError } from "../utils/HttpError";
 import { DateInput } from "../components/DateInput";
+import { useConfirmacao } from "../contexts/ConfirmacaoContext";
+import { Seletor } from "../components/Seletor";
 
 const inputClass =
-  "w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm disabled:opacity-50";
+  "w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm disabled:opacity-50";
 
 const labelClass = "text-xs text-muted-foreground block mb-1.5";
 
 const selectClass =
-  "w-full py-2.5 px-4 bg-background rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm";
+  "w-full py-2.5 px-4 bg-background rounded-lg border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/60 transition-colors text-sm";
 
 const NA = "\u2014";
 
@@ -47,6 +49,7 @@ function formatarData(data: string | null | undefined): string {
 }
 
 export function Materiais() {
+  const confirmar = useConfirmacao();
   const { grupoAtual } = useGrupo();
   const materialService = useMemo(() => new MaterialService(), []);
   const authService = useMemo(() => new AuthService(), []);
@@ -210,7 +213,13 @@ export function Materiais() {
   };
 
   const handleRemover = async (material: MaterialResponse) => {
-    if (!window.confirm(`Tem certeza que deseja excluir "${material.nome}"?`)) return;
+    const confirmado = await confirmar({
+      titulo: "Excluir material",
+      mensagem: `Tem certeza que deseja excluir "${material.nome}"?`,
+      textoConfirmar: "Excluir",
+      perigo: true,
+    });
+    if (!confirmado) return;
     try {
       await materialService.remover(material.id);
       setMateriais((prev) => prev.filter((m) => m.id !== material.id));
@@ -225,14 +234,10 @@ export function Materiais() {
 
   return (
     <div className="h-full overflow-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-foreground mb-2">Materiais e Equipamentos</h1>
-          <p className="text-muted-foreground">Gerencie o inventário de materiais dos grupos</p>
-        </div>
+      <div className="flex items-center justify-end mb-6 empty:hidden">
         <button
           onClick={() => carregarMateriais()}
-          className="p-3 bg-card rounded-xl border border-border/30 hover:bg-card/80 transition-colors"
+          className="p-3 bg-card rounded-lg border border-border/30 hover:bg-card/80 transition-colors"
           title="Recarregar"
         >
           <RefreshCw className="w-5 h-5 text-muted-foreground" />
@@ -240,13 +245,13 @@ export function Materiais() {
       </div>
 
       {erro && (
-        <div className="bg-destructive/20 text-destructive p-4 rounded-xl mb-6 border border-destructive/30">
+        <div className="bg-destructive/20 text-destructive p-4 rounded-lg mb-6 border border-destructive/30">
           <p className="font-medium">{erro}</p>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-card rounded-xl p-4 border border-border/30">
+        <div className="bg-card rounded-lg p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">Total</span>
             <Package className="w-5 h-5 text-[#4a9eff]" />
@@ -254,7 +259,7 @@ export function Materiais() {
           <div className="text-foreground text-2xl font-bold">{estatisticas.total}</div>
         </div>
 
-        <div className="bg-card rounded-xl p-4 border border-border/30">
+        <div className="bg-card rounded-lg p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">Disponível</span>
             <Box className="w-5 h-5 text-[#10b981]" />
@@ -262,7 +267,7 @@ export function Materiais() {
           <div className="text-foreground text-2xl font-bold">{estatisticas.disponiveis}</div>
         </div>
 
-        <div className="bg-card rounded-xl p-4 border border-border/30">
+        <div className="bg-card rounded-lg p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">Em Uso</span>
             <Box className="w-5 h-5 text-[#ff8c42]" />
@@ -270,7 +275,7 @@ export function Materiais() {
           <div className="text-foreground text-2xl font-bold">{estatisticas.emUso}</div>
         </div>
 
-        <div className="bg-card rounded-xl p-4 border border-border/30">
+        <div className="bg-card rounded-lg p-4 border border-border/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">Manutenção</span>
             <AlertCircle className="w-5 h-5 text-[#f59e0b]" />
@@ -287,14 +292,14 @@ export function Materiais() {
             placeholder="Buscar por nome, categoria, identificador ou localização..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#ff8c42]/50"
           />
         </div>
 
-        <select
+        <Seletor
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value)}
-          className="px-4 py-3 bg-card rounded-xl border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
+          className="px-4 py-3 bg-card rounded-lg border border-border/30 text-foreground focus:outline-none focus:border-[#ff8c42]/50"
         >
           <option value="all">Todos os Status</option>
           {MATERIAL_STATUS.map((s) => (
@@ -302,12 +307,12 @@ export function Materiais() {
               {MaterialStatusLabels[s]}
             </option>
           ))}
-        </select>
+        </Seletor>
 
         {podeGerenciar && (
           <button
             onClick={abrirModalCriar}
-            className="px-6 py-3 bg-[#ff8c42] text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium"
+            className="px-6 py-3 bg-[#ff8c42] text-white rounded-lg transition-all duration-300 flex items-center gap-2 font-medium"
           >
             <Plus className="w-5 h-5" />
             <span>Novo Material</span>
@@ -329,10 +334,10 @@ export function Materiais() {
             return (
               <div
                 key={material.id}
-                className="bg-card rounded-2xl p-6 border border-border/30 transition-all duration-300"
+                className="bg-card rounded-lg p-6 border border-border/30 transition-all duration-300"
               >
                 <div className="flex items-start gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#ff8c42] flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-lg bg-[#ff8c42] flex items-center justify-center flex-shrink-0">
                     <Box className="w-6 h-6 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -372,7 +377,7 @@ export function Materiais() {
                   <span className="text-xs text-muted-foreground">
                     Adq: {formatarData(material.dthCompra)}
                   </span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${obterCorStatus(material.status)}`}>
+                  <span className={`px-3 py-1 rounded-md text-xs font-medium ${obterCorStatus(material.status)}`}>
                     {MaterialStatusLabels[material.status] ?? material.status}
                   </span>
                 </div>
@@ -402,7 +407,7 @@ export function Materiais() {
       )}
 
       {!carregando && materiaisFiltrados.length === 0 && (
-        <div className="text-center py-12 bg-card rounded-2xl border border-border/30">
+        <div className="text-center py-12 bg-card rounded-lg border border-border/30">
           <Box className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground text-lg mb-2">
             {materiais.length === 0
@@ -412,7 +417,7 @@ export function Materiais() {
           {materiais.length === 0 && podeGerenciar && (
             <button
               onClick={abrirModalCriar}
-              className="mt-4 px-6 py-3 bg-[#ff8c42]/20 text-[#ff8c42] rounded-xl transition-colors"
+              className="mt-4 px-6 py-3 bg-[#ff8c42]/20 text-[#ff8c42] rounded-lg transition-colors"
             >
               <Plus className="w-5 h-5 inline" />
               Cadastrar primeiro material
@@ -423,21 +428,21 @@ export function Materiais() {
 
       {modalAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card rounded-2xl p-8 border border-border/30 w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
+          <div className="bg-card rounded-lg p-8 border border-border/30 w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-foreground text-lg font-semibold">
                 {editando ? "Editar Material" : "Novo Material"}
               </h2>
               <button
                 onClick={() => setModalAberto(false)}
-                className="p-2 rounded-xl hover:bg-destructive/20 transition-colors"
+                className="p-2 rounded-lg hover:bg-destructive/20 transition-colors"
               >
                 <X className="w-5 h-5 text-foreground" />
               </button>
             </div>
 
             {erroForm && (
-              <div className="bg-destructive/20 text-destructive p-3 rounded-xl mb-4">
+              <div className="bg-destructive/20 text-destructive p-3 rounded-lg mb-4">
                 {erroForm}
               </div>
             )}
@@ -459,6 +464,7 @@ export function Materiais() {
                 <label className={labelClass}>Descrição *</label>
                 <textarea
                   value={formDescricao}
+                  maxLength={1000}
                   onChange={(e) => setFormDescricao(e.target.value)}
                   className={`${inputClass} min-h-[70px]`}
                   rows={2}
@@ -528,7 +534,7 @@ export function Materiais() {
 
               <div>
                 <label className={labelClass}>Status *</label>
-                <select
+                <Seletor
                   value={formStatus}
                   onChange={(e) => setFormStatus(e.target.value)}
                   className={selectClass}
@@ -539,21 +545,21 @@ export function Materiais() {
                       {MaterialStatusLabels[s]}
                     </option>
                   ))}
-                </select>
+                </Seletor>
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setModalAberto(false)}
-                  className="flex-1 py-3 bg-background rounded-xl border border-border/30 text-foreground"
+                  className="flex-1 py-3 bg-background rounded-lg border border-border/30 text-foreground"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={salvando}
-                  className="flex-1 py-3 bg-[#ff8c42] text-white rounded-xl disabled:opacity-50 transition-opacity"
+                  className="flex-1 py-3 bg-[#ff8c42] text-white rounded-lg disabled:opacity-50 transition-opacity"
                 >
                   {salvando ? "Salvando..." : editando ? "Salvar Alterações" : "Cadastrar Material"}
                 </button>

@@ -71,11 +71,6 @@ export function Participantes() {
 
   return (
     <div className="h-full overflow-auto p-6">
-      {/* Cabeçalho */}
-      <div className="mb-6">
-        <h1 className="text-foreground text-2xl font-bold mb-2">Participantes</h1>
-        <p className="text-muted-foreground">Gerencie os participantes do grupo de pesquisa</p>
-      </div>
 
       {/* Barra de Ações */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -87,7 +82,7 @@ export function Participantes() {
             placeholder="Buscar participante por nome..."
             value={termoBusca}
             onChange={handleBuscaChange}
-            className="w-full pl-12 pr-4 py-3 bg-card rounded-xl border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/50 text-sm"
+            className="w-full pl-12 pr-4 py-3 bg-card rounded-lg border border-border/30 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/50 text-sm"
           />
         </div>
 
@@ -95,7 +90,7 @@ export function Participantes() {
         {podeConvidar && grupoAtual ? (
           <button
             onClick={() => setModalConvidarAberto(true)}
-            className="px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-300 flex items-center gap-2 font-medium cursor-pointer shadow-lg shadow-primary/20 text-sm whitespace-nowrap"
+            className="px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-300 flex items-center gap-2 font-medium cursor-pointer shadow-lg shadow-primary/20 text-sm whitespace-nowrap"
           >
             <UserPlus className="w-5 h-5" />
             <span>Convidar Membro</span>
@@ -104,7 +99,7 @@ export function Participantes() {
           <div className="relative group">
             <button
               disabled
-              className="px-6 py-3 bg-card text-muted-foreground rounded-xl flex items-center gap-2 font-medium cursor-not-allowed text-sm border border-border/30 whitespace-nowrap"
+              className="px-6 py-3 bg-card text-muted-foreground rounded-lg flex items-center gap-2 font-medium cursor-not-allowed text-sm border border-border/30 whitespace-nowrap"
             >
               <Lock className="w-4 h-4" />
               <span>Convidar Membro</span>
@@ -117,13 +112,13 @@ export function Participantes() {
       </div>
 
       {erro && (
-        <div className="mb-6 p-4 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl text-[#ef4444] text-sm">
+        <div className="mb-6 p-4 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-lg text-[#ef4444] text-sm">
           {erro}
         </div>
       )}
 
       {!grupoAtual ? (
-        <div className="bg-card rounded-2xl p-12 border border-border/30 text-center">
+        <div className="bg-card rounded-lg p-12 border border-border/30 text-center">
           <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-foreground font-semibold text-lg mb-2">Nenhum grupo selecionado</h3>
           <p className="text-muted-foreground text-sm max-w-md mx-auto">
@@ -131,7 +126,7 @@ export function Participantes() {
           </p>
         </div>
       ) : (
-        <div className="bg-card rounded-2xl border border-border/30 overflow-hidden shadow-xl">
+        <div className="bg-card rounded-lg border border-border/30 overflow-hidden shadow-xl">
           {loading ? (
             <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
               <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -225,7 +220,7 @@ export function Participantes() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#10b981]/20 text-[#10b981]">
+                          <span className="px-3 py-1 rounded-md text-xs font-medium bg-[#10b981]/20 text-[#10b981]">
                             Ativo
                           </span>
                         </td>

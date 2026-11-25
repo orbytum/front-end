@@ -31,7 +31,7 @@ export function ProjetoCombobox({
 
   if (carregando) {
     return (
-      <div className="flex items-center gap-3 px-4 py-2 rounded-xl border border-border/40 bg-background/50 text-muted-foreground text-sm font-medium">
+      <div className="flex items-center gap-3 px-4 py-2 rounded-lg border border-border/40 bg-background/50 text-muted-foreground text-sm font-medium">
         <Loader2 className="w-5 h-5 animate-spin text-[#ff8c42]" />
         <span>Carregando projetos...</span>
       </div>
@@ -40,7 +40,7 @@ export function ProjetoCombobox({
 
   if (projetos.length === 0) {
     return (
-      <div className="flex items-center gap-3 px-4 py-2 rounded-xl border border-border/40 bg-background/50 text-muted-foreground text-sm font-medium">
+      <div className="flex items-center gap-3 px-4 py-2 rounded-lg border border-border/40 bg-background/50 text-muted-foreground text-sm font-medium">
         <FolderKanban className="w-5 h-5 text-muted-foreground" />
         <span>Nenhum projeto no grupo</span>
       </div>
@@ -92,7 +92,7 @@ export function ProjetoCombobox({
       <button
         type="button"
         onClick={() => setAberto(!aberto)}
-        className={`flex items-center gap-3 px-3.5 py-2 rounded-xl border transition-all duration-200 cursor-pointer ${
+        className={`flex items-center gap-3 px-3.5 py-2 rounded-lg border transition-all duration-200 cursor-pointer ${
           aberto
             ? "bg-background border-[#ff8c42]/80 text-foreground shadow-lg shadow-[#ff8c42]/10"
             : "bg-background/70 hover:bg-background border-border/50 hover:border-[#ff8c42]/50 text-foreground"
@@ -117,12 +117,12 @@ export function ProjetoCombobox({
 
       {/* Popover Menu Suspenso */}
       {aberto && (
-        <div className="absolute left-0 mt-2 w-80 sm:w-96 origin-top-left rounded-2xl bg-card border border-border/60 p-2 shadow-2xl shadow-black/80 z-40 animate-in fade-in-50 zoom-in-95 duration-150">
+        <div className="absolute left-0 mt-2 w-80 sm:w-96 origin-top-left rounded-lg bg-card border border-border/60 p-2 shadow-2xl shadow-black/80 z-40 animate-in fade-in-50 zoom-in-95 duration-150">
           <div className="px-3 py-2 border-b border-border/40 mb-1 flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Projetos do Grupo
             </span>
-            <span className="text-[11px] font-semibold text-[#ff8c42] px-2 py-0.5 rounded-full bg-[#ff8c42]/10">
+            <span className="text-[11px] font-semibold text-[#ff8c42] px-2 py-0.5 rounded-md bg-[#ff8c42]/10">
               {projetos.length} {projetos.length === 1 ? "projeto" : "projetos"}
             </span>
           </div>
@@ -135,7 +135,7 @@ export function ProjetoCombobox({
                   key={proj.id}
                   type="button"
                   onClick={() => handleSelecionar(proj)}
-                  className={`w-full text-left px-3.5 py-3 rounded-xl flex items-center justify-between gap-3 transition-all duration-150 cursor-pointer ${
+                  className={`w-full text-left px-3.5 py-3 rounded-lg flex items-center justify-between gap-3 transition-all duration-150 cursor-pointer ${
                     selecionado
                       ? "bg-[#ff8c42]/15 text-[#ff8c42] font-semibold border border-[#ff8c42]/30"
                       : "text-foreground hover:bg-background/80 hover:text-foreground border border-transparent"
@@ -150,7 +150,7 @@ export function ProjetoCombobox({
 
                   <div className="flex items-center gap-2 shrink-0">
                     <span
-                      className={`text-[11px] px-2 py-0.5 rounded-full border flex items-center gap-1 font-medium ${obterCorStatusBadge(
+                      className={`text-[11px] px-2 py-0.5 rounded-md border flex items-center gap-1 font-medium ${obterCorStatusBadge(
                         proj.status
                       )}`}
                     >
